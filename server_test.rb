@@ -62,6 +62,13 @@ class ServerTest < Test::Unit::TestCase
     assert_equal 'test run result', last_response.body
   end
   
+  def test_it_should_be_able_to_return_the_status_of_a_not_complete_job
+    job = Job.create
+    get "/jobs/#{job[:id]}"
+    assert last_response.ok?
+    assert_equal '', last_response.body
+  end  
+  
   def test_it_should_be_possible_to_delete_a_job
     job = Job.create
     delete "/jobs/#{job[:id]}"
