@@ -8,6 +8,7 @@ DB.create_table :jobs do
   primary_key :id
   String :files
   String :result
+  String :root
   Boolean :taken, :default => false
 end
 
@@ -21,7 +22,7 @@ get '/jobs/next' do
   next_job = Job.find :taken => false
   return unless next_job
   next_job.update(:taken => true)
-  "#{next_job[:id]},#{next_job[:files]}"
+  [ next_job[:id], next_job[:root], next_job[:files] ].join(',')
 end
 
 put '/jobs/:id' do
