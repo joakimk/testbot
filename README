@@ -1,0 +1,8 @@
+Idea:
+Create a way to distribute test load to any number of testrunners using a lightweight central server to avoid having to setup remote login access to all testrunners.
+
+Required gems for running:
+sudo gem install sequel sinatra
+
+Additional required gems for running the tests:
+sudo gem install rack-test
