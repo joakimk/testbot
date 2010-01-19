@@ -14,12 +14,12 @@ class Requester
   end
   
   def request_job(files)
-    Server.post('/jobs', :query => { :root => @project_path, :files => files })
+    Server.post('/jobs', :body => { :root => @project_path, :files => files })
   end
   
   def poll(job_id)
     result = Server.get("/jobs/#{job_id}")
-    Server.delete("/jobs/#{job_id}") if result
+    Server.delete("/jobs/#{job_id}") if result != nil
     result
   end
   
@@ -44,6 +44,8 @@ def specs_in_groups(num)
   groups.compact
 end
 
+start = Time.now
+
 settings = YAML.load_file("config/testbot.yml")
 
 ignores = settings['ignores'].split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
@@ -56,11 +58,15 @@ job_ids = specs_in_groups(settings['groups'].to_i).map do |specs|
 end
 
 loop do
-  sleep 1
   job_ids.each do |job_id|
-    result = requester.poll(job_id) or next
+    sleep 0.5
+    result = requester.poll(job_id)
+    next if result == nil
     puts result
     job_ids.delete(job_id)
+    puts "#{job_ids.size} jobs to go..." unless job_ids.size == 0 unless ENV['INTEGRATION_TEST']
   end
   break if job_ids.size == 0
 end
+
+puts "Completed after #{Time.now - start} seconds." unless ENV['INTEGRATION_TEST']

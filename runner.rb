@@ -19,5 +19,5 @@ loop do
   puts "Running job #{id}..."
   result = `export RAILS_ENV=test; cd project; rake testbot:prepare; script/spec -O spec/spec.opts #{specs}`
   puts "Done"
-  Server.put("/jobs/#{id}", :query => { :result => result })
+  Server.put("/jobs/#{id}", :body => { :result => result })
 end
