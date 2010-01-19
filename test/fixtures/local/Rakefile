@@ -1,0 +1,7 @@
+namespace :testbot do
+  
+  task :prepare do
+    puts "prepare got called"
+  end
+  
+end
