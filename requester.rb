@@ -30,5 +30,12 @@ class Requester
   
 end
 
-requester = Requester.new("http://localhost:4567", "server:/path/to/project")
-requester.request_job("spec/models/car_spec.rb spec/models/house_spec.rb")
+def find_specs
+  Dir["spec/**/*_spec.rb"].map { |path| path.gsub(/#{Dir.pwd}\//, '') }.join(' ')
+end
+
+system "rsync -az --delete -e ssh . ../../../tmp/server"
+
+requester = Requester.new("http://localhost:4567", "../../tmp/server")
+requester.request_job(find_specs)
+
