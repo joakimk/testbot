@@ -5,10 +5,6 @@ include Open3
 
 class IntegrationTest < Test::Unit::TestCase
 
-  def setup
-    FileUtils.rm_rf "tmp"
-  end
-
   # This is slow, and Test:Unit does not have "before :all" method, so I'm using a single testcase for multiple tests
   def test_integration
     system "mkdir tmp; cp -rf test/fixtures/local tmp/local"
@@ -25,8 +21,8 @@ class IntegrationTest < Test::Unit::TestCase
   end
   
   def teardown
-    find_and_kill_process("../../runner.rb")
-    find_and_kill_process("server.rb")
+    find_and_kill_process("../../runner.rb") rescue nil
+    find_and_kill_process("server.rb") rescue nil
     FileUtils.rm_rf "tmp"    
   end
   
