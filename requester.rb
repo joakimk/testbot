@@ -34,8 +34,11 @@ def find_specs
   Dir["spec/**/*_spec.rb"].map { |path| path.gsub(/#{Dir.pwd}\//, '') }.join(' ')
 end
 
-system "rsync -az --delete -e ssh . ../../../tmp/server"
+settings = YAML.load_file("config/testbot.yml")
 
-requester = Requester.new("http://localhost:4567", "../../tmp/server")
+ignores = settings['ignores'].split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
+system "rsync -az --delete -e ssh #{ignores} . #{settings['server_path']}"
+
+requester = Requester.new(settings["server"], settings['server_path'])
 requester.request_job(find_specs)
 

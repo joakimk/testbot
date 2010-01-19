@@ -1,0 +1,3 @@
+server: http://localhost:4567
+server_path: ../server
+ignores: log/* tmp/*

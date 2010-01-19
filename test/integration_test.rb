@@ -9,13 +9,19 @@ class IntegrationTest < Test::Unit::TestCase
     FileUtils.rm_rf "tmp"
   end
 
-  def test_running_the_requester_will_run_tests_and_print_the_result    
-    fork { popen3("mkdir -p tmp/server; ruby server.rb") }
-    fork { popen3("mkdir -p tmp/runner; cd tmp/runner; ruby ../../runner.rb") }
-    
+  # This is slow, and Test:Unit does not have "before :all" method, so I'm using a single testcase for multiple tests
+  def test_integration
+    system "mkdir tmp; cp -rf test/fixtures/local tmp/local"
+    fork { popen3("mkdir tmp/server; ruby server.rb") }
+    fork { popen3("mkdir tmp/runner; cd tmp/runner; ruby ../../runner.rb") }
     sleep 0.5
-    result = `cd test/fixtures/local; ruby ../../../requester.rb`
+    result = `cd tmp/local; ruby ../../requester.rb`    
+    
     assert result.include?('script/spec got called with ["-O", "spec/spec.opts", "spec/models/car_spec.rb", "spec/models/house_spec.rb"]')
+    assert !File.exists?("tmp/server/log/test.log")
+    assert !File.exists?("tmp/server/tmp/test.log")
+    assert !File.exists?("tmp/runner/project/log/test.log")
+    assert !File.exists?("tmp/runner/project/tmp/test.log")
   end
   
   def teardown
