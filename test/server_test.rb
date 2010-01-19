@@ -1,4 +1,4 @@
-require 'server'
+require File.join(File.dirname(__FILE__), '../server')
 require 'test/unit'
 require 'rack/test'
 
