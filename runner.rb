@@ -1,9 +1,12 @@
+# Config
+SERVER = "http://localhost:4567"
+
 require 'rubygems'
 require 'httparty'
 
 class Server
   include HTTParty
-  base_uri "http://localhost:4567"
+  base_uri SERVER
 end
 
 loop do
