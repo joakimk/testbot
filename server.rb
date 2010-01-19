@@ -19,8 +19,7 @@ post '/jobs' do
 end
 
 get '/jobs/next' do
-  next_job = Job.find :taken => false
-  return unless next_job
+  next_job = Job.find(:taken => false) or return
   next_job.update(:taken => true)
   [ next_job[:id], next_job[:root], next_job[:files] ].join(',')
 end
