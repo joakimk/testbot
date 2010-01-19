@@ -17,7 +17,7 @@ loop do
   puts "Syncing..."
   system "rsync -az --delete -e ssh #{root}/ project"
   puts "Running job #{id}..."
-  result = `export RAILS_ENV=test; cd project; rake testbot:prepare; script/spec -O spec/spec.opts #{specs}`
+  result = `export RAILS_ENV=test; export RSPEC_COLOR=true; cd project; rake testbot:prepare; script/spec -O spec/spec.opts #{specs}`
   puts "Done"
   Server.put("/jobs/#{id}", :body => { :result => result })
 end

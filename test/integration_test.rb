@@ -15,7 +15,7 @@ class IntegrationTest < Test::Unit::TestCase
     fork { popen3("mkdir tmp/server; ruby server.rb") }
     fork { popen3("mkdir tmp/runner; cd tmp/runner; ruby ../../runner.rb") }
     sleep 0.5
-    result = `cd tmp/local; ruby ../../requester.rb`    
+    result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../requester.rb`
     
     assert result.include?("prepare got called\n" + 'script/spec got called with ["-O", "spec/spec.opts", "spec/models/car_spec.rb", "spec/models/house_spec.rb"]')
     assert !File.exists?("tmp/server/log/test.log")
