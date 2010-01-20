@@ -16,8 +16,8 @@ class IntegrationTest < Test::Unit::TestCase
     assert result.include?("prepare got called\n" + 'script/spec got called with ["-O", "spec/spec.opts", "spec/models/car_spec.rb", "spec/models/house_spec.rb"]')
     assert !File.exists?("tmp/server/log/test.log")
     assert !File.exists?("tmp/server/tmp/restart.txt")
-    assert !File.exists?("tmp/runner/project/log/test.log")
-    assert !File.exists?("tmp/runner/project/tmp/restart.txt")
+    assert !File.exists?("tmp/runner/instance0/log/test.log")
+    assert !File.exists?("tmp/runner/instance0/tmp/restart.txt")
   end
   
   def teardown
