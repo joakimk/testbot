@@ -25,13 +25,13 @@ get '/jobs/next' do
 end
 
 put '/jobs/:id' do
-  Job.find(params[:id]).update(:result => params[:result]); nil
+  Job.find(:id => params[:id].to_i).update(:result => params[:result]); nil
 end
 
 get '/jobs/:id' do
-  Job.find(params[:id])[:result]
+  Job.find(:id => params[:id].to_i)[:result]
 end
 
 delete '/jobs/:id' do
-  Job.find(params[:id]).delete; nil
+  Job.find(:id => params[:id].to_i).delete; nil
 end
