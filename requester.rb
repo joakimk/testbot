@@ -51,7 +51,7 @@ settings = YAML.load_file("config/testbot.yml")
 ignores = settings['ignores'].split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
 system "rsync -az --delete -e ssh #{ignores} . #{settings['server_path']}"
 
-requester = Requester.new(settings["server"], settings['server_path'])
+requester = Requester.new(settings["server_uri"], settings['server_path'])
 
 job_ids = specs_in_groups(settings['groups'].to_i).map do |specs|
   requester.request_job(specs.join(' '))
