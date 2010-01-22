@@ -1,4 +1,4 @@
-Speedup RSpec by running parallel on multiple CPUs on muliple computers.
+Speedup RSpec by running in parallel on multiple CPUs on muliple computers.
 
 NOTE! This is not in any way complete. It needs alot of polish before being
 truly useful.
