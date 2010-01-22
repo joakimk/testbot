@@ -5,7 +5,7 @@ truly useful.
 
 This borrows alot of ideas from parallel_specs and will probably be part of it
 in one way or another. I'm currently looking into adding a testbot requester
-to parallel_specs at: http://github.com/joakimk/parallel_specs/tree/testbot.
+to parallel_specs at: [http://github.com/joakimk/parallel_specs/tree/testbot](http://github.com/joakimk/parallel_specs/tree/testbot).
 
 Setup
 ====
@@ -27,7 +27,7 @@ Usage
     If you have multiple cores on the computer you're running the specs on, you
     will probably want to look into how to setup the database and config for it.
     Check the readme for parallel_specs for now:
-    http://github.com/joakimk/parallel_specs
+    [http://github.com/joakimk/parallel_specs](http://github.com/joakimk/parallel_specs)
 
     Also it's a good idea to vendorize all gems/plugins and dependencies in your
     rails project so that you don't have to install and maintain so much stuff
