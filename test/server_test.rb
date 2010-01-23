@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '../server')
+require File.join(File.dirname(__FILE__), '../lib/server')
 require 'test/unit'
 require 'rack/test'
 

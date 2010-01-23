@@ -8,10 +8,10 @@ class IntegrationTest < Test::Unit::TestCase
   # This is slow, and Test:Unit does not have "before :all" method, so I'm using a single testcase for multiple tests
   def test_integration
     system "mkdir tmp; cp -rf test/fixtures/local tmp/local"
-    fork { popen3("mkdir tmp/server; ruby server.rb") }
-    fork { popen3("mkdir tmp/runner; cd tmp/runner; ruby ../../runner.rb") }
+    fork { popen3("mkdir tmp/server; ruby lib/server.rb") }
+    fork { popen3("mkdir tmp/runner; cd tmp/runner; ruby ../../lib/runner.rb") }
     sleep 0.5
-    result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../requester.rb`
+    result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../lib/requester.rb`
     
     assert result.include?("prepare got called\n" + 'script/spec got called with ["-O", "spec/spec.opts", "spec/models/car_spec.rb", "spec/models/house_spec.rb"]')
     assert !File.exists?("tmp/server/log/test.log")
@@ -21,8 +21,8 @@ class IntegrationTest < Test::Unit::TestCase
   end
   
   def teardown
-    find_and_kill_process("../../runner.rb") rescue nil
-    find_and_kill_process("server.rb") rescue nil
+    find_and_kill_process("../../lib/runner.rb") rescue nil
+    find_and_kill_process("lib/server.rb") rescue nil
     FileUtils.rm_rf "tmp"    
   end
   

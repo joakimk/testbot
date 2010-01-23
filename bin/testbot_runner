@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'daemons'
+Daemons.run File.expand_path(File.join(File.dirname(__FILE__),'..','lib','runner.rb'))

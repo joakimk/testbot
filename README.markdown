@@ -10,15 +10,15 @@ to parallel_specs at: [http://github.com/joakimk/parallel_specs/tree/testbot](ht
 Setup
 ====
     
-    sudo gem install sequel sinatra sqlite3-ruby # For running the server
-    sudo gem install httparty                    # For running the runner or requester
+    sudo gem install sequel sinatra sqlite3-ruby daemons # For running the server
+    sudo gem install httparty daemons                    # For running the runner or requester
 
 Files
 ====
 
-    server.rb    <- The server that keeps track of testing jobs and results.
-    runner.rb    <- The runner that you have on each computer that actually runs the testing jobs.
-    requester.rb <- A sample implementation of a testing job-requester.
+    bin/testbot_server  <- The server that keeps track of testing jobs and results.
+    bin/testbot_runner  <- The runner that you have on each computer that actually runs the testing jobs.
+    lib/requester.rb    <- A sample implementation of a testing job-requester.
 
 Usage
 ====
@@ -35,15 +35,15 @@ Usage
     on each computer that will host a test runner.
 
 ### 1: Setup a server.
-    Copy server.rb to the server and run it.
+    Copy testbot to the server and run *bin/testbot_server start*.
 
 ### 2: Setup a runner
-    - Add a testbot.rake task to your project and customize it so that the runner
+    - Add a *testbot.rake* task to your project and customize it so that the runner
       can call it to prepare the environment before running a test.
-    - Copy runner.rb to a computer.
-    - Edit it and configure the server address and the number of parallel jobs to allow.
+    - Copy testbot to a computer.
+    - Edit *lib/runner.rb*, configure the server address and the number of parallel jobs to allow.
     - Make sure the user can ssh into the server without a password.
-    - Run it.
+    - Run *bin/testbot_runner start*
 
 ### 3: Setup the requester
     You can use the sample requester but I'd recommend you use my testbot branch of
@@ -60,8 +60,7 @@ TODO
 ====
  - Add support for multiple users
  - Make it simpler to use
-   - Deamons, rake tasks, ...
    - Example config and testbot.rake.
- - Make it simpler to install ("vendorize" gems)
+   - Gems? sudo gem install testbot; vim ~/.testbot.conf; testbot_runner start...
  - Add support for Test:Unit and Cucumber
  - Lots more

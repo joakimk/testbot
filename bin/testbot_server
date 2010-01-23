@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'daemons'
+
+lib_dir = File.expand_path(File.join(File.dirname(__FILE__),'..','lib'))
+Daemons.run_proc('server.rb') do
+  Dir.chdir(lib_dir)
+  exec "ruby server.rb -e production"
+end
