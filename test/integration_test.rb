@@ -1,15 +1,13 @@
 require 'test/unit'
 require 'fileutils'
-require "open3"
-include Open3
 
 class IntegrationTest < Test::Unit::TestCase
 
   # This is slow, and Test:Unit does not have "before :all" method, so I'm using a single testcase for multiple tests
   def test_integration
     system "mkdir tmp; cp -rf test/fixtures/local tmp/local"
-    fork { popen3("mkdir tmp/server; ruby lib/server.rb") }
-    fork { popen3("mkdir tmp/runner; cd tmp/runner; ruby ../../lib/runner.rb") }
+    system "mkdir tmp/runner; cd tmp/runner; ../../bin/testbot_runner start"
+    system "mkdir tmp/server; bin/testbot_server start"
     sleep 0.5
     result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../lib/requester.rb`
     
@@ -21,15 +19,9 @@ class IntegrationTest < Test::Unit::TestCase
   end
   
   def teardown
-    find_and_kill_process("../../lib/runner.rb") rescue nil
-    find_and_kill_process("lib/server.rb") rescue nil
+    system "bin/testbot_server stop"
+    system "bin/testbot_runner stop"
     FileUtils.rm_rf "tmp"    
   end
-  
-  def find_and_kill_process(file)
-    # TODO: Very ugly, but works. How do you kill a non-ruby sub process anyways?
-    pid = `ps ax | grep "ruby #{file}"`.split("\n").find { |line| line.split[4] == 'ruby' }.split.first
-    system "kill #{pid}"    
-  end
-  
+
 end

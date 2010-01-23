@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'daemons'
-Daemons.run File.expand_path(File.join(File.dirname(__FILE__),'..','lib','runner.rb'))
+
+pwd = Dir.pwd
+runner_path = File.expand_path(File.join(File.dirname(__FILE__),'..','lib','runner.rb'))
+Daemons.run_proc('runner.rb') do
+  Dir.chdir(pwd)
+  exec "ruby #{runner_path}"
+end
