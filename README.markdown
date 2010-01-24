@@ -37,7 +37,9 @@ Install required gems:
 
     sudo gem install sequel sinatra sqlite3-ruby daemons
 
-Copy testbot to the server and run **bin/testbot_server start**.
+* Copy testbot to the server
+* Copy **testbot_server.yml.example** to **~/.testbot_server.yml**.
+* Run **bin/testbot_server start**.
 
 ### 2: Setup a runner
 
@@ -48,7 +50,7 @@ Install required gems:
 * Add a **testbot.rake** task to your project and customize it so that the runner
   can call it to prepare the environment before running a test.
 * Copy testbot to a computer.
-* Edit **lib/runner.rb**, configure the server address and the number of parallel jobs to allow.
+* Copy **testbot_runner.yml.example** to **~/.testbot_runner.yml** and customize it.
 * Make sure the user can ssh into the server without a password.
 * Run **bin/testbot_runner start**
 
