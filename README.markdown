@@ -35,7 +35,7 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 Install required gems and download testbot:
 
-    sudo gem install sequel sinatra sqlite3-ruby daemons
+    gem install sequel sinatra sqlite3-ruby daemons
     mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
 
 * Copy **testbot_server.yml.example** to **~/.testbot_server.yml**.
@@ -45,7 +45,7 @@ Install required gems and download testbot:
 
 Install required gems and download testbot:
 
-    sudo gem install httparty daemons macaddr
+    gem install httparty daemons macaddr
     mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
 
 * Add a **testbot.rake** task to your project and customize it so that the runner
@@ -63,7 +63,7 @@ parallel_specs. Both need a config file, for now, look at
 Running the tests
 ====
 
-    sudo gem install rack-test shoulda flexmock
+    gem install rack-test shoulda flexmock
     rake
     
 Realtime runner information
