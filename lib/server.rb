@@ -54,6 +54,16 @@ class Runner < Sequel::Model
   
 end
 
+before do
+  @@config ||= YAML.load_file("~/.testbot_server.yml")
+end
+
+class Sinatra::Application
+  def config
+    OpenStruct.new(@@config)
+  end  
+end
+
 post '/jobs' do
   Job.create(params)[:id].to_s
 end
@@ -88,4 +98,8 @@ end
 
 get '/version' do
   Server.version.to_s
+end
+
+get '/update_uri' do
+  config.update_uri
 end

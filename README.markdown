@@ -61,7 +61,7 @@ parallel_specs. Both need a config file, for now, look at
 Running the tests
 ====
 
-    sudo gem install rack-test shoulda
+    sudo gem install rack-test shoulda flexmock
     rake
     
 Realtime runner information

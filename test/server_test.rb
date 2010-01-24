@@ -2,6 +2,7 @@ require File.join(File.dirname(__FILE__), '../lib/server')
 require 'test/unit'
 require 'rack/test'
 require 'shoulda'
+require 'flexmock/test_unit'
 
 set :environment, :test
 
@@ -11,6 +12,7 @@ class ServerTest < Test::Unit::TestCase
   def setup
     DB[:jobs].delete
     DB[:runners].delete
+    flexmock(YAML).should_receive("load_file").with("~/.testbot_server.yml").and_return({ :update_uri => "http://somewhere/file.tar.gz" })
   end
 
   def app
@@ -167,6 +169,16 @@ class ServerTest < Test::Unit::TestCase
       assert_equal Server.version.to_s, last_response.body
     end
 
+  end
+  
+  context "GET /update_uri" do
+    
+    should "return the configured update URI" do
+      get '/update_uri'
+      assert last_response.ok?
+      assert_equal "http://somewhere/file.tar.gz", last_response.body
+    end
+    
   end
  
 end
