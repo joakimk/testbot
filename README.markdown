@@ -55,6 +55,12 @@ Running the tests
 
     sudo gem install rack-test
     rake
+    
+Old runners
+====
+    
+    You can access /runners/outdated on the server too see which of the runners needs to be updated.
+    Out of date runners are not given any test jobs.
 
 TODO
 ====
