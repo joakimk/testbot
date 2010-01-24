@@ -57,7 +57,7 @@ class Runner
   private
   
   def time_for_update?
-    time_for_update = !@last_version_check || ((Time.now - @last_version_check) >= TIME_BETWEEN_VERSION_CHECKS)
+    time_for_update = ((Time.now - @last_version_check) >= TIME_BETWEEN_VERSION_CHECKS)
     @last_version_check = Time.now
     time_for_update
   end
