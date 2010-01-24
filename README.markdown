@@ -16,13 +16,6 @@ all other computers can access.
 As the runners pull down and run code that can be posted by anyone with access to the central server you
 will have to have trust everyone using it.
 
-Files
-====
-
-    bin/testbot_server  <- The server that keeps track of testing jobs and results.
-    bin/testbot_runner  <- The runner that you have on each computer that actually runs the testing jobs.
-    lib/requester.rb    <- A sample implementation of a testing job-requester.
-
 Usage
 ====
 
@@ -61,7 +54,7 @@ Install required gems:
 
 ### 3: Setup the requester
 
-You can use the sample requester but I'd recommend you use my testbot branch of
+You can use the sample requester (lib/requester.rb) but I'd recommend you use my testbot branch of
 parallel_specs. Both need a config file, for now, look at
 **test/fixtures/local/config/testbot.yml**.
 
