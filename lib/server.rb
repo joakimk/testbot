@@ -4,7 +4,7 @@ require 'sequel'
 
 class Server
   def self.version
-    3
+    4
   end
   
   def self.valid_version?(runner_version)

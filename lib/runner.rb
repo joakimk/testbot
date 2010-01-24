@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 3
+TESTBOT_VERSION = 4
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 
@@ -58,7 +58,7 @@ class Runner
   
   def time_for_update?
     time_for_update = ((Time.now - @last_version_check) >= TIME_BETWEEN_VERSION_CHECKS)
-    @last_version_check = Time.now
+    @last_version_check = Time.now if time_for_update
     time_for_update
   end
   
