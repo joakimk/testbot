@@ -7,11 +7,14 @@ This borrows alot of ideas from parallel_specs and will probably be part of it
 in one way or another. I'm currently looking into adding a testbot requester
 to parallel_specs at: [http://github.com/joakimk/parallel_specs/tree/testbot](http://github.com/joakimk/parallel_specs/tree/testbot).
 
-Setup
+Concept
 ====
-    
-    sudo gem install sequel sinatra sqlite3-ruby daemons # For running the server
-    sudo gem install httparty daemons macaddr            # For running the runner or requester
+This is designed to be a simple way to use all the idle computers resources on your local network to
+speedup test runtimes. One of the goals is to only require that you to have one central server which
+all other computers can access.
+
+As the runners pull down and run code that can be posted by anyone with access to the central server you
+will have to have trust everyone using it.
 
 Files
 ====
@@ -37,9 +40,17 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 ### 1: Setup a server.
 
+Install required gems:
+
+    sudo gem install sequel sinatra sqlite3-ruby daemons
+
 Copy testbot to the server and run **bin/testbot_server start**.
 
 ### 2: Setup a runner
+
+Install required gems:
+
+    sudo gem install httparty daemons macaddr
 
 * Add a **testbot.rake** task to your project and customize it so that the runner
   can call it to prepare the environment before running a test.
@@ -69,6 +80,12 @@ Out of date runners are not given any test jobs.
 You can access **/runners/available_instances** to see how many instances are available. Only runners
 that are up to date and actively asking for test jobs are included. The parallel_specs testbot
 requester will be using this.
+
+Tips
+====
+
+I've seen about 20% faster spec runtimes when using Ruby Enterprise Edition. You can find it at:
+[http://www.rubyenterpriseedition.com/](http://www.rubyenterpriseedition.com/).
 
 TODO
 ====
