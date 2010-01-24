@@ -51,12 +51,13 @@ class ServerTest < Test::Unit::TestCase
   end
   
   def test_it_should_save_information_about_the_runners
-    get '/jobs/next', :version => "1", :hostname => 'macmini.local', :mac => "00:01:..."
+    get '/jobs/next', :version => "1", :hostname => 'macmini.local', :mac => "00:01:...", :idle_instances => 2
     runner = DB[:runners].first
     assert_equal 1,           runner[:version]
     assert_equal '127.0.0.1', runner[:ip]
     assert_equal 'macmini.local', runner[:hostname]
     assert_equal '00:01:...', runner[:mac]
+    assert_equal 2, runner[:idle_instances]
     assert (Time.now - 5) < runner[:last_seen_at]
     assert (Time.now + 5) > runner[:last_seen_at]
   end
@@ -85,21 +86,27 @@ class ServerTest < Test::Unit::TestCase
     assert_equal "127.0.0.1 macmini1.local 00:01\n127.0.0.1 macmini2.local 00:02\n127.0.0.1", last_response.body
   end
   
-  def test_it_should_be_able_to_return_a_list_of_available_runners
-    get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01"
-    get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02"
-    get '/runners/available_count'
+  def test_it_should_be_able_to_return_a_list_of_available_runner_instances
+    get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
+    get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
+    get '/runners/available_instances'
+    assert last_response.ok?
+    assert_equal "6", last_response.body
+  end
+  
+  def test_it_should_not_list_runner_instances_as_available_when_not_seen_the_last_second_three_seconds
+    get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
+    get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
+    Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 3)
+    get '/runners/available_instances'
     assert last_response.ok?
     assert_equal "2", last_response.body
   end
   
-  def test_it_should_not_list_runners_as_available_when_not_seen_the_last_second_three_seconds
-    get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01"
-    get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02"
-    Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 3)
-    get '/runners/available_count'
+  def test_it_should_be_able_to_return_its_version
+    get '/version'
     assert last_response.ok?
-    assert_equal "1", last_response.body
+    assert_equal Server.version.to_s, last_response.body
   end
  
   def test_it_should_be_able_to_receive_the_results_of_a_job

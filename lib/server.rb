@@ -28,6 +28,7 @@ DB.create_table :runners do
   String :hostname
   String :mac
   Integer :version
+  Integer :idle_instances
   Datetime :last_seen_at
 end
 
@@ -47,8 +48,8 @@ class Runner < Sequel::Model
     DB[:runners].filter("version < ? OR version IS NULL", Server.version)
   end
   
-  def self.available_count
-    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3).count
+  def self.available_instances
+    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3).inject(0) { |sum, r| r[:idle_instances] + sum }
   end
   
 end
@@ -58,7 +59,7 @@ post '/jobs' do
 end
 
 get '/jobs/next' do
-  Runner.record! params.merge({ :ip => @env['REMOTE_ADDR'], :last_seen_at => Time.now })  
+  Runner.record! params.merge({ :ip => @env['REMOTE_ADDR'], :last_seen_at => Time.now })
   return unless Server.valid_version?(params[:version])
   next_job = Job.find(:taken => false) or return
   next_job.update(:taken => true)
@@ -81,6 +82,10 @@ get '/runners/outdated' do
   Runner.find_all_outdated.map { |runner| [ runner[:ip], runner[:hostname], runner[:mac] ].join(' ') }.join("\n").strip
 end
 
-get '/runners/available_count' do
-  Runner.available_count.to_s
+get '/runners/available_instances' do
+  Runner.available_instances.to_s
+end
+
+get '/version' do
+  Server.version.to_s
 end

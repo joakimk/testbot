@@ -11,7 +11,7 @@ Setup
 ====
     
     sudo gem install sequel sinatra sqlite3-ruby daemons # For running the server
-    sudo gem install httparty daemons                    # For running the runner or requester
+    sudo gem install httparty daemons macaddr            # For running the runner or requester
 
 Files
 ====
