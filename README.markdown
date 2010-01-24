@@ -39,7 +39,7 @@ Install required gems and download testbot:
     mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
 
 * Copy **testbot_server.yml.example** to **~/.testbot_server.yml**.
-* Run **bin/testbot_server start**.
+* Run **bin/server start**.
 
 ### 2: Setup a runner
 
@@ -52,7 +52,7 @@ Install required gems and download testbot:
   can call it to prepare the environment before running a test.
 * Copy **testbot_runner.yml.example** to **~/.testbot_runner.yml** and customize it.
 * Make sure the user can ssh into the server without a password.
-* Run **bin/testbot_runner start**
+* Run **bin/runner start**
 
 ### 3: Setup the requester
 
