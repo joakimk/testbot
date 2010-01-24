@@ -36,7 +36,7 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 Install required gems and download testbot:
 
     gem install sequel sinatra sqlite3-ruby daemons
-    mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
+    mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/release | tar xz --strip 1 -C testbot
 
 * Copy **testbot_server.yml.example** to **~/.testbot_server.yml**.
 * Run **bin/server start**.
@@ -46,7 +46,7 @@ Install required gems and download testbot:
 Install required gems and download testbot:
 
     gem install httparty daemons macaddr
-    mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
+    mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/release | tar xz --strip 1 -C testbot
 
 * Add a **testbot.rake** task to your project and customize it so that the runner
   can call it to prepare the environment before running a test.
