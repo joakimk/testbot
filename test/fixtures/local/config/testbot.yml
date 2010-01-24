@@ -1,4 +1,4 @@
-server_uri: http://localhost:4567
+server_uri: http://localhost:2288
 server_path: ../server
 ignores: log/* tmp/*
 groups: 1

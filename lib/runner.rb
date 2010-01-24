@@ -8,7 +8,7 @@ TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 
 @@config = OpenStruct.new(ENV['INTEGRATION_TEST'] ?
-           { :server_uri => "http://localhost:4567", :automatic_updates => false, :max_instances => 1 } :
+           { :server_uri => "http://localhost:2288", :automatic_updates => false, :max_instances => 1 } :
            YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml"))
 
 class Job
