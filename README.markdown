@@ -57,7 +57,7 @@ parallel_specs. Both need a config file, for now, look at
 Running the tests
 ====
 
-    sudo gem install rack-test
+    sudo gem install rack-test shoulda
     rake
     
 Realtime runner information
