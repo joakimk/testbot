@@ -1,7 +1,7 @@
 Speedup RSpec by running in parallel on multiple CPUs on muliple computers.
 
-NOTE! This is not in any way complete. It needs alot of polish before being
-truly useful.
+**NOTE! This is not in any way complete. It needs alot of polish before being
+truly useful.**
 
 This borrows alot of ideas from parallel_specs and will probably be part of it
 in one way or another. I'm currently looking into adding a testbot requester
