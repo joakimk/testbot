@@ -34,8 +34,9 @@ class Runner
   end
   
   def run!
-    loop do
+    loop do      
       sleep 1
+      clear_completed_instances # Makes sure all instances are listed as available after a run
       next_job = Server.get("/jobs/next", :query => query_params) rescue nil
       next if next_job == nil
       @instances << [ Thread.new { Job.new(*next_job.split(',')).run(free_instance_number) },
