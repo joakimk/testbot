@@ -33,29 +33,23 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 ### 1: Setup a server.
 
-Install required gems:
+Install required gems and download testbot:
 
     sudo gem install sequel sinatra sqlite3-ruby daemons
-
-* Copy testbot to the server or download it:
-
-    curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
+    mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
 
 * Copy **testbot_server.yml.example** to **~/.testbot_server.yml**.
 * Run **bin/testbot_server start**.
 
 ### 2: Setup a runner
 
-Install required gems:
+Install required gems and download testbot:
 
     sudo gem install httparty daemons macaddr
+    mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
 
 * Add a **testbot.rake** task to your project and customize it so that the runner
   can call it to prepare the environment before running a test.
-* Copy testbot to the computer or download it:
-
-    curl -L http://github.com/joakimk/testbot/tarball/master | tar xz --strip 1 -C testbot
-
 * Copy **testbot_runner.yml.example** to **~/.testbot_runner.yml** and customize it.
 * Make sure the user can ssh into the server without a password.
 * Run **bin/testbot_runner start**
