@@ -12,7 +12,7 @@ class ServerTest < Test::Unit::TestCase
   def setup
     DB[:jobs].delete
     DB[:runners].delete
-    flexmock(YAML).should_receive("load_file").with("~/.testbot_server.yml").and_return({ :update_uri => "http://somewhere/file.tar.gz" })
+    flexmock(YAML).should_receive("load_file").with("#{ENV['HOME']}/.testbot_server.yml").and_return({ :update_uri => "http://somewhere/file.tar.gz" })
   end
 
   def app

@@ -55,7 +55,7 @@ class Runner < Sequel::Model
 end
 
 before do
-  @@config ||= YAML.load_file("~/.testbot_server.yml")
+  @@config ||= ENV['INTEGRATION_TEST'] ? { :update_uri => '' } : YAML.load_file("#{ENV['HOME']}/.testbot_server.yml")
 end
 
 class Sinatra::Application

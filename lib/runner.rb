@@ -4,12 +4,12 @@ require 'macaddr'
 require 'ostruct'
 
 TESTBOT_VERSION = 2
+TIME_BETWEEN_POLLS = 1
+TIME_BETWEEN_VERSION_CHECKS = 60
 
-@config = YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml")
-
-def config
-  OpenStruct.new(@config)
-end
+@@config = OpenStruct.new(ENV['INTEGRATION_TEST'] ?
+           { :server_uri => "http://localhost:4567", :automatic_updates => false, :max_instances => 1 } :
+           YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml"))
 
 class Job
   def initialize(id, root, specs)
@@ -28,18 +28,20 @@ end
 
 class Server
   include HTTParty
-  base_uri config.server_uri
+  base_uri @@config.server_uri
 end
 
 class Runner
-  
+    
   def initialize
     @instances = []
+    @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1    
   end
   
   def run!
     loop do      
-      sleep 1
+      sleep TIME_BETWEEN_POLLS
+      check_for_update if time_for_update?
       clear_completed_instances # Makes sure all instances are listed as available after a run
       next_job = Server.get("/jobs/next", :query => query_params) rescue nil
       next if next_job == nil
@@ -51,16 +53,36 @@ class Runner
       end
     end
   end
-  
+    
   private
+  
+  def time_for_update?
+    time_for_update = !@last_version_check || ((Time.now - @last_version_check) >= TIME_BETWEEN_VERSION_CHECKS)
+    @last_version_check = Time.now
+    time_for_update
+  end
+  
+  def check_for_update
+    return unless @@config.automatic_updates
+    version = Server.get('/version') rescue TESTBOT_VERSION
+    return unless version.to_i != TESTBOT_VERSION
+    
+    update_uri = Server.get("/update_uri") rescue nil
+    if update_uri
+      successful_download = system "rm -rf ~/runner_update && mkdir ~/runner_update && curl -L #{update_uri} | tar xz --strip 1 -C ~/runner_update"
+
+      # This closes the process and runs the updater.
+      exec "~/runner_update/bin/update_runner" if successful_download
+    end
+  end
   
   def query_params
     { :version => TESTBOT_VERSION, :mac => Mac.addr, :hostname => (@hostname ||= `hostname`.chomp),
-      :idle_instances => (config.max_instances - @instances.size) }
+      :idle_instances => (@@config.max_instances - @instances.size) }
   end
   
   def max_instances_running?
-    @instances.size == config.max_instances
+    @instances.size == @@config.max_instances
   end
 
   def clear_completed_instances
@@ -70,7 +92,7 @@ class Runner
   end
 
   def free_instance_number
-    0.upto(config.max_instances - 1) do |number|
+    0.upto(@@config.max_instances - 1) do |number|
       return number unless @instances.find { |instance, n| n == number }
     end
   end

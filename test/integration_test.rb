@@ -8,8 +8,8 @@ class IntegrationTest < Test::Unit::TestCase
   # This is slow, and Test:Unit does not have "before/after :all" method, so I'm using a single testcase for multiple tests
   should "be able to send a job request, have it run and returned" do
     system "mkdir tmp; cp -rf test/fixtures/local tmp/local"
-    system "mkdir tmp/runner; cd tmp/runner; ../../bin/testbot_runner start"
-    system "mkdir tmp/server; bin/testbot_server start"
+    system "mkdir tmp/runner; cd tmp/runner; INTEGRATION_TEST=true ../../bin/runner start"
+    system "mkdir tmp/server; INTEGRATION_TEST=true bin/server start"
     sleep 0.5
     result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../lib/requester.rb`
 
@@ -24,9 +24,9 @@ class IntegrationTest < Test::Unit::TestCase
   end
   
   def teardown
-    system "bin/testbot_server stop"
+    system "bin/server stop"
     # daemon places the pid in PWD, so we need to be there to close it.
-    system "cd tmp/runner; ../../bin/testbot_runner stop"
+    system "cd tmp/runner; ../../bin/runner stop"
     FileUtils.rm_rf "tmp"    
   end
 
