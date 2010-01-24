@@ -4,6 +4,17 @@ MAX_INSTANCES = 2
 
 require 'rubygems'
 require 'httparty'
+require 'macaddr'
+
+class Runner
+  def self.version
+    2
+  end
+  
+  def self.query_params
+    { :version => version, :mac => Mac.addr, :hostname => (@hostname ||= `hostname`.chomp) }
+  end
+end
 
 class Server
   include HTTParty
@@ -47,7 +58,7 @@ end
 
 loop do
   sleep 1
-  next_job = Server.get("/jobs/next") rescue nil
+  next_job = Server.get("/jobs/next", :query => Runner.query_params) rescue nil
   next if next_job == nil
   @instances << [ Thread.new { Job.new(*next_job.split(',')).run(free_instance_number) },
                   free_instance_number ]
