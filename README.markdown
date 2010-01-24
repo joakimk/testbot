@@ -24,33 +24,37 @@ Usage
 ====
 
 ### 0: Prerequisites:
-    If you have multiple cores on the computer you're running the specs on, you
-    will probably want to look into how to setup the database and config for it.
-    Check the readme for parallel_specs for now:
+
+If you have multiple cores on the computer you're running the specs on, you
+will probably want to look into how to setup the database and config for it.
+Check the readme for parallel_specs for now:
 
 [http://github.com/joakimk/parallel_specs](http://github.com/joakimk/parallel_specs)
 
-    Also it's a good idea to vendorize all gems/plugins and dependencies in your
-    rails project so that you don't have to install and maintain so much stuff
-    on each computer that will host a test runner.
-    
-    Even better would be if you could use an in-memory database (like SQLite3) for testing.
+Also it's a good idea to vendorize all gems/plugins and dependencies in your
+rails project so that you don't have to install and maintain so much stuff
+on each computer that will host a test runner.
+
+Even better would be if you could use an in-memory database (like SQLite3) for testing.
 
 ### 1: Setup a server.
-    Copy testbot to the server and run *bin/testbot_server start*.
+
+Copy testbot to the server and run *bin/testbot_server start*.
 
 ### 2: Setup a runner
-    - Add a *testbot.rake* task to your project and customize it so that the runner
-      can call it to prepare the environment before running a test.
-    - Copy testbot to a computer.
-    - Edit *lib/runner.rb*, configure the server address and the number of parallel jobs to allow.
-    - Make sure the user can ssh into the server without a password.
-    - Run *bin/testbot_runner start*
+
+* Add a *testbot.rake* task to your project and customize it so that the runner
+  can call it to prepare the environment before running a test.
+* Copy testbot to a computer.
+* Edit *lib/runner.rb*, configure the server address and the number of parallel jobs to allow.
+* Make sure the user can ssh into the server without a password.
+* Run *bin/testbot_runner start*
 
 ### 3: Setup the requester
-    You can use the sample requester but I'd recommend you use my testbot branch of
-    parallel_specs. Both need a config file, for now, look at
-    test/fixtures/local/config/testbot.yml.
+
+You can use the sample requester but I'd recommend you use my testbot branch of
+parallel_specs. Both need a config file, for now, look at
+test/fixtures/local/config/testbot.yml.
 
 Running the tests
 ====
@@ -61,12 +65,12 @@ Running the tests
 Realtime runner information
 ====
     
-    You can access */runners/outdated* on the server too see which of the runners needs to be updated.
-    Out of date runners are not given any test jobs.
-    
-    You can access */runners/available_instances* to see how many instances are available. Only runners
-    that are up to date and actively asking for test jobs are included. The parallel_specs testbot
-    requester will be using this.
+You can access */runners/outdated* on the server too see which of the runners needs to be updated.
+Out of date runners are not given any test jobs.
+
+You can access */runners/available_instances* to see how many instances are available. Only runners
+that are up to date and actively asking for test jobs are included. The parallel_specs testbot
+requester will be using this.
 
 TODO
 ====
