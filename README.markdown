@@ -43,12 +43,12 @@ Copy testbot to the server and run *bin/testbot_server start*.
 
 ### 2: Setup a runner
 
-* Add a *testbot.rake* task to your project and customize it so that the runner
+* Add a **testbot.rake** task to your project and customize it so that the runner
   can call it to prepare the environment before running a test.
 * Copy testbot to a computer.
-* Edit *lib/runner.rb*, configure the server address and the number of parallel jobs to allow.
+* Edit **lib/runner.rb**, configure the server address and the number of parallel jobs to allow.
 * Make sure the user can ssh into the server without a password.
-* Run *bin/testbot_runner start*
+* Run **bin/testbot_runner start**
 
 ### 3: Setup the requester
 
@@ -65,10 +65,10 @@ Running the tests
 Realtime runner information
 ====
     
-You can access */runners/outdated* on the server too see which of the runners needs to be updated.
+You can access **/runners/outdated** on the server too see which of the runners needs to be updated.
 Out of date runners are not given any test jobs.
 
-You can access */runners/available_instances* to see how many instances are available. Only runners
+You can access **/runners/available_instances** to see how many instances are available. Only runners
 that are up to date and actively asking for test jobs are included. The parallel_specs testbot
 requester will be using this.
 
