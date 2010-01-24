@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 if File.exists?("bin/runner") && File.exists?("#{ENV['HOME']}/runner_update/bin/runner")
-  echo "Updating..."
+  puts "Updating..."
   system "rm -rf * && cp -rf ~/runner_update/* . && rm -rf ~/runner_update"
   system "gem install httparty daemons macaddr"
   puts "Done, starting runner."
