@@ -1,0 +1,2 @@
+server_uri: http://localhost:4567
+max_instances: 1

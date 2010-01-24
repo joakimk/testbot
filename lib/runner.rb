@@ -1,11 +1,15 @@
-# Config
-SERVER = "http://localhost:4567"
-MAX_INSTANCES = 2
-TESTBOT_VERSION = 2
-
 require 'rubygems'
 require 'httparty'
 require 'macaddr'
+require 'ostruct'
+
+TESTBOT_VERSION = 2
+
+@config = YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml")
+
+def config
+  OpenStruct.new(@config)
+end
 
 class Job
   def initialize(id, root, specs)
@@ -24,7 +28,7 @@ end
 
 class Server
   include HTTParty
-  base_uri SERVER
+  base_uri config.server_uri
 end
 
 class Runner
@@ -52,11 +56,11 @@ class Runner
   
   def query_params
     { :version => TESTBOT_VERSION, :mac => Mac.addr, :hostname => (@hostname ||= `hostname`.chomp),
-      :idle_instances => (MAX_INSTANCES - @instances.size) }
+      :idle_instances => (config.max_instances - @instances.size) }
   end
   
   def max_instances_running?
-    @instances.size == MAX_INSTANCES
+    @instances.size == config.max_instances
   end
 
   def clear_completed_instances
@@ -66,7 +70,7 @@ class Runner
   end
 
   def free_instance_number
-    0.upto(MAX_INSTANCES - 1) do |number|
+    0.upto(config.max_instances - 1) do |number|
       return number unless @instances.find { |instance, n| n == number }
     end
   end
