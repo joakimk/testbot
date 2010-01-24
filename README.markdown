@@ -27,9 +27,7 @@ Usage
 
 If you have multiple cores on the computer you're running the specs on, you
 will probably want to look into how to setup the database and config for it.
-Check the readme for parallel_specs for now:
-
-[http://github.com/joakimk/parallel_specs](http://github.com/joakimk/parallel_specs)
+Check the readme for parallel_specs for now: [http://github.com/joakimk/parallel_specs](http://github.com/joakimk/parallel_specs)
 
 Also it's a good idea to vendorize all gems/plugins and dependencies in your
 rails project so that you don't have to install and maintain so much stuff
@@ -39,7 +37,7 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 ### 1: Setup a server.
 
-Copy testbot to the server and run *bin/testbot_server start*.
+Copy testbot to the server and run **bin/testbot_server start**.
 
 ### 2: Setup a runner
 
@@ -54,7 +52,7 @@ Copy testbot to the server and run *bin/testbot_server start*.
 
 You can use the sample requester but I'd recommend you use my testbot branch of
 parallel_specs. Both need a config file, for now, look at
-test/fixtures/local/config/testbot.yml.
+**test/fixtures/local/config/testbot.yml**.
 
 Running the tests
 ====
