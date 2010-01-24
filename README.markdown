@@ -33,6 +33,8 @@ Usage
     Also it's a good idea to vendorize all gems/plugins and dependencies in your
     rails project so that you don't have to install and maintain so much stuff
     on each computer that will host a test runner.
+    
+    Even better would be if you could use an in-memory database (like SQLite3) for testing.
 
 ### 1: Setup a server.
     Copy testbot to the server and run *bin/testbot_server start*.
@@ -56,11 +58,15 @@ Running the tests
     sudo gem install rack-test
     rake
     
-Old runners
+Realtime runner information
 ====
     
-    You can access /runners/outdated on the server too see which of the runners needs to be updated.
+    You can access */runners/outdated* on the server too see which of the runners needs to be updated.
     Out of date runners are not given any test jobs.
+    
+    You can access */runners/available_instances* to see how many instances are available. Only runners
+    that are up to date and actively asking for test jobs are included. The parallel_specs testbot
+    requester will be using this.
 
 TODO
 ====
