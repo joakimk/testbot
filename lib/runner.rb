@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 4
+TESTBOT_VERSION = 5
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 
@@ -20,7 +20,7 @@ class Job
     puts "Running job #{@id} in instance #{instance}... "
     system "rsync -az --delete -e ssh #{@root}/ instance#{instance}"
     test_env_number = (instance == 0) ? '' : instance + 1
-    result = `export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export RSPEC_COLOR=true; cd instance#{instance}; rake testbot:prepare; script/spec -O spec/spec.opts #{@specs}`
+    result = `export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export RSPEC_COLOR=true; cd instance#{instance}; rake testbot:before_run; script/spec -O spec/spec.opts #{@specs}`
     Server.put("/jobs/#{@id}", :body => { :result => result })
     puts "Job #{@id} finished."
   end
