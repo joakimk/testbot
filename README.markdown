@@ -18,7 +18,7 @@ will have to have trust everyone using it.
 
 Benchmarks
 ====
-http://gist.github.com/287124
+[http://gist.github.com/287124](http://gist.github.com/287124)
 
 Usage
 ====
