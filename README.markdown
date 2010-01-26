@@ -16,6 +16,10 @@ all other computers can access.
 As the runners pull down and run code that can be posted by anyone with access to the central server you
 will have to have trust everyone using it.
 
+Benchmarks
+====
+http://gist.github.com/287124
+
 Usage
 ====
 
