@@ -76,10 +76,10 @@ Running the tests
 
     gem install rack-test shoulda flexmock
     rake
-    
+
 Realtime runner information
 ====
-    
+
 You can access **/runners/outdated** on the server too see which of the runners needs to be updated.
 Out of date runners are not given any test jobs.
 
