@@ -64,12 +64,21 @@ Install required gems and download testbot:
 * Run **bin/runner run** and make sure it does not immediately crash. Then press ctrl+c.
 * Run **bin/runner start** to start the runner as a daemon.
 
-### 3: Setup the requester
+### 4: Setup the requester
 
 You can use the sample requester (lib/requester.rb) but I'd recommend you use my testbot branch of
 parallel_specs.
 
     cp testbot.yml.example ~/PROJECT_PATH/config/testbot.yml
+
+### 5: Running the tests
+
+The first time you run your specs the runners will sync the project so you can expect it to take a bit
+more time than usual.
+
+Using my testbot branch of parallel_specs:
+
+    rake parallel:testbot_spec
 
 Running the tests
 ====
