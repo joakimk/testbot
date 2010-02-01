@@ -35,7 +35,7 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 * Add a **testbot.rake** task to your project and customize it so that the runner
   can call it to prepare the environment before running a test.
 
-  cp testbot.rake.example ~/PROJECT_PATH/lib/tasks/testbot.yml
+    cp testbot.rake.example ~/PROJECT_PATH/lib/tasks/testbot.yml
 
 ### 2: Setup a server.
 
