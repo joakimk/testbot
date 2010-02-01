@@ -1,7 +1,6 @@
 Speedup RSpec by running in parallel on multiple CPUs on muliple computers.
 
-**NOTE! This is not in any way complete. It needs alot of polish before being
-truly useful.**
+**NOTE: This is very much a work in progress.**
 
 This borrows alot of ideas from parallel_specs and will probably be part of it
 in one way or another. I'm currently looking into adding a testbot requester
@@ -35,34 +34,46 @@ on each computer that will host a test runner.
 
 Even better would be if you could use an in-memory database (like SQLite3) for testing.
 
-### 1: Setup a server.
+### 1: Prepare your project
+
+* Add a **testbot.rake** task to your project and customize it so that the runner
+  can call it to prepare the environment before running a test.
+
+  cp testbot.rake.example ~/PROJECT_PATH/lib/tasks/testbot.yml
+
+### 2: Setup a server.
 
 Install required gems and download testbot:
 
     gem install sequel sinatra sqlite3-ruby daemons
     mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/release | tar xz --strip 1 -C testbot
+    cd testbot
+    cp testbot_server.yml.example ~/testbot_server.yml
 
-* Copy **testbot_server.yml.example** to **~/.testbot_server.yml**.
+* Customize **~/.testbot_server.yml**.
+* Run **bin/server run** and make sure it does not immediately crash. Then press ctrl+c.
 * Run **bin/server start**.
 
-### 2: Setup a runner
+### 3: Setup a runner
 
 Install required gems and download testbot:
 
     gem install httparty daemons macaddr
     mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/release | tar xz --strip 1 -C testbot
+    cd testbot
+    cp testbot_runner.yml.example ~/testbot_runner.yml
 
-* Add a **testbot.rake** task to your project and customize it so that the runner
-  can call it to prepare the environment before running a test.
-* Copy **testbot_runner.yml.example** to **~/.testbot_runner.yml** and customize it.
+* Customize **~/.testbot_runner.yml**.
 * Make sure the user can ssh into the server without a password.
-* Run **bin/runner start**
+* Run **bin/runner run** and make sure it does not immediately crash. Then press ctrl+c.
+* Run **bin/runner start** to start the runner as a daemon.
 
 ### 3: Setup the requester
 
 You can use the sample requester (lib/requester.rb) but I'd recommend you use my testbot branch of
-parallel_specs. Both need a config file, for now, look at
-**test/fixtures/local/config/testbot.yml**.
+parallel_specs.
+
+    cp testbot.yml.example ~/PROJECT_PATH/config/testbot.yml
 
 Running the tests
 ====
@@ -80,6 +91,13 @@ You can access **/runners/available_instances** to see how many instances are av
 that are up to date and actively asking for test jobs are included. The parallel_specs testbot
 requester will be using this.
 
+Gotchas
+====
+
+* When you run your specs in smaller sets you can become unaware of dependency errors in your suite. I'd
+recommend that you use testbot for development but have a CI server that runs the entire suite with "rake spec"
+on each commit.
+
 Tips
 ====
 
@@ -88,9 +106,6 @@ I've seen about 20% faster spec runtimes when using Ruby Enterprise Edition. You
 
 TODO
 ====
- - Add support for multiple users
  - Make it simpler to use
-   - Example config and testbot.rake.
-   - Gems? sudo gem install testbot; vim ~/.testbot.conf; testbot_runner start...
  - Add support for Test:Unit and Cucumber
  - Lots more
