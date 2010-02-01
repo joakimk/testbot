@@ -1,6 +1,6 @@
 namespace :testbot do
   
-  task :prepare do
+  task :before_run do
     puts "prepare got called"
   end
   
