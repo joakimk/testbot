@@ -80,7 +80,7 @@ Using my testbot branch of parallel_specs:
 
     rake parallel:testbot_spec
 
-Running the tests
+Running testbot's tests
 ====
 
     gem install rack-test shoulda flexmock
