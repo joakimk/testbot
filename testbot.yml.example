@@ -1,4 +1,3 @@
-server_uri: http://localhost:2288
-server_path: ../server
+server_uri: http://server:2288
+server_path: server:/tmp/testbot/!USERNAME!
 ignores: log/* tmp/*
-groups: 1
