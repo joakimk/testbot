@@ -3,13 +3,35 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 6
+TESTBOT_VERSION = 7
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
+MAX_CPU_USAGE_WHEN_IDLE = 50
 
 @@config = OpenStruct.new(ENV['INTEGRATION_TEST'] ?
            { :server_uri => "http://localhost:2288", :automatic_updates => false, :max_instances => 1 } :
            YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml"))
+
+class CpuUsage
+
+ def self.current
+   process_usages = `ps -eo pcpu | sort -k 1 -r`
+   total_usage = process_usages.split("\n").inject(0) { |sum, usage| sum += usage.strip.to_f }
+   (total_usage / number_of_cpus).to_i
+ end
+
+ private
+
+ def self.number_of_cpus
+   case RUBY_PLATFORM
+     when /darwin/
+       `hwprefs cpu_count`.to_i
+     when /linux/
+       `cat /proc/cpuinfo | grep processor | wc -l`.to_i
+   end
+ end
+
+end
 
 class Job
   def initialize(id, root, specs)
@@ -44,6 +66,7 @@ class Runner
       sleep TIME_BETWEEN_POLLS
       check_for_update if time_for_update?
       clear_completed_instances # Makes sure all instances are listed as available after a run
+      next if CpuUsage.current > MAX_CPU_USAGE_WHEN_IDLE
       next_job = Server.get("/jobs/next", :query => query_params) rescue nil
       next if next_job == nil
       @instances << [ Thread.new { Job.new(*next_job.split(',')).run(free_instance_number) },
