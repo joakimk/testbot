@@ -1,7 +1,6 @@
 0.1.1
 
-Added a CPU usage check to so that the runner does not start a job when
-the computer is busy.
+Added a CPU usage check to make sure that the runner does not start a job when the computer is busy.
 
 0.1
 
