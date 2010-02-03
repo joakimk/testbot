@@ -15,7 +15,7 @@ MAX_CPU_USAGE_WHEN_IDLE = 50
 class CpuUsage
 
  def self.current
-   process_usages = `ps -eo pcpu | sort -k 1 -r`
+   process_usages = `ps -eo pcpu`
    total_usage = process_usages.split("\n").inject(0) { |sum, usage| sum += usage.strip.to_f }
    (total_usage / number_of_cpus).to_i
  end
