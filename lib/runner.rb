@@ -20,7 +20,8 @@ class Job
     puts "Running job #{@id} in instance #{instance}... "
     system "rsync -az --delete -e ssh #{@root}/ instance#{instance}"
     test_env_number = (instance == 0) ? '' : instance + 1
-    result = `export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export RSPEC_COLOR=true; cd instance#{instance}; rake testbot:before_run; script/spec -O spec/spec.opts #{@specs}`
+    result = "#{`hostname`.chomp} "
+    result += `export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export RSPEC_COLOR=true; cd instance#{instance}; rake testbot:before_run; script/spec -O spec/spec.opts #{@specs}  2>&1`
     Server.put("/jobs/#{@id}", :body => { :result => result })
     puts "Job #{@id} finished."
   end
