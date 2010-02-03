@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 5
+TESTBOT_VERSION = 6
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 
