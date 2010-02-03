@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 7
+TESTBOT_VERSION = 8
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -66,7 +66,7 @@ class Runner
       sleep TIME_BETWEEN_POLLS
       check_for_update if time_for_update?
       clear_completed_instances # Makes sure all instances are listed as available after a run
-      next if CpuUsage.current > MAX_CPU_USAGE_WHEN_IDLE
+      next unless cpu_available?
       next_job = Server.get("/jobs/next", :query => query_params) rescue nil
       next if next_job == nil
       @instances << [ Thread.new { Job.new(*next_job.split(',')).run(free_instance_number) },
@@ -79,6 +79,10 @@ class Runner
   end
     
   private
+  
+  def cpu_available?
+    @instances.size > 0 || CpuUsage.current < MAX_CPU_USAGE_WHEN_IDLE
+  end
   
   def time_for_update?
     time_for_update = ((Time.now - @last_version_check) >= TIME_BETWEEN_VERSION_CHECKS)
