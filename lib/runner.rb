@@ -43,9 +43,9 @@ class Job
     system "rsync -az --delete -e ssh #{@root}/ instance#{instance}"
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "#{`hostname`.chomp} "
-    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number};"
+    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd instance#{instance};"
     if @type == 'rspec'
-      result += `#{base_environment} export RSPEC_COLOR=true; cd instance#{instance}; rake testbot:before_run; script/spec -O spec/spec.opts #{@files}  2>&1`
+      result += `#{base_environment} export RSPEC_COLOR=true; rake testbot:before_run; script/spec -O spec/spec.opts #{@files}  2>&1`
     elsif @type == 'cucumber'
       result += `#{base_environment} script/cucumber -f progress --backtrace -r features/support -r features/step_definitions #{@files}   2>&1`
     else
