@@ -47,7 +47,7 @@ class Job
     if @type == 'rspec'
       result += `#{base_environment} export RSPEC_COLOR=true; cd instance#{instance}; rake testbot:before_run; script/spec -O spec/spec.opts #{@files}  2>&1`
     elsif @type == 'cucumber'
-      result += `#{base_environment} script/cucumber -f progress -r features/support -r features/step_definitions #{@files}   2>&1`
+      result += `#{base_environment} script/cucumber -f progress --backtrace -r features/support -r features/step_definitions #{@files}   2>&1`
     else
       raise "Unknown job type! (#{@type})"
     end
