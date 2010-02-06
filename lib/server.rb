@@ -6,7 +6,7 @@ set :port, 2288
 
 class Server
   def self.version
-    12
+    13
   end
   
   def self.valid_version?(runner_version)

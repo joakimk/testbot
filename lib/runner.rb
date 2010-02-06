@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 12
+TESTBOT_VERSION = 13
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -47,7 +47,7 @@ class Job
     if @type == 'rspec'
       result += `#{base_environment} export RSPEC_COLOR=true; script/spec -O spec/spec.opts #{@files}  2>&1`
     elsif @type == 'cucumber'
-      result += `#{base_environment} script/cucumber -f progress --backtrace -r features/support -r features/step_definitions #{@files}   2>&1`
+      result += `#{base_environment} export AUTOTEST=1; script/cucumber -f progress --backtrace -r features/support -r features/step_definitions #{@files}   2>&1`
     else
       raise "Unknown job type! (#{@type})"
     end
