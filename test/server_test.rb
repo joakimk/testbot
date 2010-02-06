@@ -22,12 +22,13 @@ class ServerTest < Test::Unit::TestCase
   context "POST /jobs" do
 
     should "save a job and return the id" do
-      post '/jobs', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project'
+      post '/jobs', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec'
       first_job = Job.first
       assert last_response.ok?    
       assert_equal first_job[:id].to_s, last_response.body
       assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_job[:files]
       assert_equal 'server:/path/to/project', first_job[:root]
+      assert_equal 'rspec', first_job[:type]
     end
     
   end
@@ -35,21 +36,21 @@ class ServerTest < Test::Unit::TestCase
   context "GET /jobs/next" do
   
     should "be able to return a job and mark it as taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project'
-      job2 = Job.create :files => 'spec/models/house_spec.rb'
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec'
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :type => 'rspec'
       get '/jobs/next', :version => Server.version
       assert last_response.ok?      
-      assert_equal [ job1[:id], "server:/project", "spec/models/car_spec.rb" ].join(','), last_response.body
+      assert_equal [ job1[:id], "server:/project", "rspec", "spec/models/car_spec.rb" ].join(','), last_response.body
       assert job1.reload[:taken]
       assert !job2.reload[:taken]
     end
   
     should "not return a job that has already been taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project' 
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :type => 'rspec'
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec'
       get '/jobs/next', :version => Server.version
       assert last_response.ok?
-      assert_equal [ job2[:id], "server:/project", "spec/models/house_spec.rb" ].join(','), last_response.body
+      assert_equal [ job2[:id], "server:/project", "rspec", "spec/models/house_spec.rb" ].join(','), last_response.body
       assert job2.reload[:taken]    
     end
 

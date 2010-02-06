@@ -14,7 +14,7 @@ class Requester
   end
   
   def request_job(files)
-    Server.post('/jobs', :body => { :root => @project_path, :files => files })
+    Server.post('/jobs', :body => { :root => @project_path, :files => files, :type => 'rspec' })
   end
   
   def poll(job_id)

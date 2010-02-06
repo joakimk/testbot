@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 8
+TESTBOT_VERSION = 9
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -34,8 +34,8 @@ class CpuUsage
 end
 
 class Job
-  def initialize(id, root, specs)
-    @id, @root, @specs = id, root, specs
+  def initialize(id, root, type, files)
+    @id, @root, @type, @files = id, root, type, files
   end
   
   def run(instance)
@@ -43,7 +43,14 @@ class Job
     system "rsync -az --delete -e ssh #{@root}/ instance#{instance}"
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "#{`hostname`.chomp} "
-    result += `export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export RSPEC_COLOR=true; cd instance#{instance}; rake testbot:before_run; script/spec -O spec/spec.opts #{@specs}  2>&1`
+    base_environment = 'export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number};'
+    if @type == 'rspec'
+      result += `#{base_environment} export RSPEC_COLOR=true; cd instance#{instance}; rake testbot:before_run; script/spec -O spec/spec.opts #{@files}  2>&1`
+    elsif @type == 'cucumber'
+      result += `#{base_environment} script/cucumber -f progress -r features/support -r features/step_definitions #{@files}   2>&1`
+    else
+      raise "Unknown job type! (#{@type})"
+    end
     Server.put("/jobs/#{@id}", :body => { :result => result })
     puts "Job #{@id} finished."
   end
