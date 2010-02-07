@@ -1,10 +1,4 @@
-Speedup RSpec by running in parallel on multiple CPUs on muliple computers.
-
-**NOTE: This is very much a work in progress.**
-
-This borrows alot of ideas from parallel_specs and will probably be part of it
-in one way or another. I'm currently looking into adding a testbot requester
-to parallel_specs at: [http://github.com/joakimk/parallel_specs/tree/testbot](http://github.com/joakimk/parallel_specs/tree/testbot).
+Speedup RSpec and Cucumber by running in parallel on multiple CPUs on muliple computers.
 
 Concept
 ====
@@ -32,10 +26,14 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 ### 1: Prepare your project
 
-* Add a **testbot.rake** task to your project and customize it so that the runner
-  can call it to prepare the environment before running a test.
+Get my testbot branch of parallel_specs and install it in your rails app:
 
-    cp testbot.rake.example ~/PROJECT_PATH/lib/tasks/testbot.yml
+    cd vendor/plugins && git clone git://github.com/joakimk/parallel_specs.git && cd parallel_specs && git checkout remotes/origin/testbot -b testbot && rm -rf .git && cd ../../..
+    cp vendor/plugins/parallel_specs/docs/testbot.yml.example config/testbot.yml
+    cp vendor/plugins/parallel_specs/docs/testbot.rake.example config/testbot.rake
+
+Customize *lib/tasks/testbot.rake* and *config/testbot.yml*. You will probably want to keep config/testbot.yml
+outside of version control for now (as every used must specify their own server_path).
 
 ### 2: Setup a server.
 
@@ -64,21 +62,18 @@ Install required gems and download testbot:
 * Run **bin/runner run** and make sure it does not immediately crash. Then press ctrl+c.
 * Run **bin/runner start** to start the runner as a daemon.
 
-### 4: Setup the requester
-
-You can use the sample requester (lib/requester.rb) but I'd recommend you use my testbot branch of
-parallel_specs.
-
-    cp testbot.yml.example ~/PROJECT_PATH/config/testbot.yml
-
 ### 5: Running the tests
 
-The first time you run your specs the runners will sync the project so you can expect it to take a bit
+The first time you run your tests the runners will sync the project so you can expect it to take a bit
 more time than usual.
 
-Using my testbot branch of parallel_specs:
+To run the rspec specs:
 
     rake parallel:testbot_spec
+    
+To run the cucumber features:
+
+    rake parallel:testbot_features
 
 Running testbot's tests
 ====
@@ -99,18 +94,19 @@ requester will be using this.
 Gotchas
 ====
 
-* When you run your specs in smaller sets you can become unaware of dependency errors in your suite. I'd
-recommend that you use testbot for development but have a CI server that runs the entire suite with "rake spec"
-on each commit.
+* When you run your tests in smaller sets you can become unaware of dependency errors in your suite. I'd
+recommend that you use testbot for development but have a CI server that runs the entire suite with "rake spec" / "script/cucumber features" on each commit.
 
 Tips
 ====
 
-I've seen about 20% faster spec runtimes when using Ruby Enterprise Edition. You can find it at:
+I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
 [http://www.rubyenterpriseedition.com/](http://www.rubyenterpriseedition.com/).
 
 TODO
 ====
  - Make it simpler to use
- - Add support for Test:Unit and Cucumber
+ - Add support for Test:Unit / Shoulda
+ - Add support for jRuby
+ - Optimizations
  - Lots more

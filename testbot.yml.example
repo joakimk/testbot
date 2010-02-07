@@ -1,3 +1,0 @@
-server_uri: http://server:2288
-server_path: server:/tmp/testbot/!USERNAME!
-ignores: log/* tmp/*
