@@ -11,7 +11,6 @@ will have to have trust everyone using it.
 
 How it works
 ====
-
 1. You run something like "rake parallel:testbot_spec".
 2. Your project files is synced to a server.
 3. Your local client requests testing jobs based on your tests.
