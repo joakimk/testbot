@@ -73,7 +73,7 @@ Install required gems and download testbot:
 * Run **bin/runner run** and make sure it does not immediately crash. Then press ctrl+c.
 * Run **bin/runner start** to start the runner as a daemon.
 
-### 5: Running the tests
+### 4: Running the tests
 
 The first time you run your tests the runners will sync the project so you can expect it to take a bit
 more time than usual.
