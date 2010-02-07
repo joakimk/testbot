@@ -30,10 +30,10 @@ Get my testbot branch of parallel_specs and install it in your rails app:
 
     cd vendor/plugins && git clone git://github.com/joakimk/parallel_specs.git && cd parallel_specs && git checkout remotes/origin/testbot -b testbot && rm -rf .git && cd ../../..
     cp vendor/plugins/parallel_specs/docs/testbot.yml.example config/testbot.yml
-    cp vendor/plugins/parallel_specs/docs/testbot.rake.example config/testbot.rake
+    cp vendor/plugins/parallel_specs/docs/testbot.rake.example lib/tasks/testbot.rake
 
-Customize *lib/tasks/testbot.rake* and *config/testbot.yml*. You will probably want to keep config/testbot.yml
-outside of version control for now (as every used must specify their own server_path).
+Customize **lib/tasks/testbot.rake** and **config/testbot.yml**. You will probably want to keep **config/testbot.yml**
+outside of version control for now (as every user must specify their own server_path).
 
 ### 2: Setup a server.
 
