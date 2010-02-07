@@ -37,8 +37,9 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 ### 1: Prepare your project
 
-Get my testbot branch of parallel_specs and install it in your rails app:
+Install required gems and parallel_specs:
 
+    gem install httparty parallel
     cd vendor/plugins && git clone git://github.com/joakimk/parallel_specs.git && cd parallel_specs && git checkout remotes/origin/testbot -b testbot && rm -rf .git && cd ../../..
     cp vendor/plugins/parallel_specs/docs/testbot.yml.example config/testbot.yml
     cp vendor/plugins/parallel_specs/docs/testbot.rake.example lib/tasks/testbot.rake
