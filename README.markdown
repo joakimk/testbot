@@ -100,7 +100,7 @@ Out of date runners are not given any test jobs.
 
 You can access **/runners/available_instances** to see how many instances are available. Only runners
 that are up to date and actively asking for test jobs are included. The parallel_specs testbot
-requester will be using this.
+requesters use this.
 
 Gotchas
 ====
