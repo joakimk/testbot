@@ -1,3 +1,7 @@
+0.1.2
+
+Added cucumber support.
+
 0.1.1
 
 Added a CPU usage check to make sure that the runner does not start a job when the computer is busy.
