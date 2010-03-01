@@ -53,7 +53,7 @@ Install required gems and download testbot:
     gem install sequel sinatra sqlite3-ruby daemons
     mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/release | tar xz --strip 1 -C testbot
     cd testbot
-    cp testbot_server.yml.example ~/testbot_server.yml
+    cp testbot_server.yml.example ~/.testbot_server.yml
 
 * Customize **~/.testbot_server.yml**.
 * Run **bin/server run** and make sure it does not immediately crash. Then press ctrl+c.
@@ -66,7 +66,7 @@ Install required gems and download testbot:
     gem install httparty daemons macaddr
     mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/release | tar xz --strip 1 -C testbot
     cd testbot
-    cp testbot_runner.yml.example ~/testbot_runner.yml
+    cp testbot_runner.yml.example ~/.testbot_runner.yml
 
 * Customize **~/.testbot_runner.yml**.
 * Make sure the user can ssh into the server without a password.
@@ -81,7 +81,7 @@ more time than usual.
 To run the rspec specs:
 
     rake parallel:testbot_spec
-    
+
 To run the cucumber features:
 
     rake parallel:testbot_features
