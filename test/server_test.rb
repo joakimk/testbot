@@ -101,10 +101,30 @@ class ServerTest < Test::Unit::TestCase
     end
     
   end
+
+  context "GET /runners/available_runners" do
+
+    should "return a list of available runners" do
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
+      get '/runners/available'
+      assert last_response.ok?
+      assert_equal "127.0.0.1 macmini1.local 00:01 2\n127.0.0.1 macmini2.local 00:02 4", last_response.body
+    end
+    
+    should "not return runners as available when not seen the last three seconds" do
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
+      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 3)      
+      get '/runners/available'
+      assert_equal "127.0.0.1 macmini1.local 00:01 2", last_response.body
+    end
+    
+  end
   
   context "GET /runners/available_instances" do
     
-    should "return a list of available runner instances" do
+    should "return the number of available runner instances" do
       get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
       get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
       get '/runners/available_instances'
@@ -112,7 +132,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal "6", last_response.body
     end    
         
-    should "not list runner instances as available when not seen the last second three seconds" do
+    should "not return instances as available when not seen the last three seconds" do
       get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
       get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
       Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 3)

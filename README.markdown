@@ -102,6 +102,9 @@ You can access **/runners/available_instances** to see how many instances are av
 that are up to date and actively asking for test jobs are included. The parallel_specs testbot
 requesters use this.
 
+You can access **/runners/available_runners** to see how many runners are available. Only runners
+that are up to date and actively asking for test jobs are included.
+
 Gotchas
 ====
 

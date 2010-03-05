@@ -51,8 +51,12 @@ class Runner < Sequel::Model
     DB[:runners].filter("version < ? OR version IS NULL", Server.version)
   end
   
+  def self.find_all_available
+    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3)
+  end  
+  
   def self.available_instances
-    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3).inject(0) { |sum, r| r[:idle_instances] + sum }
+    find_all_available.inject(0) { |sum, r| r[:idle_instances] + sum }
   end
   
 end
@@ -97,6 +101,10 @@ end
 
 get '/runners/available_instances' do
   Runner.available_instances.to_s
+end
+
+get '/runners/available' do
+  Runner.find_all_available.map { |runner| [ runner[:ip], runner[:hostname], runner[:mac], runner[:idle_instances] ].join(' ') }.join("\n").strip
 end
 
 get '/version' do
