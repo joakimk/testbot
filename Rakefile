@@ -6,5 +6,5 @@ end
 task 'default' do
   ruby "test/server_test.rb"
   ruby "test/new_runner_test.rb"  
-  ruby "test/integration_test.rb"
+  ruby "test/integration_test.rb" unless ENV['RUN_CODE_RUN']
 end
