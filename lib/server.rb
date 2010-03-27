@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'sinatra'
 require 'sequel'
+require 'yaml'
 
 set :port, 2288
 
