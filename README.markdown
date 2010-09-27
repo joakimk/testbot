@@ -117,6 +117,10 @@ Tips
 I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
 [http://www.rubyenterpriseedition.com/](http://www.rubyenterpriseedition.com/).
 
+Add "server_type: git" to testbot.yml and change "server_path" to your git repo to
+greatly improve startup speed. This is probably not practical if you want to run
+uncommited code, but great for CI servers.
+
 TODO
 ====
  - Make it simpler to use
