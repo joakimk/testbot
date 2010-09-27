@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 14
+TESTBOT_VERSION = 15
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -34,16 +34,17 @@ class CpuUsage
 end
 
 class Job
-  def initialize(id, root, type, files)
-    @id, @root, @type, @files = id, root, type, files
+  def initialize(id, root, type, root_type, files)
+    @id, @root, @type, @root_type, @files = id, root, type, root_type, files
   end
   
   def run(instance)
     puts "Running job #{@id} in instance #{instance}... "
-    system "rsync -az --delete -e ssh #{@root}/ instance#{instance}"
+    fetch_instance_code(instance)    
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "#{`hostname`.chomp} "
     base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd instance#{instance}; rake testbot:before_run;"
+    
     if @type == 'rspec'
       result += `#{base_environment} export RSPEC_COLOR=true; script/spec -O spec/spec.opts #{@files}  2>&1`
     elsif @type == 'cucumber'
@@ -51,8 +52,25 @@ class Job
     else
       raise "Unknown job type! (#{@type})"
     end
+    
     Server.put("/jobs/#{@id}", :body => { :result => result })
     puts "Job #{@id} finished."
+  end
+  
+  private
+  
+  def fetch_instance_code(instance)
+    if @root_type == 'rsync'
+      system "rsync -az --delete -e ssh #{@root}/ instance#{instance}"
+    elsif @root_type == 'git'
+      if File.exists?("instance#{instance}")
+        system "cd instance#{instance}; git pull; cd .."
+      else
+        system "git clone #{@root} instance#{instance}"
+      end
+    else
+      raise "Unknown root type! (#{@root_type})"
+    end
   end
 end
 
