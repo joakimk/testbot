@@ -43,7 +43,7 @@ class Job
     fetch_instance_code(instance)    
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "#{`hostname`.chomp} "
-    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd instance#{instance}; rake testbot:before_run;"
+    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export TEST_SERVER_TYPE=#{@server_type}; cd instance#{instance}; rake testbot:before_run;"
     
     if @type == 'rspec'
       result += `#{base_environment} export RSPEC_COLOR=true; script/spec -O spec/spec.opts #{@files}  2>&1`
