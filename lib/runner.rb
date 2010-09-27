@@ -34,8 +34,8 @@ class CpuUsage
 end
 
 class Job
-  def initialize(id, root, type, root_type, files)
-    @id, @root, @type, @root_type, @files = id, root, type, root_type, files
+  def initialize(id, root, type, server_type, files)
+    @id, @root, @type, @server_type, @files = id, root, type, server_type, files
   end
   
   def run(instance)
@@ -60,16 +60,16 @@ class Job
   private
   
   def fetch_instance_code(instance)
-    if @root_type == 'rsync'
+    if @server_type == 'rsync'
       system "rsync -az --delete -e ssh #{@root}/ instance#{instance}"
-    elsif @root_type == 'git'
+    elsif @server_type == 'git'
       if File.exists?("instance#{instance}")
         system "cd instance#{instance}; git pull; cd .."
       else
         system "git clone #{@root} instance#{instance}"
       end
     else
-      raise "Unknown root type! (#{@root_type})"
+      raise "Unknown root type! (#{@server_type})"
     end
   end
 end

@@ -23,7 +23,7 @@ DB.create_table :jobs do
   String :result
   String :root
   String :type
-  String :root_type
+  String :server_type
   Boolean :taken, :default => false
 end
 
@@ -82,7 +82,7 @@ get '/jobs/next' do
   return unless Server.valid_version?(params[:version])
   next_job = Job.find(:taken => false) or return
   next_job.update(:taken => true)
-  [ next_job[:id], next_job[:root], next_job[:type], next_job[:root_type], next_job[:files] ].join(',')
+  [ next_job[:id], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
 end
 
 put '/jobs/:id' do
