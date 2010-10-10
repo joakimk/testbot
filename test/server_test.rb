@@ -121,6 +121,15 @@ class ServerTest < Test::Unit::TestCase
       assert_equal "127.0.0.1 macmini1.local 00:01 2", last_response.body
     end
     
+    should "accept a larger time since last seen when supplied" do
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
+      Runner.find(:mac => "00:01").update(:last_seen_at => Time.now - 14)
+      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 16)
+      get '/runners/available?last_seen=15'
+      assert_equal "127.0.0.1 macmini1.local 00:01 2", last_response.body
+    end
+    
   end
   
   context "GET /runners/available_instances" do
@@ -140,7 +149,18 @@ class ServerTest < Test::Unit::TestCase
       get '/runners/available_instances'
       assert last_response.ok?
       assert_equal "2", last_response.body
-    end    
+    end
+    
+    should "accept a larger time since last seen when supplied" do
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
+      Runner.find(:mac => "00:01").update(:last_seen_at => Time.now - 14)
+      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 16)
+      get '/runners/available_instances?last_seen=15'
+      assert last_response.ok?
+      assert_equal "2", last_response.body
+      
+    end
     
   end
   
