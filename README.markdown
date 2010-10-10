@@ -105,11 +105,12 @@ requesters use this.
 You can access **/runners/available** to see how many runners are available. Only runners
 that are up to date and actively asking for test jobs are included.
 
+You can access **/runners/total_instances** to see how many instances have been available within the last hour.
+
 Gotchas
 ====
 
-* When you run your tests in smaller sets you can become unaware of dependency errors in your suite. I'd
-recommend that you use testbot for development but have a CI server that runs the entire suite with "rake spec" / "script/cucumber features" on each commit.
+* When you run your tests in smaller sets you can become unaware of dependency errors in your suite.
 
 Tips
 ====
