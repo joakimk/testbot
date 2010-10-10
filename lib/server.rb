@@ -34,6 +34,7 @@ DB.create_table :runners do
   String :mac
   Integer :version
   Integer :idle_instances
+  Integer :max_instances
   Datetime :last_seen_at
 end
 
@@ -42,23 +43,35 @@ class Job < Sequel::Model; end
 class Runner < Sequel::Model
 
   def self.record!(hash)
+    runner = create_or_update_by_mac!(hash)
+    
+    if runner[:idle_instances].to_i > runner[:max_instances].to_i
+      runner.update :max_instances => runner[:idle_instances]
+    end
+  end
+  
+  def self.create_or_update_by_mac!(hash)
     if (runner = find(:mac => hash[:mac]))
       runner.update hash
     else
       Runner.create hash
-    end    
+    end
   end
   
   def self.find_all_outdated
     DB[:runners].filter("version < ? OR version IS NULL", Server.version)
   end
   
-  def self.find_all_available(last_seen = nil)
-    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - (last_seen ? last_seen.to_i : 3))
+  def self.find_all_available
+    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3)
   end  
   
-  def self.available_instances(last_seen = nil)
-    find_all_available(last_seen).inject(0) { |sum, r| r[:idle_instances] + sum }
+  def self.available_instances
+    find_all_available.inject(0) { |sum, r| r[:idle_instances] + sum }
+  end
+  
+  def self.total_instances
+    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3600).inject(0) { |sum, r| r[:max_instances] + sum }
   end
   
 end
@@ -102,11 +115,15 @@ get '/runners/outdated' do
 end
 
 get '/runners/available_instances' do
-  Runner.available_instances(params[:last_seen]).to_s
+  Runner.available_instances.to_s
+end
+
+get '/runners/total_instances' do
+  Runner.total_instances.to_s
 end
 
 get '/runners/available' do
-  Runner.find_all_available(params[:last_seen]).map { |runner| [ runner[:ip], runner[:hostname], runner[:mac], runner[:idle_instances] ].join(' ') }.join("\n").strip
+  Runner.find_all_available.map { |runner| [ runner[:ip], runner[:hostname], runner[:mac], runner[:idle_instances] ].join(' ') }.join("\n").strip
 end
 
 get '/version' do
