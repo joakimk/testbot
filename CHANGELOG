@@ -1,3 +1,8 @@
+0.1.5
+
+Added "/runners/total_instances" to be able to balance requesters by knowing how many instances
+there are in total.
+
 0.1.4
 
 Added support for fetching the latest version from git instead of rsync when doing a test run.
