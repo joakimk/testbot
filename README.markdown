@@ -99,8 +99,7 @@ You can access **/runners/outdated** on the server too see which of the runners 
 Out of date runners are not given any test jobs.
 
 You can access **/runners/available_instances** to see how many instances are available. Only runners
-that are up to date and actively asking for test jobs are included. The parallel_specs testbot
-requesters use this.
+that are up to date and actively asking for test jobs are included.
 
 You can access **/runners/available** to see how many runners are available. Only runners
 that are up to date and actively asking for test jobs are included.
