@@ -121,6 +121,10 @@ Add "server_type: git" to testbot.yml and change "server_path" to your git repo 
 greatly improve startup speed. This is probably not practical if you want to run
 uncommited code, but great for CI servers.
 
+I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
+to install anything on the computers. Adding a new computer is as simple as setting it to
+boot from network. You can find the base PXE server setup at: http://gist.github.com/622495.
+
 TODO
 ====
  - Make it simpler to use
