@@ -123,7 +123,7 @@ uncommited code, but great for CI servers.
 
 I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
 to install anything on the computers. Adding a new computer is as simple as setting it to
-boot from network. You can find the base PXE server setup at: http://gist.github.com/622495.
+boot from network. You can find the base PXE server setup at: [http://gist.github.com/622495](http://gist.github.com/622495).
 
 TODO
 ====
