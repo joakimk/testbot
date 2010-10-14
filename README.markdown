@@ -1,4 +1,4 @@
-Speedup RSpec and Cucumber by running in parallel on multiple CPUs on muliple computers.
+Speedup RSpec and Cucumber by running in parallel on multiple CPUs on multiple computers.
 
 Concept
 ====
