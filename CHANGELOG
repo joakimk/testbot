@@ -1,3 +1,7 @@
+0.1.6
+
+Now only fetching the code once, and only keeping one copy of it. Less overhead.
+
 0.1.5
 
 Added "/runners/total_instances" to be able to balance requesters by knowing how many instances
