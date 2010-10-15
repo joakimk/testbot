@@ -7,7 +7,7 @@ set :port, 2288
 
 class Server
   def self.version
-    16
+    17
   end
   
   def self.valid_version?(runner_version)
@@ -97,7 +97,7 @@ get '/jobs/next' do
   return unless Server.valid_version?(params[:version])
   next_job = Job.find(:taken => false) or return
   next_job.update(:taken => true)
-  [ next_job[:id], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
+  [ next_job[:id], next_job[:requester_ip], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
 end
 
 put '/jobs/:id' do

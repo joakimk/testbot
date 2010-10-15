@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 16
+TESTBOT_VERSION = 17
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -34,16 +34,16 @@ class CpuUsage
 end
 
 class Job
-  def initialize(id, root, type, server_type, files)
-    @id, @root, @type, @server_type, @files = id, root, type, server_type, files
+  def initialize(id, requester_ip, root, type, server_type, files)
+    @id, @requester_ip, @root, @type, @server_type, @files = id, requester_ip, root, type, server_type, files
   end
   
   def run(instance)
-    puts "Running job #{@id} in instance #{instance}... "
+    puts "Running job #{@id} from #{@requester_ip} (#{@server_type})... "
     fetch_instance_code(instance)    
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "#{`hostname`.chomp} "
-    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export TEST_SERVER_TYPE=#{@server_type}; cd instance#{instance}; rake testbot:before_run;"
+    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export TEST_SERVER_TYPE=#{@server_type}; cd instance_#{@server_type}; rake testbot:before_run;"
     
     if @type == 'rspec'
       result += `#{base_environment} export RSPEC_COLOR=true; script/spec -O spec/spec.opts #{@files}  2>&1`
@@ -61,12 +61,12 @@ class Job
   
   def fetch_instance_code(instance)
     if @server_type == 'rsync'
-      system "rsync -az --delete -e ssh #{@root}/ instance#{instance}"
+      system "rsync -az --delete -e ssh #{@root}/ instance_rsync"
     elsif @server_type == 'git'
-      if File.exists?("instance#{instance}")
-        system "cd instance#{instance}; git pull; cd .."
+      if File.exists?("instance_git")
+        system "cd instance_git; git pull; cd .."
       else
-        system "git clone #{@root} instance#{instance}"
+        system "git clone #{@root} instance_git"
       end
     else
       raise "Unknown root type! (#{@server_type})"
@@ -83,17 +83,29 @@ class Runner
     
   def initialize
     @instances = []
+    @last_requester_ip = nil
     @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1    
   end
   
   def run!
-    loop do      
+    loop do
       sleep TIME_BETWEEN_POLLS
       check_for_update if time_for_update?
       clear_completed_instances # Makes sure all instances are listed as available after a run
       next unless cpu_available?
-      next_job = Server.get("/jobs/next", :query => query_params) rescue nil
+      
+      # Only get jobs from one requester at a time
+      if @instances.size > 0
+        params = "?requester_ip=#{@last_requester_ip}"
+      else
+        params = ''
+        @last_requester_ip = nil
+      end
+      
+      next_job = Server.get("/jobs/next#{params}", :query => query_params) rescue nil
       next if next_job == nil
+      
+      @last_requester_ip = next_job[1]
       @instances << [ Thread.new { Job.new(*next_job.split(',')).run(free_instance_number) },
                       free_instance_number ]
       loop do
@@ -151,6 +163,11 @@ class Runner
   end
    
 end
+
+# Remove legacy instanceX style folders
+Dir.entries(".").find_all { |name| name.include?('instance') && ( name[-1,1] == '0' || name[-1,1].to_i != 0) }.each { |folder|
+  system "rm -rf #{folder}"
+}
 
 runner = Runner.new
 runner.run!

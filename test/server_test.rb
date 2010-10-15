@@ -38,21 +38,23 @@ class ServerTest < Test::Unit::TestCase
   context "GET /jobs/next" do
   
     should "be able to return a job and mark it as taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync'
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync',
+                        :requester_ip => "192.168.0.55"
       job2 = Job.create :files => 'spec/models/house_spec.rb', :type => 'rspec'
       get '/jobs/next', :version => Server.version
       assert last_response.ok?      
-      assert_equal [ job1[:id], "server:/project", "rspec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
+      assert_equal [ job1[:id], "192.168.0.55", "server:/project", "rspec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
       assert job1.reload[:taken]
       assert !job2.reload[:taken]
     end
   
     should "not return a job that has already been taken" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :type => 'rspec'
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync"
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync",
+                        :requester_ip => "192.168.0.66"
       get '/jobs/next', :version => Server.version
       assert last_response.ok?
-      assert_equal [ job2[:id], "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
+      assert_equal [ job2[:id], "192.168.0.66", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
       assert job2.reload[:taken]    
     end
 
