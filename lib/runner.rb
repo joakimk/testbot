@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 17
+TESTBOT_VERSION = 18
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -42,7 +42,7 @@ class Job
     puts "Running job #{@id} from #{@requester_ip} (#{@server_type})... "
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "#{`hostname`.chomp} "
-    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export TEST_SERVER_TYPE=#{@server_type}; cd instance_#{@server_type}; rake testbot:before_run;"
+    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd instance_#{@server_type};"
     
     if @type == 'rspec'
       result += `#{base_environment} export RSPEC_COLOR=true; script/spec -O spec/spec.opts #{@files}  2>&1`
@@ -63,9 +63,7 @@ class Server
 end
 
 class Runner
-    
-  attr_reader :last_requester_ip
-    
+
   def initialize
     @instances = []
     @last_requester_ip = nil
@@ -92,7 +90,11 @@ class Runner
       next_job = Server.get("/jobs/next#{params}", :query => query_params) rescue nil
       next if next_job == nil
       
-      fetch_code if first_job_from_requester?
+      if first_job_from_requester?
+        fetch_code
+        before_run
+      end
+      
       @instances << [ Thread.new { Job.new(*next_job.split(',')).run(first_job_from_requester, free_instance_number) },
                       free_instance_number ]
       @last_requester_ip = next_job[1]
@@ -117,6 +119,10 @@ class Runner
     else
       raise "Unknown root type! (#{@server_type})"
     end
+  end
+  
+  def before_run
+    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@@config.max_instances}; export TEST_SERVER_TYPE=#{@server_type}; cd instance_#{@server_type}; rake testbot:before_run"
   end
   
   def first_job_from_requester?
