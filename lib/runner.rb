@@ -44,7 +44,7 @@ class Job
   def run(instance)
     puts "Running job #{@id} from #{@requester_ip} (#{@server_type})... "
     test_env_number = (instance == 0) ? '' : instance + 1
-    result = "\n#{`hostname`.chomp}:#{Dir.pwd}:\n"
+    result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
     base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd instance_#{@server_type};"
     
     if @type == 'rspec'
