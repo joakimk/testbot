@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 18
+TESTBOT_VERSION = 19
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -34,6 +34,9 @@ class CpuUsage
 end
 
 class Job
+
+  attr_reader :server_type, :root
+  
   def initialize(id, requester_ip, root, type, server_type, files)
     @id, @requester_ip, @root, @type, @server_type, @files = id, requester_ip, root, type, server_type, files
   end
@@ -90,12 +93,13 @@ class Runner
       next_job = Server.get("/jobs/next#{params}", :query => query_params) rescue nil
       next if next_job == nil
       
+      job = Job.new(*next_job.split(','))
       if first_job_from_requester?
-        fetch_code
-        before_run
+        fetch_code(job)
+        before_run(job)
       end
       
-      @instances << [ Thread.new { Job.new(*next_job.split(',')).run(first_job_from_requester, free_instance_number) },
+      @instances << [ Thread.new { job.run(free_instance_number) },
                       free_instance_number ]
       @last_requester_ip = next_job[1]
       loop do
@@ -107,22 +111,22 @@ class Runner
       
   private
   
-  def fetch_code
-    if @server_type == 'rsync'
-      system "rsync -az --delete -e ssh #{@root}/ instance_rsync"
-    elsif @server_type == 'git'
+  def fetch_code(job)
+    if job.server_type == 'rsync'
+      system "rsync -az --delete -e ssh #{job.root}/ instance_rsync"
+    elsif job.server_type == 'git'
       if File.exists?("instance_git")
         system "cd instance_git; git pull; cd .."
       else
-        system "git clone #{@root} instance_git"
+        system "git clone #{job.root} instance_git"
       end
     else
-      raise "Unknown root type! (#{@server_type})"
+      raise "Unknown root type! (#{job.server_type})"
     end
   end
   
-  def before_run
-    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@@config.max_instances}; export TEST_SERVER_TYPE=#{@server_type}; cd instance_#{@server_type}; rake testbot:before_run"
+  def before_run(job)
+    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@@config.max_instances}; export TEST_SERVER_TYPE=#{job.server_type}; cd instance_#{job.server_type}; rake testbot:before_run"
   end
   
   def first_job_from_requester?

@@ -14,13 +14,13 @@ class IntegrationTest < Test::Unit::TestCase
     result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../lib/requester.rb`
 
     # Should include the result from script/spec
-    assert result.include?("prepare got called\n" + 'script/spec got called with ["-O", "spec/spec.opts", "spec/models/car_spec.rb", "spec/models/house_spec.rb"]')
+    assert result.include?('script/spec got called with ["-O", "spec/spec.opts", "spec/models/car_spec.rb", "spec/models/house_spec.rb"]')
 
     # Should not include ignored files
     assert !File.exists?("tmp/server/log/test.log")
     assert !File.exists?("tmp/server/tmp/restart.txt")
-    assert !File.exists?("tmp/runner/instance0/log/test.log")
-    assert !File.exists?("tmp/runner/instance0/tmp/restart.txt")
+    assert !File.exists?("tmp/runner/instance_rsync/log/test.log")
+    assert !File.exists?("tmp/runner/instance_rsync/tmp/restart.txt")
   end
   
   def teardown
