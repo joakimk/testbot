@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 19
+TESTBOT_VERSION = 20
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -35,7 +35,7 @@ end
 
 class Job
 
-  attr_reader :server_type, :root
+  attr_reader :server_type, :root, :requester_ip
   
   def initialize(id, requester_ip, root, type, server_type, files)
     @id, @requester_ip, @root, @type, @server_type, @files = id, requester_ip, root, type, server_type, files
@@ -101,7 +101,7 @@ class Runner
       
       @instances << [ Thread.new { job.run(free_instance_number) },
                       free_instance_number ]
-      @last_requester_ip = next_job[1]
+      @last_requester_ip = job.requester_ip
       loop do
         clear_completed_instances
         break unless max_instances_running?
