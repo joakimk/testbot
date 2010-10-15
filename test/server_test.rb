@@ -30,6 +30,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'server:/path/to/project', first_job[:root]
       assert_equal 'rspec', first_job[:type]
       assert_equal 'rsync', first_job[:server_type]
+      assert_equal '127.0.0.1', first_job[:requester_ip]
     end
     
   end
@@ -82,6 +83,15 @@ class ServerTest < Test::Unit::TestCase
     should "not return anything to outdated clients" do
       Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project'
       get '/jobs/next', :version => "1", :hostname => 'macmini.local', :mac => "00:..."
+      assert last_response.ok?
+      assert_equal '', last_response.body
+    end
+    
+    should "only give jobs from the same source to a runner" do
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :type => 'rspec', :requester_ip => "192.168.0.55"
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57"
+      get '/jobs/next', :version => "1", :hostname => 'macmini.local', :mac => "00:..."
+      get '/jobs/next?requester_ip=192.168.0.55', :version => "1", :hostname => 'macmini.local', :mac => "00:..."
       assert last_response.ok?
       assert_equal '', last_response.body
     end

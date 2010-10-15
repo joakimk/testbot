@@ -24,6 +24,7 @@ DB.create_table :jobs do
   String :root
   String :type
   String :server_type
+  String :requester_ip
   Boolean :taken, :default => false
 end
 
@@ -87,11 +88,12 @@ class Sinatra::Application
 end
 
 post '/jobs' do
-  Job.create(params)[:id].to_s
+  Job.create(params.merge({ :requester_ip => @env['REMOTE_ADDR'] }))[:id].to_s
 end
 
 get '/jobs/next' do
-  Runner.record! params.merge({ :ip => @env['REMOTE_ADDR'], :last_seen_at => Time.now })
+  params_without_requester_ip = params.reject { |k, v| k == "requester_ip" }  
+  Runner.record! params_without_requester_ip.merge({ :ip => @env['REMOTE_ADDR'], :last_seen_at => Time.now })
   return unless Server.valid_version?(params[:version])
   next_job = Job.find(:taken => false) or return
   next_job.update(:taken => true)
