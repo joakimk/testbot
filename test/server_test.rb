@@ -65,9 +65,9 @@ class ServerTest < Test::Unit::TestCase
     end
   
     should "save information about the runners" do
-      get '/jobs/next', :version => "1", :hostname => 'macmini.local', :mac => "00:01:...", :idle_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:01:...", :idle_instances => 2
       runner = DB[:runners].first
-      assert_equal 1,           runner[:version]
+      assert_equal Server.version, runner[:version]
       assert_equal '127.0.0.1', runner[:ip]
       assert_equal 'macmini.local', runner[:hostname]
       assert_equal '00:01:...', runner[:mac]
@@ -77,8 +77,8 @@ class ServerTest < Test::Unit::TestCase
     end
   
     should "only create one record for the same mac" do
-      get '/jobs/next', :version => "1", :hostname => 'macmini.local1', :mac => "00:01:..."
-      get '/jobs/next', :version => "1", :hostname => 'macmini.local2', :mac => "00:01:..."
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local1', :mac => "00:01:..."
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local2', :mac => "00:01:..."
       assert_equal 1, Runner.count
     end
   
@@ -90,13 +90,15 @@ class ServerTest < Test::Unit::TestCase
     end
     
     should "only give jobs from the same source to a runner" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :type => 'rspec', :requester_ip => "192.168.0.55"
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'rspec', :requester_ip => "192.168.0.55"
       job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57"
-      get '/jobs/next', :version => "1", :hostname => 'macmini.local', :mac => "00:..."
-      get '/jobs/next?requester_ip=192.168.0.55', :version => "1", :hostname => 'macmini.local', :mac => "00:..."
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
+      get '/jobs/next?requester_ip=192.168.0.55', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
       assert last_response.ok?
       assert_equal '', last_response.body
     end
+    
+  
     
   end
   

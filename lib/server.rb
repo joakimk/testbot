@@ -92,10 +92,16 @@ post '/jobs' do
 end
 
 get '/jobs/next' do
-  params_without_requester_ip = params.reject { |k, v| k == "requester_ip" }  
+  params_without_requester_ip = params.reject { |k, v| k == "requester_ip" }
   Runner.record! params_without_requester_ip.merge({ :ip => @env['REMOTE_ADDR'], :last_seen_at => Time.now })
   return unless Server.valid_version?(params[:version])
-  next_job = Job.find(:taken => false) or return
+
+  if params["requester_ip"]
+    next_job = Job.find(:taken => false, :requester_ip => params["requester_ip"]) or return
+  else
+    next_job = Job.find(:taken => false) or return
+  end
+    
   next_job.update(:taken => true)
   [ next_job[:id], next_job[:requester_ip], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
 end
