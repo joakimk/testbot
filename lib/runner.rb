@@ -40,7 +40,6 @@ class Job
   
   def run(instance)
     puts "Running job #{@id} from #{@requester_ip} (#{@server_type})... "
-    fetch_instance_code(instance)    
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "#{`hostname`.chomp} "
     base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; export TEST_SERVER_TYPE=#{@server_type}; cd instance_#{@server_type}; rake testbot:before_run;"
@@ -56,10 +55,57 @@ class Job
     Server.put("/jobs/#{@id}", :body => { :result => result })
     puts "Job #{@id} finished."
   end
+end
+
+class Server
+  include HTTParty
+  base_uri @@config.server_uri
+end
+
+class Runner
+    
+  attr_reader :last_requester_ip
+    
+  def initialize
+    @instances = []
+    @last_requester_ip = nil
+    @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1    
+  end
   
+  def run!
+    loop do
+      sleep TIME_BETWEEN_POLLS
+      check_for_update if time_for_update?
+
+      # Only get jobs from one requester at a time
+      if @instances.size > 0
+        params = "?requester_ip=#{@last_requester_ip}"
+      else
+        params = ''
+        @last_requester_ip = nil
+      end
+      
+      # Makes sure all instances are listed as available after a run
+      clear_completed_instances 
+      next unless cpu_available?
+      
+      next_job = Server.get("/jobs/next#{params}", :query => query_params) rescue nil
+      next if next_job == nil
+      
+      fetch_code if first_job_from_requester?
+      @instances << [ Thread.new { Job.new(*next_job.split(',')).run(first_job_from_requester, free_instance_number) },
+                      free_instance_number ]
+      @last_requester_ip = next_job[1]
+      loop do
+        clear_completed_instances
+        break unless max_instances_running?
+      end
+    end
+  end
+      
   private
   
-  def fetch_instance_code(instance)
+  def fetch_code
     if @server_type == 'rsync'
       system "rsync -az --delete -e ssh #{@root}/ instance_rsync"
     elsif @server_type == 'git'
@@ -72,50 +118,10 @@ class Job
       raise "Unknown root type! (#{@server_type})"
     end
   end
-end
-
-class Server
-  include HTTParty
-  base_uri @@config.server_uri
-end
-
-class Runner
-    
-  def initialize
-    @instances = []
-    @last_requester_ip = nil
-    @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1    
-  end
   
-  def run!
-    loop do
-      sleep TIME_BETWEEN_POLLS
-      check_for_update if time_for_update?
-      clear_completed_instances # Makes sure all instances are listed as available after a run
-      next unless cpu_available?
-      
-      # Only get jobs from one requester at a time
-      if @instances.size > 0
-        params = "?requester_ip=#{@last_requester_ip}"
-      else
-        params = ''
-        @last_requester_ip = nil
-      end
-      
-      next_job = Server.get("/jobs/next#{params}", :query => query_params) rescue nil
-      next if next_job == nil
-      
-      @last_requester_ip = next_job[1]
-      @instances << [ Thread.new { Job.new(*next_job.split(',')).run(free_instance_number) },
-                      free_instance_number ]
-      loop do
-        clear_completed_instances
-        break unless max_instances_running?
-      end
-    end
+  def first_job_from_requester?
+    @last_requester_ip == nil
   end
-    
-  private
   
   def cpu_available?
     @instances.size > 0 || CpuUsage.current < MAX_CPU_USAGE_WHEN_IDLE
