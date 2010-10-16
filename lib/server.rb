@@ -21,7 +21,7 @@ DB = Sequel.sqlite
 DB.create_table :builds do
   primary_key :id
   String :files
-  String :results
+  String :results, :default => ''
   String :root
   String :type
   String :server_type
@@ -57,7 +57,9 @@ class Job < Sequel::Model
   def update(hash)
     super(hash)
     if build = Build.find([ "id = ?", self[:build_id] ])
-      build.update(:results => build[:results].to_s + hash[:result])
+      done = Job.filter([ "result IS NULL AND build_id = ?", self[:build_id] ]).count == 0
+      build.update(:results => build[:results].to_s + hash[:result].to_s,
+                   :done => done)
     end
   end
 end
@@ -72,7 +74,7 @@ class Build < Sequel::Model
   
   def create_jobs!
     files = self[:files].split
-    files_per_job = files.size / Runner.available_instances
+    files_per_job = files.size / Runner.total_instances
 
     job_files = []
     files.each_with_index do |file, i|
@@ -122,6 +124,7 @@ class Runner < Sequel::Model
   end
   
   def self.total_instances
+    return 1 if ENV['INTEGRATION_TEST']
     DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3600).inject(0) { |sum, r| r[:max_instances] + sum }
   end
   

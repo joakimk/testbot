@@ -23,7 +23,7 @@ class ServerTest < Test::Unit::TestCase
   context "POST /builds" do
     
     should "create a build and return its id" do
-       flexmock(Runner).should_receive(:available_instances).and_return(2)
+       flexmock(Runner).should_receive(:total_instances).and_return(2)
        post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync'
        
        first_build = Build.first
@@ -34,10 +34,11 @@ class ServerTest < Test::Unit::TestCase
        assert_equal 'rspec', first_build[:type]
        assert_equal 'rsync', first_build[:server_type]
        assert_equal '127.0.0.1', first_build[:requester_ip]
+       assert_equal '', first_build[:results]
     end
         
-    should "create jobs from the build based on the number of available instances" do
-      flexmock(Runner).should_receive(:available_instances).and_return(2)
+    should "create jobs from the build based on the number of total instances" do
+      flexmock(Runner).should_receive(:total_instances).and_return(2)
       post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync'
       
       assert_equal 2, Job.count
@@ -51,7 +52,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal '127.0.0.1', first_job[:requester_ip]
       assert_equal Build.first[:id], first_job[:build_id]
     end
-    
+
   end
   
   context "GET /builds/:id" do
@@ -243,6 +244,15 @@ class ServerTest < Test::Unit::TestCase
       put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
       put "/jobs/#{job2[:id]}", :result => 'test run result 2\n'
       assert_equal 'test run result 1\ntest run result 2\n', build.reload[:results]
+    end
+    
+    should "make the related build done if there are no more jobs for the build" do
+      build = Build.create
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :build_id => build[:id]
+      job2 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :build_id => build[:id]
+      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
+      put "/jobs/#{job2[:id]}", :result => 'test run result 2\n'
+      assert_equal true, build.reload[:done]
     end
 
   end
