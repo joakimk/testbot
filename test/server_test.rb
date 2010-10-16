@@ -12,6 +12,7 @@ class ServerTest < Test::Unit::TestCase
   def setup
     DB[:jobs].delete
     DB[:runners].delete
+    DB[:builds].delete
     flexmock(YAML).should_receive("load_file").with("#{ENV['HOME']}/.testbot_server.yml").and_return({ :update_uri => "http://somewhere/file.tar.gz" })
   end
 
@@ -34,7 +35,7 @@ class ServerTest < Test::Unit::TestCase
        assert_equal 'rsync', first_build[:server_type]
        assert_equal '127.0.0.1', first_build[:requester_ip]
     end
-    
+        
     should "create jobs from the build based on the number of available instances" do
       flexmock(Runner).should_receive(:available_instances).and_return(2)
       post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync'
@@ -48,6 +49,26 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'rspec', first_job[:type]
       assert_equal 'rsync', first_job[:server_type]
       assert_equal '127.0.0.1', first_job[:requester_ip]
+      assert_equal Build.first[:id], first_job[:build_id]
+    end
+    
+  end
+  
+  context "GET /builds/:id" do
+    
+    should 'return the build status' do
+      build = Build.create(:done => false, :results => "testbot5\n..........\ncompleted")
+      get "/builds/#{build[:id]}"
+      assert_equal true, last_response.ok?
+      assert_equal ({ "done" => false, "results" => "testbot5\n..........\ncompleted" }),
+                   JSON.parse(last_response.body)
+    end
+    
+    should 'remove a build that is done' do
+      build = Build.create(:done => true)
+      get "/builds/#{build[:id]}"
+      assert_equal true, JSON.parse(last_response.body)['done']
+      assert_equal 0, Build.count
     end
     
   end
@@ -209,11 +230,20 @@ class ServerTest < Test::Unit::TestCase
   context "PUT /jobs/:id" do
 
     should "receive the results of a job" do
-       job = Job.create :files => 'spec/models/car_spec.rb', :taken => true
-       put "/jobs/#{job[:id]}", :result => 'test run result'
-       assert last_response.ok?
-       assert_equal 'test run result', job.reload.result
-     end
+      job = Job.create :files => 'spec/models/car_spec.rb', :taken => true
+      put "/jobs/#{job[:id]}", :result => 'test run result'
+      assert last_response.ok?
+      assert_equal 'test run result', job.reload.result
+    end
+
+    should "update the related build" do
+      build = Build.create
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :build_id => build[:id]
+      job2 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :build_id => build[:id]      
+      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
+      put "/jobs/#{job2[:id]}", :result => 'test run result 2\n'
+      assert_equal 'test run result 1\ntest run result 2\n', build.reload[:results]
+    end
 
   end
   

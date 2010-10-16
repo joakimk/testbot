@@ -2,6 +2,7 @@ require 'rubygems'
 require 'sinatra'
 require 'sequel'
 require 'yaml'
+require 'json'
 
 set :port, 2288
 
@@ -37,6 +38,7 @@ DB.create_table :jobs do
   String :type
   String :server_type
   String :requester_ip
+  Integer :build_id
   Boolean :taken, :default => false
 end
 
@@ -51,12 +53,19 @@ DB.create_table :runners do
   Datetime :last_seen_at
 end
 
-class Job < Sequel::Model; end
+class Job < Sequel::Model
+  def update(hash)
+    super(hash)
+    if build = Build.find([ "id = ?", self[:build_id] ])
+      build.update(:results => build[:results].to_s + hash[:result])
+    end
+  end
+end
 
 class Build < Sequel::Model
 
-  def self.create(hash)
-    build = super(hash)
+  def self.create_and_build_jobs(hash)
+    build = create(hash)
     build.create_jobs!
     build
   end
@@ -73,7 +82,8 @@ class Build < Sequel::Model
                    :root => self[:root],
                    :type => self[:type],
                    :server_type => self[:server_type],
-                   :requester_ip => self[:requester_ip])
+                   :requester_ip => self[:requester_ip],
+                   :build_id => self[:id])
         job_files = []
       end
     end
@@ -128,7 +138,13 @@ class Sinatra::Application
 end
 
 post '/builds' do
-  build = Build.create(params.merge({ :requester_ip => @env['REMOTE_ADDR'] }))[:id].to_s
+  build = Build.create_and_build_jobs(params.merge({ :requester_ip => @env['REMOTE_ADDR'] }))[:id].to_s
+end
+
+get '/builds/:id' do
+  build = Build.find(:id => params[:id].to_i)
+  build.destroy if build[:done]
+  { "done" => build[:done], "results" => build[:results] }.to_json
 end
 
 post '/jobs' do
