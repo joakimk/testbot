@@ -36,6 +36,10 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 ### 1: Prepare your project
 
+Note: Testbot can now be installed as a rails plugin and includes a client of its own. It's not
+yet as fully featured as the client within parallel_specs. I will document it more when it's
+stable and more feature complete.
+
 Install required gems and parallel_specs:
 
     gem install httparty parallel
