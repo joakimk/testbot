@@ -24,15 +24,16 @@ class IntegrationTest < Test::Unit::TestCase
   end
   
   should "be able to send a build request, have it run and show the results" do
-    system "mkdir tmp; cp -rf test/fixtures/local tmp/local"
-    system "mkdir tmp/runner; cd tmp/runner; INTEGRATION_TEST=true ../../bin/runner start"
+    system "mkdir -p tmp/runner; cp -rf test/fixtures/local tmp/local"
+    system "cd tmp/runner; INTEGRATION_TEST=true ../../bin/runner start"
     system "mkdir tmp/server; INTEGRATION_TEST=true bin/server start"
     sleep 0.5
     result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../lib/new_requester.rb`
-
+  
     # Should include the result from script/spec
-    assert result.include?('script/spec got called with ["-O", "spec/spec.opts", "spec/models/car_spec.rb", "spec/models/house_spec.rb"]')
-
+    #puts result.inspect
+    assert result.include?('script/spec got called with ["-O", "spec/spec.opts", "spec/models/house_spec.rb", "spec/models/car_spec.rb"]')
+  
     # Should not include ignored files
     assert !File.exists?("tmp/server/log/test.log")
     assert !File.exists?("tmp/server/tmp/restart.txt")

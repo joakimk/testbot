@@ -1,3 +1,4 @@
+*.db
 todo.txt
 *.pid
 instance*

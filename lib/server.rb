@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'sinatra'
-require 'sequel'
 require 'yaml'
 require 'json'
 require File.join(File.dirname(__FILE__), 'server/runtime.rb')
@@ -21,43 +20,6 @@ class Server
   end
 end
 
-DB = Sequel.sqlite
-
-DB.create_table :builds do
-  primary_key :id
-  String :files
-  String :results, :default => ''
-  String :root
-  String :type
-  String :server_type
-  String :requester_ip
-  Boolean :done, :default => false
-end
-
-
-DB.create_table :jobs do
-  primary_key :id
-  String :files
-  String :result
-  String :root
-  String :type
-  String :server_type
-  String :requester_ip
-  Integer :build_id
-  Boolean :taken, :default => false
-end
-
-DB.create_table :runners do
-  primary_key :id
-  String :ip
-  String :hostname
-  String :mac
-  Integer :version
-  Integer :idle_instances
-  Integer :max_instances
-  Datetime :last_seen_at
-end
-
 class Job < Sequel::Model
   def update(hash)
     super(hash)
@@ -66,6 +28,7 @@ class Job < Sequel::Model
       build.update(:results => build[:results].to_s + hash[:result].to_s,
                    :done => done)
     end
+    Runtime.store_results(self[:files].split(' '), Time.now - self[:taken_at], self[:type])
   end
 end
 
@@ -79,7 +42,7 @@ class Build < Sequel::Model
   
   def create_jobs!(available_runner_usage)
     groups = Runtime.build_groups(self[:files].split,
-                     Runner.total_instances.to_f * (available_runner_usage.to_i / 100.0))
+                     Runner.total_instances.to_f * (available_runner_usage.to_i / 100.0), self[:type])
     groups.each do |group|
       Job.create(:files => group.join(' '),
                  :root => self[:root],
@@ -159,12 +122,12 @@ get '/jobs/next' do
   return unless Server.valid_version?(params[:version])
 
   if params["requester_ip"]
-    next_job = Job.find(:taken => false, :requester_ip => params["requester_ip"]) or return
+    next_job = Job.find("taken_at IS NULL AND requester_ip = '#{params["requester_ip"]}'") or return
   else
-    next_job = Job.find(:taken => false) or return
+    next_job = Job.find("taken_at IS NULL") or return
   end
     
-  next_job.update(:taken => true)
+  next_job.update(:taken_at => Time.now)
   [ next_job[:id], next_job[:requester_ip], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
 end
 

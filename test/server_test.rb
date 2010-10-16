@@ -39,7 +39,7 @@ class ServerTest < Test::Unit::TestCase
         
     should "create jobs from the build based on the number of total instances" do
       flexmock(Runner).should_receive(:total_instances).and_return(2)      
-      flexmock(Runtime).should_receive(:build_groups).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], 2).once.and_return([
+      flexmock(Runtime).should_receive(:build_groups).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], 2, 'rspec').once.and_return([
         ["spec/models/car_spec.rb", "spec/models/car2_spec.rb"],
         ["spec/models/house_spec.rb", "spec/models/house2_spec.rb"]
       ])
@@ -60,23 +60,11 @@ class ServerTest < Test::Unit::TestCase
     
     should "only use resources according to available_runner_usage" do
       flexmock(Runner).should_receive(:total_instances).and_return(4)
-      flexmock(Runtime).should_receive(:build_groups).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], 2).and_return([])
+      flexmock(Runtime).should_receive(:build_groups).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], 2, 'rspec').and_return([])
       post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync',
       :available_runner_usage => "50%"
     end
-    
-    should "create a small job when there isn't enough specs to fill a normal one" do
-      flexmock(Runner).should_receive(:total_instances).and_return(3)
-      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb spec/models/house3_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%"
-      
-      assert_equal 3, Job.count
-      
-      job1, job2, job3 = Job.all
-      assert_equal 'spec/models/car_spec.rb spec/models/car2_spec.rb', job1[:files]
-      assert_equal 'spec/models/house_spec.rb spec/models/house2_spec.rb', job2[:files]
-      assert_equal 'spec/models/house3_spec.rb', job3[:files]
-    end
-
+  
   end
   
   context "GET /builds/:id" do
@@ -117,24 +105,23 @@ class ServerTest < Test::Unit::TestCase
   context "GET /jobs/next" do
   
     should "be able to return a job and mark it as taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync',
-                        :requester_ip => "192.168.0.55"
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync', :requester_ip => "192.168.0.55"
       job2 = Job.create :files => 'spec/models/house_spec.rb', :type => 'rspec'
       get '/jobs/next', :version => Server.version
       assert last_response.ok?      
       assert_equal [ job1[:id], "192.168.0.55", "server:/project", "rspec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
-      assert job1.reload[:taken]
-      assert !job2.reload[:taken]
+      assert job1.reload[:taken_at] != nil
+      assert job2.reload[:taken_at] == nil
     end
   
     should "not return a job that has already been taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :type => 'rspec'
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now, :type => 'rspec'
       job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync",
                         :requester_ip => "192.168.0.66"
       get '/jobs/next', :version => Server.version
       assert last_response.ok?
       assert_equal [ job2[:id], "192.168.0.66", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
-      assert job2.reload[:taken]    
+      assert job2.reload[:taken_at] != nil
     end
 
     should "not return a job if there isnt any" do
@@ -255,7 +242,7 @@ class ServerTest < Test::Unit::TestCase
   context "PUT /jobs/:id" do
 
     should "receive the results of a job" do
-      job = Job.create :files => 'spec/models/car_spec.rb', :taken => true
+      job = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30
       put "/jobs/#{job[:id]}", :result => 'test run result'
       assert last_response.ok?
       assert_equal 'test run result', job.reload.result
@@ -263,8 +250,8 @@ class ServerTest < Test::Unit::TestCase
 
     should "update the related build" do
       build = Build.create
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :build_id => build[:id]
-      job2 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :build_id => build[:id]      
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
+      job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]      
       put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
       put "/jobs/#{job2[:id]}", :result => 'test run result 2\n'
       assert_equal 'test run result 1\ntest run result 2\n', build.reload[:results]
@@ -272,11 +259,20 @@ class ServerTest < Test::Unit::TestCase
     
     should "make the related build done if there are no more jobs for the build" do
       build = Build.create
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :build_id => build[:id]
-      job2 = Job.create :files => 'spec/models/car_spec.rb', :taken => true, :build_id => build[:id]
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
+      job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
       put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
       put "/jobs/#{job2[:id]}", :result => 'test run result 2\n'
       assert_equal true, build.reload[:done]
+    end
+    
+    should "store the runtime results" do
+      build = Build.create
+      job1 = Job.create :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id], :taken_at => Time.now - 30, :type => 'rspec'
+      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
+            
+      assert (13...16).include?(Runtime.find(:path => "spec/models/car_spec.rb", :type => "rspec").time)
+      assert (13...16).include?(Runtime.find(:path => "spec/models/house_spec.rb", :type => "rspec").time)
     end
 
   end
