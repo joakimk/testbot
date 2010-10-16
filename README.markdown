@@ -11,7 +11,7 @@ will have to have trust everyone using it.
 
 How it works
 ====
-1. You run something like "rake parallel:testbot_spec".
+1. You run something like "rake testbot:spec".
 2. Your project files is synced to a server.
 3. Your local client requests testing jobs based on your tests.
 4. Runners on different computers syncs your project files from the server, runs the testing jobs and returns the results.
@@ -36,19 +36,14 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 ### 1: Prepare your project
 
-Note: Testbot can now be installed as a rails plugin and includes a client of its own. It's not
-yet as fully featured as the client within parallel_specs. I will document it more when it's
-stable and more feature complete.
+Install testbot and required gems:
 
-Install required gems and parallel_specs:
+    gem install httparty
+    cd vendor/plugins && mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/release | tar xz --strip 1 -C testbot && cd ../..
+    cp vendor/plugins/testbot/testbot.yml.example config/testbot.yml
+    cp vendor/plugins/testbot/testbot.rake.example lib/tasks/testbot.rake
 
-    gem install httparty parallel
-    cd vendor/plugins && git clone git://github.com/joakimk/parallel_specs.git && cd parallel_specs && git checkout remotes/origin/testbot -b testbot && rm -rf .git && cd ../../..
-    cp vendor/plugins/parallel_specs/docs/testbot.yml.example config/testbot.yml
-    cp vendor/plugins/parallel_specs/docs/testbot.rake.example lib/tasks/testbot.rake
-
-Customize **lib/tasks/testbot.rake** and **config/testbot.yml**. You will probably want to keep **config/testbot.yml**
-outside of version control for now (as every user must specify their own server_path).
+Customize **lib/tasks/testbot.rake** and **config/testbot.yml**. You will probably want to keep **config/testbot.yml** outside of version control for now (as every user must specify their own server_path).
 
 ### 2: Setup a server.
 
@@ -84,11 +79,11 @@ more time than usual.
 
 To run the rspec specs:
 
-    rake parallel:testbot_spec
+    rake testbot:spec
 
 To run the cucumber features:
 
-    rake parallel:testbot_features
+    rake testbot:features
 
 Running testbot's tests
 ====
@@ -128,11 +123,3 @@ uncommited code, but great for CI servers.
 I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
 to install anything on the computers. Adding a new computer is as simple as setting it to
 boot from network. You can find the base PXE server setup at: [http://gist.github.com/622495](http://gist.github.com/622495).
-
-TODO
-====
- - Make it simpler to use
- - Add support for Test:Unit / Shoulda
- - Add support for jRuby
- - Optimizations
- - Lots more

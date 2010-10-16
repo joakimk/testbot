@@ -1,0 +1,51 @@
+# This is the way I'm distributing / resetting the database before each run.
+# It's possible that a future version of testbot could automate this.
+
+require 'ftools'
+
+namespace :testbot do
+  task :before_request do
+    # Save the local test database so that it can be used on the testbot runner machines.
+    rails_root = File.expand_path(File.join(File.dirname(__FILE__),'../..'))
+    config_path = "#{rails_root}/config/testbot.yml"
+    test_database_name = YAML.load_file(config_path)["local_test_database"]
+    raise "Missing 'local_test_database' in config/testbot.yml!'" if test_database_name.to_s == ""
+    system "mysqldump --compact -u root #{test_database_name} > #{rails_root}/tmp/test_database.sql"
+    system "chmod -R 755 #{rails_root}/tmp"
+  end
+  
+  task :before_run do
+    use_git = (ENV['TEST_SERVER_TYPE'] == 'git')    
+
+    # Create database.yml
+    database_yml = <<-DB_CONFIG
+test:
+  adapter: mysql
+  encoding: utf8
+  database: !APPNAME!_testbot_test<%= ENV['TEST_ENV_NUMBER'] %>
+  username: root
+  password:
+  host: localhost
+DB_CONFIG
+
+    database_file_path = "config/database.yml"
+    File.open(database_file_path, 'w') { |f| f.write(database_yml) }
+
+    # Setup databases for all instances
+    0.upto(ENV['TEST_INSTANCES'].to_i - 1) do |instance|
+      test_env_number = (instance == 0) ? '' : instance + 1
+      system "mysqladmin -u root -f drop !APPNAME!_testbot_test#{test_env_number}  > /dev/null 2>&1"
+      system "mysqladmin -u root -f create !APPNAME!_testbot_test#{test_env_number} > /dev/null 2>&1"
+      
+      if use_git
+        system "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; rake db:test:load"
+      else
+        system "mysql -u root !APPNAME!_testbot_test#{test_env_number} < tmp/test_database.sql"
+      end
+    end
+
+    # Build gems
+    system "rm vendor/gems/*/ext/**/*.o > /dev/null 2>&1"
+    system "rake gems:build:force > /dev/null 2>&1"
+  end
+end

@@ -24,7 +24,6 @@ DB.create_table :jobs do
   String :requester_ip
   Integer :build_id
   Datetime :taken_at, :default => nil
-  Boolean :taken, :default => false
 end
 
 DB.create_table :runners do

@@ -1,0 +1,18 @@
+server_uri: http://server:2288
+
+# Using rsync
+# The folder where your files are synced to and then
+# fetched from before running the tests.
+server_type: rsync
+server_path: user@server:/tmp/testbot/!USERNAME!
+
+# Using git
+# server_type: git
+# server_path: git@server:/path/to/repo
+
+# Only used for rsync, but the current version requires it.
+ignores: log/* .git
+
+# Set to a lower percentage to not use every available
+# instance or higher to create more jobs than there are instances.
+available_runner_usage: 100%

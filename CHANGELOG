@@ -1,3 +1,8 @@
+0.1.8
+
+Added cucumber support and failure detection to the client. Added docs. Added code that uses
+historic test runtimes to reduce test runtime (in theory).
+
 0.1.7
 
 Added a basic client so that testbot can be installed as a rails plugin. 'rake testbot:spec'.

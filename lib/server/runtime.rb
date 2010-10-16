@@ -24,7 +24,7 @@ class Runtime < Sequel::Model
       groups[current_group] << test
     end
     
-    groups
+    groups.compact
   end
   
   def self.store_results(files, total_time, type)
