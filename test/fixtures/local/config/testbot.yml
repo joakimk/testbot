@@ -1,4 +1,4 @@
-server_uri: http://localhost:2288
+server_uri: http://localhost:22880
 server_type: rsync
 server_path: ../server
 ignores: log/* tmp/*

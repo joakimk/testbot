@@ -9,7 +9,7 @@ TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
 
 @@config = OpenStruct.new(ENV['INTEGRATION_TEST'] ?
-           { :server_uri => "http://localhost:2288", :automatic_updates => false, :max_instances => 1 } :
+           { :server_uri => "http://localhost:22880", :automatic_updates => false, :max_instances => 1 } :
            YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml"))
 
 class CpuUsage

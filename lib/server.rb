@@ -4,7 +4,11 @@ require 'sequel'
 require 'yaml'
 require 'json'
 
-set :port, 2288
+if ENV['INTEGRATION_TEST']
+  set :port, 22880
+else
+  set :port, 2288
+end
 
 class Server
   def self.version

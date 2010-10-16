@@ -19,6 +19,7 @@ class NewRequester
                                                                  :type => type.to_s,
                                                                  :files => files.join(' ') })
     last_results_size = 0
+    success = true
     while true
       sleep 1
       
@@ -28,8 +29,11 @@ class NewRequester
       puts results unless results == ''
       last_results_size = build['results'].size
       
+      success = false if failed_build?(build)
       break if build['done']
     end
+    
+    success
   end
   
   def self.create_by_config(path)
@@ -38,6 +42,10 @@ class NewRequester
   end
   
   private
+  
+  def failed_build?(build)
+    build['results'].include?('failure') || build['results'].include?('error')
+  end
   
   def find_tests(type, dir)
     root = "#{dir}/"

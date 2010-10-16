@@ -32,7 +32,7 @@ class NewRequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
       
-      requester.run_tests(:rspec, 'spec')
+      assert_equal true, requester.run_tests(:rspec, 'spec')
     end
 
     should "keep calling the server for results until done" do
@@ -85,6 +85,34 @@ class NewRequesterTest < Test::Unit::TestCase
       requester.run_tests(:rspec, 'spec')
     end
     
+    should "return false if there 'failure' is part of the results" do
+      requester = NewRequester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'git')
+
+      flexmock(requester).should_receive(:find_tests).and_return([])
+      
+      flexmock(HTTParty).should_receive(:post).and_return('5')
+      flexmock(requester).should_receive(:sleep).once
+       flexmock(requester).should_receive(:puts).once
+      flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
+                  :format => :json).and_return({ "done" => true, "results" => "... failure ..." })
+      
+      assert_equal false, requester.run_tests(:rspec, 'spec')
+    end
+    
+    should "return false if there 'error' is part of the results" do
+      requester = NewRequester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'git')
+
+       flexmock(requester).should_receive(:find_tests).and_return([])
+
+       flexmock(HTTParty).should_receive(:post).and_return('5')      
+       flexmock(requester).should_receive(:sleep).once
+       flexmock(requester).should_receive(:puts).once
+       flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
+                   :format => :json).and_return({ "done" => true, "results" => "... error ..." })
+
+       assert_equal false, requester.run_tests(:rspec, 'spec')
+    end
+
   end
 
 end
