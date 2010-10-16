@@ -13,11 +13,17 @@ class NewRequester
                                                                  :server_type => @server_type,
                                                                  :type => type.to_s,
                                                                  :files => files.join(' ') })
+
+    last_results_size = 0
     while true
-     sleep 1
-     build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
-     puts build['results']
-     break if build['done']
+      sleep 1
+      
+      build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
+
+      puts build['results'][last_results_size..-1]
+      last_results_size = build['results'].size
+      
+      break if build['done']
     end
   end
   

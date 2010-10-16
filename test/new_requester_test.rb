@@ -48,13 +48,11 @@ class NewRequesterTest < Test::Unit::TestCase
       
       flexmock(HTTParty).should_receive(:post).and_return('5')
             
-      flexmock(HTTParty).should_receive(:get).times(3).with("http://192.168.1.100:2288/builds/5",
-                  :format => :json).and_return({ "done" => false, "results" => "job 3 done: ...." },
-                                               { "done" => false, "results" => "job 2 done: ...." },
-                                               { "done" => true, "results" => "job 1 done: ...." })
+      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
+                  :format => :json).and_return({ "done" => false, "results" => "job 2 done: ...." },
+                                               { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
       
-      flexmock(requester).should_receive(:sleep).times(3).with(1)
-      flexmock(requester).should_receive(:puts).once.with("job 3 done: ....")
+      flexmock(requester).should_receive(:sleep).times(2).with(1)
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....")
       flexmock(requester).should_receive(:puts).once.with("job 1 done: ....")
 
