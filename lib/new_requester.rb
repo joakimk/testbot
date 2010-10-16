@@ -54,11 +54,11 @@ class NewRequester
   end
   
   def line_is_result?(line)
-    line =~ /\d+ failure/
+    line =~ /\d+ fail/
   end  
   
   def line_is_failure?(line)
-    line =~ /(\d{2,}|[1-9]) (failure|error)/
+    line =~ /(\d{2,}|[1-9]) (fail|error)/
   end
   
   def find_tests(type, dir)

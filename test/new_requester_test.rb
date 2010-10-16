@@ -147,6 +147,10 @@ class NewRequesterTest < Test::Unit::TestCase
       assert_equal false, build_with_result("10 tests, 20 assertions, 10 failures, 0 errors\n10 tests, 20 assertions, 0 failures, 0 errors")
     end
     
+    should "fail with cucumber failure messages" do
+      assert_equal false, build_with_result("721 steps (4 failed, 4 skipped, 713 passed)")
+    end
+    
   end
 
 end
