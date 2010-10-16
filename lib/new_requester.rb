@@ -10,7 +10,7 @@ class NewRequester
   def run_tests(type, dir)
     if @server_type == 'rsync'
       ignores = @ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      system "rsync -az --delete -e ssh #{ignores} . #{@server_path}"
+      system "rake testbot:before_request &> /dev/null; rsync -az --delete -e ssh #{ignores} . #{@server_path}"
     end
     
     files = find_tests(type, dir)

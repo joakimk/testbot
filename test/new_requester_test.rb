@@ -70,7 +70,7 @@ class NewRequesterTest < Test::Unit::TestCase
       requester.run_tests(:rspec, 'spec')
     end
     
-    should "sync the files to the server when the server_type is rsync" do
+    should "prepare and sync the files to the server when the server_type is rsync" do
       requester = NewRequester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'rsync', '.git tmp')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
@@ -80,7 +80,7 @@ class NewRequesterTest < Test::Unit::TestCase
       flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
                   :format => :json).and_return({ "done" => true, "results" => "" })
       
-      flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . user@somewhere:/path")
+      flexmock(requester).should_receive('system').with("rake testbot:before_request &> /dev/null; rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . user@somewhere:/path")
       
       requester.run_tests(:rspec, 'spec')
     end
