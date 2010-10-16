@@ -1,5 +1,8 @@
 Speedup RSpec and Cucumber by running in parallel on multiple CPUs on multiple computers.
 
+A rails plugin to reduce test runtime by distributing test load. With very small modifications
+I'm sure it could be used for other frameworks or even other languages.
+
 Concept
 ====
 This is designed to be a simple way to use all the idle computers resources on your local network to
