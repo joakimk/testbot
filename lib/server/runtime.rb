@@ -3,7 +3,7 @@ require File.join(File.dirname(__FILE__), '../db.rb')
 
 class Runtime < Sequel::Model
   
-  DEFAULT = 10
+  DEFAULT = nil
   
   def self.build_groups(files, instance_count, type)
     update_db(files, type)
@@ -28,7 +28,19 @@ class Runtime < Sequel::Model
   end
   
   def self.store_results(files, total_time, type)
-    filter("type = '#{type}' AND path IN ('#{files.join("','")}')").update(:time => (total_time / files.size).to_i)
+    # Disabled until we can find a way that actually works.
+    # We might need to profile the machines that run the code so that we can
+    # compute a better job size for them.
+    
+    # average = total_time / files.size.to_f
+    # filter("type = '#{type}' AND path IN ('#{files.join("','")}')").each do |runtime|  
+    #   if runtime.time
+    #     new_runtime = runtime.time + ((average - runtime.time) / 4.0)
+    #     runtime.update(:time => new_runtime.to_i)
+    #   else
+    #     runtime.update(:time => average.to_i)
+    #   end
+    # end
   end
   
   private
@@ -39,11 +51,11 @@ class Runtime < Sequel::Model
   end
   
   def self.slow_tests_first(tests)
-    tests.sort_by { |test, time| time }.reverse
+    tests.sort_by { |test, time| time.to_i }.reverse
   end
   
   def self.find_tests_with_times(type)
-    filter(:type => type).map { |runtime| [ runtime[:path], runtime[:time] ] }
+    filter(:type => type).map { |runtime| [ runtime[:path], (runtime[:time] ? runtime[:time] : 1) ] }
   end
   
   def self.update_db(files, type)
