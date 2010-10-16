@@ -24,7 +24,7 @@ class ServerTest < Test::Unit::TestCase
     
     should "create a build and return its id" do
        flexmock(Runner).should_receive(:total_instances).and_return(2)
-       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync'
+       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%"
        
        first_build = Build.first
        assert last_response.ok?
@@ -39,7 +39,7 @@ class ServerTest < Test::Unit::TestCase
         
     should "create jobs from the build based on the number of total instances" do
       flexmock(Runner).should_receive(:total_instances).and_return(2)
-      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync'
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%"
       
       assert_equal 2, Job.count
       first_job, last_job = Job.all
@@ -51,6 +51,27 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'rsync', first_job[:server_type]
       assert_equal '127.0.0.1', first_job[:requester_ip]
       assert_equal Build.first[:id], first_job[:build_id]
+    end
+    
+    should "only use resources according to available_runner_usage" do
+      flexmock(Runner).should_receive(:total_instances).and_return(4)
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync',
+      :available_runner_usage => "50%"
+      
+      assert_equal 2, Job.count
+      first_job, last_job = Job.all
+    end
+    
+    should "create a small job when there isn't enough specs to fill a normal one" do
+      flexmock(Runner).should_receive(:total_instances).and_return(3)
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb spec/models/house3_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%"
+      
+      assert_equal 3, Job.count
+      
+      job1, job2, job3 = Job.all
+      assert_equal 'spec/models/car_spec.rb spec/models/car2_spec.rb', job1[:files]
+      assert_equal 'spec/models/house_spec.rb spec/models/house2_spec.rb', job2[:files]
+      assert_equal 'spec/models/house3_spec.rb', job3[:files]
     end
 
   end

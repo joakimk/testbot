@@ -3,8 +3,9 @@ require 'httparty'
 
 class NewRequester
   
-  def initialize(server_uri, server_path, server_type, ignores = '')
-    @server_uri, @server_path, @server_type, @ignores = server_uri, server_path, server_type, ignores
+  def initialize(server_uri, server_path, server_type, ignores = '', available_runner_usage = '100%')
+    @server_uri, @server_path, @server_type, @ignores, @available_runner_usage =
+     server_uri, server_path, server_type, ignores, available_runner_usage
   end
   
   def run_tests(type, dir)
@@ -15,9 +16,10 @@ class NewRequester
     
     files = find_tests(type, dir)
     build_id = HTTParty.post("#{@server_uri}/builds", :body => { :root => @server_path,
-                                                                 :server_type => @server_type,
-                                                                 :type => type.to_s,
-                                                                 :files => files.join(' ') })
+                                                       :server_type => @server_type,
+                                                       :type => type.to_s,
+                                                       :available_runner_usage => @available_runner_usage,
+                                                       :files => files.join(' ') })
     last_results_size = 0
     success = true
     while true
@@ -38,7 +40,7 @@ class NewRequester
   
   def self.create_by_config(path)
     config = YAML.load_file(path)
-    NewRequester.new(config['server_uri'], config['server_path'], config['server_type'], config['ignores'])
+    NewRequester.new(config['server_uri'], config['server_path'], config['server_type'], config['ignores'], config['available_runner_usage'])
   end
   
   private

@@ -9,8 +9,8 @@ class NewRequesterTest < Test::Unit::TestCase
 
     should 'create a requester from config' do
       flexmock(YAML).should_receive(:load_file).once.with("testbot.yml").
-                     and_return({ 'server_uri' => 'http://somewhere:2288', 'server_type' => "rsync", 'server_path' => "user@somewhere:/path", 'ignores' => ".git tmp" })
-      flexmock(NewRequester).should_receive(:new).once.with('http://somewhere:2288', 'user@somewhere:/path', 'rsync', '.git tmp')
+                     and_return({ 'server_uri' => 'http://somewhere:2288', 'server_type' => "rsync", 'server_path' => "user@somewhere:/path", 'ignores' => ".git tmp", 'available_runner_usage' => "50%" })
+      flexmock(NewRequester).should_receive(:new).once.with('http://somewhere:2288', 'user@somewhere:/path', 'rsync', '.git tmp', '50%')
       NewRequester.create_by_config("testbot.yml")
     end
 
@@ -19,12 +19,13 @@ class NewRequesterTest < Test::Unit::TestCase
   context "run_tests" do
 
     should "should be able to create a build" do
-      requester = NewRequester.new("http://192.168.1.100:2288", 'git@somewhere', 'git')
+      requester = NewRequester.new("http://192.168.1.100:2288", 'git@somewhere', 'git', '', '60%')
       flexmock(requester).should_receive(:find_tests).with(:rspec, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:2288/builds",
                                         :body => { :type => "rspec",
                                                    :root => "git@somewhere",
                                                    :server_type => "git",
+                                                   :available_runner_usage => "60%",
                                                    :files => "spec/models/house_spec.rb" +
                                                              " spec_models/car_spec.rb" })
           

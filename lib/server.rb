@@ -71,19 +71,19 @@ end
 class Build < Sequel::Model
 
   def self.create_and_build_jobs(hash)
-    build = create(hash)
-    build.create_jobs!
+    build = create(hash.reject { |k, v| k == 'available_runner_usage' })
+    build.create_jobs!(hash['available_runner_usage'])
     build
   end
   
-  def create_jobs!
+  def create_jobs!(available_runner_usage)
     files = self[:files].split
-    files_per_job = files.size / Runner.total_instances
+    files_per_job = (files.size / (Runner.total_instances.to_f * (available_runner_usage.to_i / 100.0))).ceil
 
     job_files = []
     files.each_with_index do |file, i|
       job_files << file
-      if job_files.size == files_per_job
+      if job_files.size == files_per_job || (files.size - 1 == i)
         Job.create(:files => job_files.join(' '),
                    :root => self[:root],
                    :type => self[:type],
