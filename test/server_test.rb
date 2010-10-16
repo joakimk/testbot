@@ -38,7 +38,12 @@ class ServerTest < Test::Unit::TestCase
     end
         
     should "create jobs from the build based on the number of total instances" do
-      flexmock(Runner).should_receive(:total_instances).and_return(2)
+      flexmock(Runner).should_receive(:total_instances).and_return(2)      
+      flexmock(Runtime).should_receive(:build_groups).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], 2).once.and_return([
+        ["spec/models/car_spec.rb", "spec/models/car2_spec.rb"],
+        ["spec/models/house_spec.rb", "spec/models/house2_spec.rb"]
+      ])
+      
       post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%"
       
       assert_equal 2, Job.count
@@ -55,11 +60,9 @@ class ServerTest < Test::Unit::TestCase
     
     should "only use resources according to available_runner_usage" do
       flexmock(Runner).should_receive(:total_instances).and_return(4)
+      flexmock(Runtime).should_receive(:build_groups).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], 2).and_return([])
       post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync',
       :available_runner_usage => "50%"
-      
-      assert_equal 2, Job.count
-      first_job, last_job = Job.all
     end
     
     should "create a small job when there isn't enough specs to fill a normal one" do

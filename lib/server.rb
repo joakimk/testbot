@@ -3,6 +3,7 @@ require 'sinatra'
 require 'sequel'
 require 'yaml'
 require 'json'
+require File.join(File.dirname(__FILE__), 'server/runtime.rb')
 
 if ENV['INTEGRATION_TEST']
   set :port, 22880
@@ -77,21 +78,15 @@ class Build < Sequel::Model
   end
   
   def create_jobs!(available_runner_usage)
-    files = self[:files].split
-    files_per_job = (files.size / (Runner.total_instances.to_f * (available_runner_usage.to_i / 100.0))).ceil
-
-    job_files = []
-    files.each_with_index do |file, i|
-      job_files << file
-      if job_files.size == files_per_job || (files.size - 1 == i)
-        Job.create(:files => job_files.join(' '),
-                   :root => self[:root],
-                   :type => self[:type],
-                   :server_type => self[:server_type],
-                   :requester_ip => self[:requester_ip],
-                   :build_id => self[:id])
-        job_files = []
-      end
+    groups = Runtime.build_groups(self[:files].split,
+                     Runner.total_instances.to_f * (available_runner_usage.to_i / 100.0))
+    groups.each do |group|
+      Job.create(:files => group.join(' '),
+                 :root => self[:root],
+                 :type => self[:type],
+                 :server_type => self[:server_type],
+                 :requester_ip => self[:requester_ip],
+                 :build_id => self[:id])
     end
   end
   

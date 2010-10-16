@@ -1,11 +1,13 @@
+FAST_TESTS = [ "test/server_test.rb", "test/new_runner_test.rb", "test/new_requester_test.rb",
+               "test/server/runtime_test.rb" ]
+FAST_TESTS_CMD = "ruby #{FAST_TESTS.join('; ruby ')}"
+
 desc 'Runs the tests after each change'
 task 'autotest' do
-  system "/usr/bin/kicker --no-growl -e 'ruby test/server_test.rb; ruby test/new_runner_test.rb; ruby test/new_requester_test.rb' ."
+  system "/usr/bin/kicker --no-growl -e '#{FAST_TESTS_CMD}' ."
 end
 
 task 'default' do
-  ruby "test/server_test.rb"
-  ruby "test/new_runner_test.rb"
-  ruby "test/new_requester_test.rb"
+  system FAST_TESTS_CMD
   ruby "test/integration_test.rb" unless ENV['RUN_CODE_RUN']
 end
