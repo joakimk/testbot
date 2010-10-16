@@ -3,6 +3,23 @@ require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'
 
+def requester_with_result(results)
+  requester = NewRequester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'git')
+
+  flexmock(requester).should_receive(:find_tests).and_return([])
+  flexmock(HTTParty).should_receive(:post).and_return('5')
+  flexmock(requester).should_receive(:sleep).once
+  flexmock(requester).should_receive(:puts).once
+  flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
+              :format => :json).and_return({ "done" => true, "results" => results })
+  requester
+end
+  
+def build_with_result(results)
+  requester_with_result(results).run_tests(:rspec, 'spec')
+end
+
+
 class NewRequesterTest < Test::Unit::TestCase
   
   context "self.create_by_config" do
@@ -86,34 +103,50 @@ class NewRequesterTest < Test::Unit::TestCase
       requester.run_tests(:rspec, 'spec')
     end
     
-    should "return false if there 'failure' is part of the results" do
-      requester = NewRequester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'git')
-
-      flexmock(requester).should_receive(:find_tests).and_return([])
-      
-      flexmock(HTTParty).should_receive(:post).and_return('5')
-      flexmock(requester).should_receive(:sleep).once
-       flexmock(requester).should_receive(:puts).once
-      flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
-                  :format => :json).and_return({ "done" => true, "results" => "... failure ..." })
-      
-      assert_equal false, requester.run_tests(:rspec, 'spec')
+  end
+  
+  context "result_lines" do
+    
+    should "return all lines with results in them" do
+      results = "one\ntwo..\n... 0 failures\nthree"
+      requester = requester_with_result(results)
+      requester.run_tests(:rspec, 'spec')
+      assert_equal [ '... 0 failures' ], requester.result_lines
     end
     
-    should "return false if there 'error' is part of the results" do
-      requester = NewRequester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'git')
-
-       flexmock(requester).should_receive(:find_tests).and_return([])
-
-       flexmock(HTTParty).should_receive(:post).and_return('5')      
-       flexmock(requester).should_receive(:sleep).once
-       flexmock(requester).should_receive(:puts).once
-       flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
-                   :format => :json).and_return({ "done" => true, "results" => "... error ..." })
-
-       assert_equal false, requester.run_tests(:rspec, 'spec')
+  end
+  
+  context "failure detection" do
+    
+    should "not fail if the word error or failure is in the text" do
+      assert_equal true, build_with_result('... failure ...')
+      assert_equal true, build_with_result('... error ...')
     end
 
+    should "fail with single failed" do
+      assert_equal false, build_with_result("10 tests, 20 assertions, 0 failures, 0 errors\n10 tests, 20 assertions, 1 failure, 0 errors")
+    end
+
+    should "fail with single error" do
+      assert_equal false, build_with_result("10 tests, 20 assertions, 0 failures, 1 errors\n10 tests, 20 assertions, 0 failures, 0 errors")
+    end
+
+    should "fail with failed and error" do
+      assert_equal false, build_with_result("10 tests, 20 assertions, 0 failures, 1 errors\n10 tests, 20 assertions, 1 failures, 1 errors")
+    end
+
+    should "fail with multiple failed tests" do
+      assert_equal false, build_with_result("10 tests, 20 assertions, 2 failures, 0 errors\n10 tests, 1 assertion, 1 failures, 0 errors")
+    end
+
+    should "not fail with successful tests" do
+     assert_equal true, build_with_result("10 tests, 20 assertions, 0 failures, 0 errors\n10 tests, 20 assertions, 0 failures, 0 errors")
+    end
+
+    should "fail with 10 failures" do
+      assert_equal false, build_with_result("10 tests, 20 assertions, 10 failures, 0 errors\n10 tests, 20 assertions, 0 failures, 0 errors")
+    end
+    
   end
 
 end

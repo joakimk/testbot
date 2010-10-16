@@ -25,14 +25,14 @@ class NewRequester
     while true
       sleep 1
       
-      build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
+      @build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
 
-      results = build['results'][last_results_size..-1]
+      results = @build['results'][last_results_size..-1]
       puts results unless results == ''
-      last_results_size = build['results'].size
+      last_results_size = @build['results'].size
       
-      success = false if failed_build?(build)
-      break if build['done']
+      success = false if failed_build?(@build)
+      break if @build['done']
     end
     
     success
@@ -43,16 +43,30 @@ class NewRequester
     NewRequester.new(config['server_uri'], config['server_path'], config['server_type'], config['ignores'], config['available_runner_usage'])
   end
   
+  def result_lines
+    @build['results'].find_all { |line| line_is_result?(line) }.map { |line| line.chomp }
+  end
+  
   private
   
   def failed_build?(build)
-    build['results'].include?('failure') || build['results'].include?('error')
+    result_lines.any? { |line| line_is_failure?(line) }
+  end
+  
+  def line_is_result?(line)
+    line =~ /\d+ failure/
+  end  
+  
+  def line_is_failure?(line)
+    line =~ /(\d{2,}|[1-9]) (failure|error)/
   end
   
   def find_tests(type, dir)
     root = "#{dir}/"
     if type == :rspec
       Dir["#{root}**/**/*_spec.rb"]
+    elsif type == :cucumber
+      Dir["#{root}**/**/*.feature"]
     else
       raise "unsupported type: #{type}"
     end
