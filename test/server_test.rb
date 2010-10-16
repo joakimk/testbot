@@ -19,6 +19,39 @@ class ServerTest < Test::Unit::TestCase
     Sinatra::Application
   end
 
+  context "POST /builds" do
+    
+    should "create a build and return its id" do
+       flexmock(Runner).should_receive(:available_instances).and_return(2)
+       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync'
+       
+       first_build = Build.first
+       assert last_response.ok?
+       assert_equal first_build[:id].to_s, last_response.body
+       assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_build[:files]
+       assert_equal 'server:/path/to/project', first_build[:root]
+       assert_equal 'rspec', first_build[:type]
+       assert_equal 'rsync', first_build[:server_type]
+       assert_equal '127.0.0.1', first_build[:requester_ip]
+    end
+    
+    should "create jobs from the build based on the number of available instances" do
+      flexmock(Runner).should_receive(:available_instances).and_return(2)
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync'
+      
+      assert_equal 2, Job.count
+      first_job, last_job = Job.all
+      assert_equal 'spec/models/car_spec.rb spec/models/car2_spec.rb', first_job[:files]
+      assert_equal 'spec/models/house_spec.rb spec/models/house2_spec.rb', last_job[:files]
+
+      assert_equal 'server:/path/to/project', first_job[:root]
+      assert_equal 'rspec', first_job[:type]
+      assert_equal 'rsync', first_job[:server_type]
+      assert_equal '127.0.0.1', first_job[:requester_ip]
+    end
+    
+  end
+
   context "POST /jobs" do
 
     should "save a job and return the id" do

@@ -17,6 +17,18 @@ end
 
 DB = Sequel.sqlite
 
+DB.create_table :builds do
+  primary_key :id
+  String :files
+  String :results
+  String :root
+  String :type
+  String :server_type
+  String :requester_ip
+  Boolean :done, :default => false
+end
+
+
 DB.create_table :jobs do
   primary_key :id
   String :files
@@ -40,6 +52,34 @@ DB.create_table :runners do
 end
 
 class Job < Sequel::Model; end
+
+class Build < Sequel::Model
+
+  def self.create(hash)
+    build = super(hash)
+    build.create_jobs!
+    build
+  end
+  
+  def create_jobs!
+    files = self[:files].split
+    files_per_job = files.size / Runner.available_instances
+
+    job_files = []
+    files.each_with_index do |file, i|
+      job_files << file
+      if job_files.size == files_per_job
+        Job.create(:files => job_files.join(' '),
+                   :root => self[:root],
+                   :type => self[:type],
+                   :server_type => self[:server_type],
+                   :requester_ip => self[:requester_ip])
+        job_files = []
+      end
+    end
+  end
+  
+end
 
 class Runner < Sequel::Model
 
@@ -85,6 +125,10 @@ class Sinatra::Application
   def config
     OpenStruct.new(@@config)
   end  
+end
+
+post '/builds' do
+  build = Build.create(params.merge({ :requester_ip => @env['REMOTE_ADDR'] }))[:id].to_s
 end
 
 post '/jobs' do
