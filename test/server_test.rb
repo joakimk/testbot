@@ -266,14 +266,14 @@ class ServerTest < Test::Unit::TestCase
       assert_equal true, build.reload[:done]
     end
     
-    should "store the runtime results" do
-      build = Build.create
-      job1 = Job.create :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id], :taken_at => Time.now - 30, :type => 'rspec'
-      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
-            
-      assert (13...16).include?(Runtime.find(:path => "spec/models/car_spec.rb", :type => "rspec").time)
-      assert (13...16).include?(Runtime.find(:path => "spec/models/house_spec.rb", :type => "rspec").time)
-    end
+    # should "store the runtime results" do
+    #   build = Build.create
+    #   job1 = Job.create :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id], :taken_at => Time.now - 30, :type => 'rspec'
+    #   put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
+    #         
+    #   assert (13...16).include?(Runtime.find(:path => "spec/models/car_spec.rb", :type => "rspec").time)
+    #   assert (13...16).include?(Runtime.find(:path => "spec/models/house_spec.rb", :type => "rspec").time)
+    # end
 
   end
   
