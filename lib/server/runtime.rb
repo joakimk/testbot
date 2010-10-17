@@ -1,5 +1,5 @@
 require 'rubygems'
-require File.join(File.dirname(__FILE__), '../db.rb')
+require File.join(File.dirname(__FILE__), 'db.rb')
 
 class Runtime < Sequel::Model
   

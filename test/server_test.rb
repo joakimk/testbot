@@ -106,18 +106,17 @@ class ServerTest < Test::Unit::TestCase
   
     should "be able to return a job and mark it as taken" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync', :requester_ip => "192.168.0.55"
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :type => 'rspec'
+      
       get '/jobs/next', :version => Server.version
       assert last_response.ok?      
+      
       assert_equal [ job1[:id], "192.168.0.55", "server:/project", "rspec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
       assert job1.reload[:taken_at] != nil
-      assert job2.reload[:taken_at] == nil
     end
   
     should "not return a job that has already been taken" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now, :type => 'rspec'
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync",
-                        :requester_ip => "192.168.0.66"
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.66"
       get '/jobs/next', :version => Server.version
       assert last_response.ok?
       assert_equal [ job2[:id], "192.168.0.66", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
@@ -156,16 +155,45 @@ class ServerTest < Test::Unit::TestCase
     end
     
     should "only give jobs from the same source to a runner" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'rspec', :requester_ip => "192.168.0.55"
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57"
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'rspec', :requester_ip => "192.168.0.55"      
       get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
+      
+      # Creating the second job here because of the random lookup.
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57"
       get '/jobs/next?requester_ip=192.168.0.55', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
+      
       assert last_response.ok?
       assert_equal '', last_response.body
     end
     
-  
+    should "return the jobs in random order in order to start working for a new requester right away" do
+      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57" }
+      
+      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.60" }
+      
+      ips = (0...10).map {
+        get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
+        last_response.body.split(',')[1]
+      }
+      
+      assert ips.find { |ip| ip == '192.168.0.57' }
+      assert ips.find { |ip| ip == '192.168.0.60' }
+    end
     
+    should "return the jobs randomly when passing requester" do
+      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57" }
+      
+      20.times { Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57" }
+      
+      files = (0...10).map {
+        get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:...", :requester_ip => "192.168.0.57"
+        last_response.body.split(',').last
+      }
+      
+      assert files.find { |file| file.include?('car') }
+      assert files.find { |file| file.include?('house') }
+    end
+  
   end
   
   context "/runners/outdated" do
