@@ -84,6 +84,15 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 0, Build.count
     end
     
+    should 'remove all related jobs of a build that is done' do
+      build = Build.create(:done => true)
+      related_job = Job.create(:build_id => build.id)
+      other_job = Job.create(:build_id => nil)
+      get "/builds/#{build[:id]}"
+      assert !Job.find([ 'id = ?', related_job.id ])
+      assert Job.find([ 'id = ?', other_job.id ])
+    end
+    
   end
   
   context "GET /jobs/next" do
