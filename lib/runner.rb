@@ -5,6 +5,7 @@ require 'ostruct'
 
 TESTBOT_VERSION = 20
 TIME_BETWEEN_POLLS = 1
+TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
 
@@ -74,6 +75,7 @@ class Runner
   end
   
   def run!
+    start_ping
     loop do
       sleep TIME_BETWEEN_POLLS
       check_for_update if time_for_update?
@@ -159,7 +161,7 @@ class Runner
   
   def query_params
     { :version => TESTBOT_VERSION, :mac => Mac.addr, :hostname => (@hostname ||= `hostname`.chomp),
-      :idle_instances => (@@config.max_instances - @instances.size) }
+      :idle_instances => (@@config.max_instances - @instances.size), :max_instances => @@config.max_instances }
   end
   
   def max_instances_running?
@@ -175,6 +177,13 @@ class Runner
   def free_instance_number
     0.upto(@@config.max_instances - 1) do |number|
       return number unless @instances.find { |instance, n| n == number }
+    end
+  end
+   
+  def start_ping
+    Thread.new do
+      Server.post("/runners/ping", :query => { :mac => Mac.addr })
+      sleep TIME_BETWEEN_PINGS
     end
   end
    

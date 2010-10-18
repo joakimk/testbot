@@ -123,13 +123,14 @@ class ServerTest < Test::Unit::TestCase
     end
   
     should "save information about the runners" do
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:01:...", :idle_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:01:...", :idle_instances => 2, :max_instances => 4
       runner = DB[:runners].first
       assert_equal Server.version, runner[:version]
       assert_equal '127.0.0.1', runner[:ip]
       assert_equal 'macmini.local', runner[:hostname]
       assert_equal '00:01:...', runner[:mac]
       assert_equal 2, runner[:idle_instances]
+      assert_equal 4, runner[:max_instances]
       assert (Time.now - 5) < runner[:last_seen_at]
       assert (Time.now + 5) > runner[:last_seen_at]
     end
@@ -214,10 +215,10 @@ class ServerTest < Test::Unit::TestCase
       assert_equal "127.0.0.1 macmini1.local 00:01 2\n127.0.0.1 macmini2.local 00:02 4", last_response.body
     end
     
-    should "not return runners as available when not seen the last three seconds" do
+    should "not return runners as available when not seen the last 10 seconds" do
       get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
       get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
-      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 3)      
+      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 10)      
       get '/runners/available'
       assert_equal "127.0.0.1 macmini1.local 00:01 2", last_response.body
     end
@@ -234,10 +235,10 @@ class ServerTest < Test::Unit::TestCase
       assert_equal "6", last_response.body
     end    
         
-    should "not return instances as available when not seen the last three seconds" do
+    should "not return instances as available when not seen the last 10 seconds" do
       get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
       get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
-      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 3)
+      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 10)
       get '/runners/available_instances'
       assert last_response.ok?
       assert_equal "2", last_response.body
@@ -247,15 +248,39 @@ class ServerTest < Test::Unit::TestCase
   
   context "GET /runners/total_instances" do
     
-    should "return the instances seen within the last hour" do
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 4
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
-      Runner.find(:mac => "00:01").update(:last_seen_at => Time.now - 3599)
-      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 3601)
+    should "return the number of available runner instances" do
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :max_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :max_instances => 4
       get '/runners/total_instances'
       assert last_response.ok?
-      assert_equal "4", last_response.body
+      assert_equal "6", last_response.body
+    end    
+        
+    should "not return instances as available when not seen the last 10 seconds" do
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :max_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :max_instances => 4
+      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 10)
+      get '/runners/total_instances'
+      assert last_response.ok?
+      assert_equal "2", last_response.body
+    end
+    
+  end  
+    
+  context "POST /runners/ping" do
+    
+    should "update last_seen_at for the runner" do
+      runner = Runner.create(:mac => 'aa:aa:aa:aa:aa:aa')
+      post "/runners/ping", :mac => 'aa:aa:aa:aa:aa:aa'
+      runner.reload
+      assert last_response.ok?
+      assert (Time.now - 5) < runner[:last_seen_at]
+      assert (Time.now + 5) > runner[:last_seen_at]
+    end
+    
+    should "do nothing if the runners isnt known yet found" do
+      post "/runners/ping", :mac => 'aa:aa:aa:aa:aa:aa'
+      assert last_response.ok?
     end
     
   end

@@ -4,10 +4,6 @@ class Runner < Sequel::Model
 
   def self.record!(hash)
     runner = create_or_update_by_mac!(hash)
-    
-    if runner[:idle_instances].to_i > runner[:max_instances].to_i
-      runner.update :max_instances => runner[:idle_instances]
-    end
   end
   
   def self.create_or_update_by_mac!(hash)
@@ -23,7 +19,7 @@ class Runner < Sequel::Model
   end
   
   def self.find_all_available
-    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3)
+    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 10)
   end  
   
   def self.available_instances
@@ -32,7 +28,7 @@ class Runner < Sequel::Model
   
   def self.total_instances
     return 1 if ENV['INTEGRATION_TEST']
-    DB[:runners].filter("version = ? AND last_seen_at > ?", Server.version, Time.now - 3600).inject(0) { |sum, r| r[:max_instances] + sum }
+    find_all_available.inject(0) { |sum, r| r[:max_instances] + sum }
   end
   
 end

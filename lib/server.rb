@@ -53,6 +53,12 @@ put '/jobs/:id' do
   Job.find(:id => params[:id].to_i).update(:result => params[:result]); nil
 end
 
+post '/runners/ping' do
+  runner = Runner.find(:mac => params[:mac])
+  runner.update(:last_seen_at => Time.now) if runner
+  nil
+end
+
 get '/runners/outdated' do
   Runner.find_all_outdated.map { |runner| [ runner[:ip], runner[:hostname], runner[:mac] ].join(' ') }.join("\n").strip
 end
