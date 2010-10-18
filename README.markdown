@@ -111,6 +111,8 @@ Gotchas
 
 * When you run your tests in smaller sets you can become unaware of dependency errors in your suite.
 
+* Testbot currently assumes that you only use it with one project. For example, it only keeps one cache of the project folder. This is because I haven't had a need for more yet, but if you do, tell me and I'll add some scoping. Or you could send me a pull request.
+
 Tips
 ====
 
