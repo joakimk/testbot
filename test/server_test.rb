@@ -24,7 +24,7 @@ class ServerTest < Test::Unit::TestCase
     
     should "create a build and return its id" do
        flexmock(Runner).should_receive(:total_instances).and_return(2)
-       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%"
+       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb"
        
        first_build = Build.first
        assert last_response.ok?
@@ -33,7 +33,7 @@ class ServerTest < Test::Unit::TestCase
        assert_equal 'server:/path/to/project', first_build[:root]
        assert_equal 'rspec', first_build[:type]
        assert_equal 'rsync', first_build[:server_type]
-       assert_equal '127.0.0.1', first_build[:requester_ip]
+       assert_equal 'bb:bb:bb:bb:bb:bb', first_build[:requester_mac]
        assert_equal '', first_build[:results]
     end
         
@@ -44,7 +44,7 @@ class ServerTest < Test::Unit::TestCase
         ["spec/models/house_spec.rb", "spec/models/house2_spec.rb"]
       ])
       
-      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%"
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb"
       
       assert_equal 2, Job.count
       first_job, last_job = Job.all
@@ -54,7 +54,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'server:/path/to/project', first_job[:root]
       assert_equal 'rspec', first_job[:type]
       assert_equal 'rsync', first_job[:server_type]
-      assert_equal '127.0.0.1', first_job[:requester_ip]
+      assert_equal 'bb:bb:bb:bb:bb:bb', first_job[:requester_mac]
       assert_equal Build.first[:id], first_job[:build_id]
     end
     
@@ -97,7 +97,6 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'server:/path/to/project', first_job[:root]
       assert_equal 'rspec', first_job[:type]
       assert_equal 'rsync', first_job[:server_type]
-      assert_equal '127.0.0.1', first_job[:requester_ip]
     end
     
   end
@@ -105,21 +104,21 @@ class ServerTest < Test::Unit::TestCase
   context "GET /jobs/next" do
   
     should "be able to return a job and mark it as taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync', :requester_ip => "192.168.0.55"
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync', :requester_mac => "bb:bb:bb:bb:bb:bb"
       
       get '/jobs/next', :version => Server.version
       assert last_response.ok?      
       
-      assert_equal [ job1[:id], "192.168.0.55", "server:/project", "rspec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
+      assert_equal [ job1[:id], "bb:bb:bb:bb:bb:bb", "server:/project", "rspec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
       assert job1.reload[:taken_at] != nil
     end
   
     should "not return a job that has already been taken" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now, :type => 'rspec'
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.66"
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa"
       get '/jobs/next', :version => Server.version
       assert last_response.ok?
-      assert_equal [ job2[:id], "192.168.0.66", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
+      assert_equal [ job2[:id], "aa:aa:aa:aa:aa:aa", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
       assert job2.reload[:taken_at] != nil
     end
 
@@ -155,38 +154,38 @@ class ServerTest < Test::Unit::TestCase
     end
     
     should "only give jobs from the same source to a runner" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'rspec', :requester_ip => "192.168.0.55"      
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'rspec', :requester_mac => "bb:bb:bb:bb:bb:bb"      
       get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
       
       # Creating the second job here because of the random lookup.
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57"
-      get '/jobs/next?requester_ip=192.168.0.55', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa"
+      get '/jobs/next?requester_mac=bb:bb:bb:bb:bb:bb', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
       
       assert last_response.ok?
       assert_equal '', last_response.body
     end
     
     should "return the jobs in random order in order to start working for a new requester right away" do
-      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57" }
+      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "bb:bb:bb:bb:bb:bb" }
       
-      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.60" }
+      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa" }
       
-      ips = (0...10).map {
+      macs = (0...10).map {
         get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
         last_response.body.split(',')[1]
       }
       
-      assert ips.find { |ip| ip == '192.168.0.57' }
-      assert ips.find { |ip| ip == '192.168.0.60' }
+      assert macs.find { |mac| mac == 'bb:bb:bb:bb:bb:bb' }
+      assert macs.find { |mac| mac == 'aa:aa:aa:aa:aa:aa' }
     end
     
     should "return the jobs randomly when passing requester" do
-      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57" }
+      20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "bb:bb:bb:bb:bb:bb" }
       
-      20.times { Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_ip => "192.168.0.57" }
+      20.times { Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "bb:bb:bb:bb:bb:bb" }
       
       files = (0...10).map {
-        get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:...", :requester_ip => "192.168.0.57"
+        get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
         last_response.body.split(',').last
       }
       

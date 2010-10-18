@@ -39,7 +39,7 @@ Even better would be if you could use an in-memory database (like SQLite3) for t
 
 Install testbot and required gems:
 
-    gem install httparty
+    gem install httparty macaddr
     cd vendor/plugins && mkdir testbot && curl -L http://github.com/joakimk/testbot/tarball/release | tar xz --strip 1 -C testbot && cd ../..
     cp vendor/plugins/testbot/testbot.yml.example config/testbot.yml
     cp vendor/plugins/testbot/testbot.rake.example lib/tasks/testbot.rake

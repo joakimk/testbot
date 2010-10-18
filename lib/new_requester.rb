@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'httparty'
+require 'macaddr'
 
 class NewRequester
   
@@ -18,6 +19,7 @@ class NewRequester
     build_id = HTTParty.post("#{@server_uri}/builds", :body => { :root => @server_path,
                                                        :server_type => @server_type,
                                                        :type => type.to_s,
+                                                       :requester_mac => Mac.addr,
                                                        :available_runner_usage => @available_runner_usage,
                                                        :files => files.join(' ') })
     last_results_size = 0

@@ -16,7 +16,7 @@ class Build < Sequel::Model
                  :root => self[:root],
                  :type => self[:type],
                  :server_type => self[:server_type],
-                 :requester_ip => self[:requester_ip],
+                 :requester_mac => self[:requester_mac],
                  :build_id => self[:id])
     end
   end

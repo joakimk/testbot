@@ -9,7 +9,7 @@ DB.create_table :builds do
   String :root
   String :type
   String :server_type
-  String :requester_ip
+  String :requester_mac
   Boolean :done, :default => false
 end
 
@@ -21,7 +21,7 @@ DB.create_table :jobs do
   String :root
   String :type
   String :server_type
-  String :requester_ip
+  String :requester_mac
   Integer :build_id
   Datetime :taken_at, :default => nil
 end

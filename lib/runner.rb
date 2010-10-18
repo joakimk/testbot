@@ -35,14 +35,14 @@ end
 
 class Job
 
-  attr_reader :server_type, :root, :requester_ip
+  attr_reader :server_type, :root, :requester_mac
   
-  def initialize(id, requester_ip, root, type, server_type, files)
-    @id, @requester_ip, @root, @type, @server_type, @files = id, requester_ip, root, type, server_type, files
+  def initialize(id, requester_mac, root, type, server_type, files)
+    @id, @requester_mac, @root, @type, @server_type, @files = id, requester_mac, root, type, server_type, files
   end
   
   def run(instance)
-    puts "Running job #{@id} from #{@requester_ip} (#{@server_type})... "
+    puts "Running job #{@id} from #{@requester_mac} (#{@server_type})... "
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
     base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd instance_#{@server_type};"
@@ -69,7 +69,7 @@ class Runner
 
   def initialize
     @instances = []
-    @last_requester_ip = nil
+    @last_requester_mac = nil
     @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1    
   end
   
@@ -80,10 +80,10 @@ class Runner
 
       # Only get jobs from one requester at a time
       if @instances.size > 0
-        params = "?requester_ip=#{@last_requester_ip}"
+        params = "?requester_mac=#{@last_requester_mac}"
       else
         params = ''
-        @last_requester_ip = nil
+        @last_requester_mac = nil
       end
       
       # Makes sure all instances are listed as available after a run
@@ -101,7 +101,7 @@ class Runner
       
       @instances << [ Thread.new { job.run(free_instance_number) },
                       free_instance_number ]
-      @last_requester_ip = job.requester_ip
+      @last_requester_mac = job.requester_mac
       loop do
         clear_completed_instances
         break unless max_instances_running?
@@ -130,7 +130,7 @@ class Runner
   end
   
   def first_job_from_requester?
-    @last_requester_ip == nil
+    @last_requester_mac == nil
   end
   
   def cpu_available?

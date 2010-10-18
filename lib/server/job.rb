@@ -12,18 +12,18 @@ class Job < Sequel::Model
   end
   
   def self.next(params, remove_addr)
-    params_without_requester_ip = params.reject { |k, v| k == "requester_ip" }
-    Runner.record! params_without_requester_ip.merge({ :ip => remove_addr, :last_seen_at => Time.now })
+    params_without_requester_mac = params.reject { |k, v| k == "requester_mac" }
+    Runner.record! params_without_requester_mac.merge({ :ip => remove_addr, :last_seen_at => Time.now })
     return unless Server.valid_version?(params[:version])
-    next_job_query(params["requester_ip"]).first
+    next_job_query(params["requester_mac"]).first
   end
   
   private
   
-  def self.next_job_query(requester_ip)
+  def self.next_job_query(requester_mac)
     query = Job.filter("taken_at IS NULL").order("Random()".lit)
-    if requester_ip
-      query.filter("requester_ip = '#{requester_ip}'")
+    if requester_mac
+      query.filter("requester_mac = '#{requester_mac}'")
     else
       query
     end

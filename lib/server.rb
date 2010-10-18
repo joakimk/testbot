@@ -34,7 +34,7 @@ class Sinatra::Application
 end
 
 post '/builds' do
-  build = Build.create_and_build_jobs(params.merge({ :requester_ip => @env['REMOTE_ADDR'] }))[:id].to_s
+  build = Build.create_and_build_jobs(params)[:id].to_s
 end
 
 get '/builds/:id' do
@@ -44,13 +44,13 @@ get '/builds/:id' do
 end
 
 post '/jobs' do
-  Job.create(params.merge({ :requester_ip => @env['REMOTE_ADDR'] }))[:id].to_s
+  Job.create(params)[:id].to_s
 end
 
 get '/jobs/next' do
   next_job = Job.next(params, @env['REMOTE_ADDR']) or return
   next_job.update(:taken_at => Time.now)
-  [ next_job[:id], next_job[:requester_ip], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
+  [ next_job[:id], next_job[:requester_mac], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
 end
 
 put '/jobs/:id' do

@@ -36,6 +36,7 @@ class NewRequesterTest < Test::Unit::TestCase
   context "run_tests" do
 
     should "should be able to create a build" do
+      flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
       requester = NewRequester.new("http://192.168.1.100:2288", 'git@somewhere', 'git', '', '60%')
       flexmock(requester).should_receive(:find_tests).with(:rspec, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:2288/builds",
@@ -43,6 +44,7 @@ class NewRequesterTest < Test::Unit::TestCase
                                                    :root => "git@somewhere",
                                                    :server_type => "git",
                                                    :available_runner_usage => "60%",
+                                                   :requester_mac => 'aa:aa:aa:aa:aa:aa',
                                                    :files => "spec/models/house_spec.rb" +
                                                              " spec_models/car_spec.rb" })
           
