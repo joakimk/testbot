@@ -1,3 +1,8 @@
+0.1.9
+
+The server can now handle if a runner is shutdown in the middle of a test run (it will give the
+job to another runner).
+
 0.1.8
 
 Added cucumber support and failure detection to the client. Added docs. Added code that uses
