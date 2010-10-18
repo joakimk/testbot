@@ -195,4 +195,10 @@ Dir.entries(".").find_all { |name| name.include?('instance') && ( name[-1,1] == 
 }
 
 runner = Runner.new
-runner.run!
+while true
+  begin  
+    runner.run!
+  rescue Exception => ex
+    puts "The runner crashed, restarting. Error: #{ex.inspect}"
+  end
+end
