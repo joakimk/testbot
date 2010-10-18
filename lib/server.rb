@@ -44,9 +44,11 @@ get '/builds/:id' do
 end
 
 get '/jobs/next' do
-  next_job = Job.next(params, @env['REMOTE_ADDR']) or return
-  next_job.update(:taken_at => Time.now)
-  [ next_job[:id], next_job[:requester_mac], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
+  next_job, runner = Job.next(params, @env['REMOTE_ADDR'])
+  if next_job
+    next_job.update(:taken_at => Time.now, :taken_by_id => runner.id)
+    [ next_job[:id], next_job[:requester_mac], next_job[:root], next_job[:type], next_job[:server_type], next_job[:files] ].join(',')
+  end
 end
 
 put '/jobs/:id' do

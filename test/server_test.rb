@@ -121,6 +121,12 @@ class ServerTest < Test::Unit::TestCase
       assert last_response.ok?
       assert_equal '', last_response.body
     end
+    
+    should "save which runner takes a job" do
+      job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa"
+      get '/jobs/next', :version => Server.version
+      assert_equal Runner.first.id, job.reload.taken_by_id
+    end
   
     should "save information about the runners" do
       get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:01:...", :idle_instances => 2, :max_instances => 4
@@ -186,6 +192,18 @@ class ServerTest < Test::Unit::TestCase
       
       assert files.find { |file| file.include?('car') }
       assert files.find { |file| file.include?('house') }
+    end
+    
+    should "return taken jobs to other runners if the runner hasn't been seen for 10 seconds or more" do
+      missing_runner = Runner.create(:last_seen_at => Time.now - 15)
+      old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa", :taken_by_id => missing_runner.id, :taken_at => Time.now - 30
+      
+      new_runner = Runner.create(:mac => "00:01")
+      get '/jobs/next', :version => Server.version, :mac => "00:01"
+      assert_equal new_runner.id, old_taken_job.reload.taken_by_id
+      
+      assert last_response.ok?
+      assert_equal [ old_taken_job[:id], "aa:aa:aa:aa:aa:aa", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
     end
   
   end

@@ -23,6 +23,7 @@ DB.create_table :jobs do
   String :server_type
   String :requester_mac
   Integer :build_id
+  Integer :taken_by_id
   Datetime :taken_at, :default => nil
 end
 
