@@ -43,10 +43,6 @@ get '/builds/:id' do
   { "done" => build[:done], "results" => build[:results] }.to_json
 end
 
-post '/jobs' do
-  Job.create(params)[:id].to_s
-end
-
 get '/jobs/next' do
   next_job = Job.next(params, @env['REMOTE_ADDR']) or return
   next_job.update(:taken_at => Time.now)
@@ -55,14 +51,6 @@ end
 
 put '/jobs/:id' do
   Job.find(:id => params[:id].to_i).update(:result => params[:result]); nil
-end
-
-get '/jobs/:id' do
-  Job.find(:id => params[:id].to_i)[:result]
-end
-
-delete '/jobs/:id' do
-  Job.find(:id => params[:id].to_i).delete; nil
 end
 
 get '/runners/outdated' do

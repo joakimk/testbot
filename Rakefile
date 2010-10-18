@@ -1,4 +1,4 @@
-FAST_TESTS = [ "test/server_test.rb", "test/new_runner_test.rb", "test/new_requester_test.rb",
+FAST_TESTS = [ "test/server_test.rb", "test/new_runner_test.rb", "test/requester_test.rb",
                "test/server/runtime_test.rb" ]
 FAST_TESTS_CMD = "ruby #{FAST_TESTS.join('; ruby ')}"
 

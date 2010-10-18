@@ -1,72 +1,82 @@
 require 'rubygems'
 require 'httparty'
-
+require 'macaddr'
 
 class Requester
   
-  class Server
-    include HTTParty    
+  def initialize(server_uri, server_path, server_type, ignores = '', available_runner_usage = '100%')
+    @server_uri, @server_path, @server_type, @ignores, @available_runner_usage =
+     server_uri, server_path, server_type, ignores, available_runner_usage
   end
   
-  def initialize(server, project_path)
-    @project_path = project_path
-    Server.base_uri server
-  end
-  
-  def request_job(files)
-    Server.post('/jobs', :body => { :root => @project_path, :files => files, :type => 'rspec', :server_type => 'rsync' })
-  end
-  
-  def poll(job_id)
-    result = Server.get("/jobs/#{job_id}")
-    Server.delete("/jobs/#{job_id}") if result != nil
-    result
-  end
-  
-end
-
-def find_specs
-  Dir["spec/**/*_spec.rb"].map { |path| path.gsub(/#{Dir.pwd}\//, '') }
-end
-
-def specs_in_groups(num)
-  specs = find_specs
-  return [ specs ] if num == 1
-  groups = []
-  current_group = 0
-  specs.each do |test|    
-    if groups[current_group] && groups[current_group].size >= (specs.size / num.to_f)
-      current_group += 1
+  def run_tests(type, dir)
+    if @server_type == 'rsync'
+      ignores = @ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
+      system "rake testbot:before_request &> /dev/null; rsync -az --delete -e ssh #{ignores} . #{@server_path}"
     end
-    groups[current_group] ||= []
-    groups[current_group] << test
+    
+    files = find_tests(type, dir)
+    build_id = HTTParty.post("#{@server_uri}/builds", :body => { :root => @server_path,
+                                                       :server_type => @server_type,
+                                                       :type => type.to_s,
+                                                       :requester_mac => Mac.addr,
+                                                       :available_runner_usage => @available_runner_usage,
+                                                       :files => files.join(' ') })
+    last_results_size = 0
+    success = true
+    while true
+      sleep 1
+      
+      @build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
+
+      results = @build['results'][last_results_size..-1]
+      puts results unless results == ''
+      last_results_size = @build['results'].size
+      
+      success = false if failed_build?(@build)
+      break if @build['done']
+    end
+    
+    success
   end
-  groups.compact
-end
-
-start = Time.now
-
-settings = YAML.load_file("config/testbot.yml")
-
-ignores = settings['ignores'].split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-system "rsync -az --delete -e ssh #{ignores} . #{settings['server_path']}"
-
-requester = Requester.new(settings["server_uri"], settings['server_path'])
-
-job_ids = specs_in_groups(settings['groups'].to_i).map do |specs|
-  requester.request_job(specs.join(' '))
-end
-
-loop do
-  job_ids.each do |job_id|
-    sleep 0.5
-    result = requester.poll(job_id)
-    next if result == nil
-    puts result
-    job_ids.delete(job_id)
-    puts "#{job_ids.size} jobs to go..." unless job_ids.size == 0 unless ENV['INTEGRATION_TEST']
+  
+  def self.create_by_config(path)
+    config = YAML.load_file(path)
+    Requester.new(config['server_uri'], config['server_path'], config['server_type'], config['ignores'], config['available_runner_usage'])
   end
-  break if job_ids.size == 0
+  
+  def result_lines
+    @build['results'].find_all { |line| line_is_result?(line) }.map { |line| line.chomp }
+  end
+  
+  private
+  
+  def failed_build?(build)
+    result_lines.any? { |line| line_is_failure?(line) }
+  end
+  
+  def line_is_result?(line)
+    line =~ /\d+ fail/
+  end  
+  
+  def line_is_failure?(line)
+    line =~ /(\d{2,}|[1-9]) (fail|error)/
+  end
+  
+  def find_tests(type, dir)
+    root = "#{dir}/"
+    if type == :rspec
+      Dir["#{root}**/**/*_spec.rb"]
+    elsif type == :cucumber
+      Dir["#{root}**/**/*.feature"]
+    else
+      raise "unsupported type: #{type}"
+    end
+  end
+  
 end
 
-puts "Completed after #{Time.now - start} seconds." unless ENV['INTEGRATION_TEST']
+if ENV['INTEGRATION_TEST']
+  requester = Requester.create_by_config('config/testbot.yml')
+  requester.run_tests(:rspec, 'spec')
+end

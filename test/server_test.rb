@@ -85,21 +85,6 @@ class ServerTest < Test::Unit::TestCase
     end
     
   end
-
-  context "POST /jobs" do
-
-    should "save a job and return the id" do
-      post '/jobs', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync'
-      first_job = Job.first
-      assert last_response.ok?    
-      assert_equal first_job[:id].to_s, last_response.body
-      assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_job[:files]
-      assert_equal 'server:/path/to/project', first_job[:root]
-      assert_equal 'rspec', first_job[:type]
-      assert_equal 'rsync', first_job[:server_type]
-    end
-    
-  end
   
   context "GET /jobs/next" do
   
@@ -301,34 +286,6 @@ class ServerTest < Test::Unit::TestCase
     #   assert (13...16).include?(Runtime.find(:path => "spec/models/car_spec.rb", :type => "rspec").time)
     #   assert (13...16).include?(Runtime.find(:path => "spec/models/house_spec.rb", :type => "rspec").time)
     # end
-
-  end
-  
-  context "GET /jobs/:id" do
-
-     should "return the status of a job" do
-       job = Job.create :result => 'test run result'
-       get "/jobs/#{job[:id]}"
-       assert last_response.ok?
-       assert_equal 'test run result', last_response.body
-     end
-
-     should "be able to return the status of a non complete job" do
-       job = Job.create
-       get "/jobs/#{job[:id]}"
-       assert last_response.ok?
-       assert_equal '', last_response.body
-     end  
-  
-  end
-  
-  context "DELETE /jobs/:id" do
-
-    should "delete the job" do
-      job = Job.create
-      delete "/jobs/#{job[:id]}"
-      assert_equal 0, Job.count
-    end
 
   end
   

@@ -1,10 +1,10 @@
-require File.join(File.dirname(__FILE__), '../lib/new_requester.rb')
+require File.join(File.dirname(__FILE__), '../lib/requester.rb')
 require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'
 
 def requester_with_result(results)
-  requester = NewRequester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'git')
+  requester = Requester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'git')
 
   flexmock(requester).should_receive(:find_tests).and_return([])
   flexmock(HTTParty).should_receive(:post).and_return('5')
@@ -20,15 +20,15 @@ def build_with_result(results)
 end
 
 
-class NewRequesterTest < Test::Unit::TestCase
+class RequesterTest < Test::Unit::TestCase
   
   context "self.create_by_config" do
 
     should 'create a requester from config' do
       flexmock(YAML).should_receive(:load_file).once.with("testbot.yml").
                      and_return({ 'server_uri' => 'http://somewhere:2288', 'server_type' => "rsync", 'server_path' => "user@somewhere:/path", 'ignores' => ".git tmp", 'available_runner_usage' => "50%" })
-      flexmock(NewRequester).should_receive(:new).once.with('http://somewhere:2288', 'user@somewhere:/path', 'rsync', '.git tmp', '50%')
-      NewRequester.create_by_config("testbot.yml")
+      flexmock(Requester).should_receive(:new).once.with('http://somewhere:2288', 'user@somewhere:/path', 'rsync', '.git tmp', '50%')
+      Requester.create_by_config("testbot.yml")
     end
 
   end
@@ -37,7 +37,7 @@ class NewRequesterTest < Test::Unit::TestCase
 
     should "should be able to create a build" do
       flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
-      requester = NewRequester.new("http://192.168.1.100:2288", 'git@somewhere', 'git', '', '60%')
+      requester = Requester.new("http://192.168.1.100:2288", 'git@somewhere', 'git', '', '60%')
       flexmock(requester).should_receive(:find_tests).with(:rspec, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:2288/builds",
                                         :body => { :type => "rspec",
@@ -56,7 +56,7 @@ class NewRequesterTest < Test::Unit::TestCase
     end
 
     should "keep calling the server for results until done" do
-      requester = NewRequester.new("http://192.168.1.100:2288", 'git@somewhere', 'git')
+      requester = Requester.new("http://192.168.1.100:2288", 'git@somewhere', 'git')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
@@ -74,7 +74,7 @@ class NewRequesterTest < Test::Unit::TestCase
     end
     
     should "not print empty lines when there is no result" do
-      requester = NewRequester.new("http://192.168.1.100:2288", 'git@somewhere', 'git')
+      requester = Requester.new("http://192.168.1.100:2288", 'git@somewhere', 'git')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
@@ -91,7 +91,7 @@ class NewRequesterTest < Test::Unit::TestCase
     end
     
     should "prepare and sync the files to the server when the server_type is rsync" do
-      requester = NewRequester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'rsync', '.git tmp')
+      requester = Requester.new("http://192.168.1.100:2288", 'user@somewhere:/path', 'rsync', '.git tmp')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
