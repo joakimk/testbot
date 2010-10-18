@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'httparty'
+require 'macaddr'
 
 class NewRequester
   
@@ -19,7 +20,8 @@ class NewRequester
                                                        :server_type => @server_type,
                                                        :type => type.to_s,
                                                        :available_runner_usage => @available_runner_usage,
-                                                       :files => files.join(' ') })
+                                                       :files => files.join(' '),
+                                                       :requester_ip => Mac.addr }) # HACK
     last_results_size = 0
     success = true
     while true

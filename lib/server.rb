@@ -34,7 +34,7 @@ class Sinatra::Application
 end
 
 post '/builds' do
-  build = Build.create_and_build_jobs(params.merge({ :requester_ip => @env['REMOTE_ADDR'] }))[:id].to_s
+  build = Build.create_and_build_jobs(params)[:id].to_s
 end
 
 get '/builds/:id' do
