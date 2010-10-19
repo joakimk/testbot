@@ -32,6 +32,7 @@ DB.create_table :runners do
   String :ip
   String :hostname
   String :mac
+  String :username
   Integer :version
   Integer :idle_instances
   Integer :max_instances

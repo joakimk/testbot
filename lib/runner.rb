@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 25
+TESTBOT_VERSION = 26
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -161,7 +161,7 @@ class Runner
   
   def ping_params
     { :hostname => (@hostname ||= `hostname`.chomp), :max_instances => @@config.max_instances,
-      :idle_instances => (@@config.max_instances - @instances.size) }.merge(base_params)
+      :idle_instances => (@@config.max_instances - @instances.size), :username => ENV['USER'] }.merge(base_params)
   end
   
   def base_params

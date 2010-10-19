@@ -226,19 +226,19 @@ class ServerTest < Test::Unit::TestCase
   context "GET /runners/available_runners" do
 
     should "return a list of available runners" do
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2, :username => 'user1'
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4, :username => 'user2'
       get '/runners/available'
       assert last_response.ok?
-      assert_equal "127.0.0.1 macmini1.local 00:01 2\n127.0.0.1 macmini2.local 00:02 4", last_response.body
+      assert_equal "127.0.0.1 macmini1.local 00:01 user1 2\n127.0.0.1 macmini2.local 00:02 user2 4", last_response.body
     end
     
     should "not return runners as available when not seen the last 10 seconds" do
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
+      get '/jobs/next', :version => Server.version, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2, :username => "user1"
       get '/jobs/next', :version => Server.version, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
       Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 10)      
       get '/runners/available'
-      assert_equal "127.0.0.1 macmini1.local 00:01 2", last_response.body
+      assert_equal "127.0.0.1 macmini1.local 00:01 user1 2", last_response.body
     end
     
   end
@@ -298,7 +298,7 @@ class ServerTest < Test::Unit::TestCase
     
     should "update data on the runner" do
       runner = Runner.create(:mac => 'aa:aa:..')
-      get "/runners/ping", :mac => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Server.version
+      get "/runners/ping", :mac => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Server.version, :username => 'jocke'
       runner.reload
       assert last_response.ok?
       assert_equal 'aa:aa:..', runner.mac
@@ -306,6 +306,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 2, runner.idle_instances
       assert_equal 'hostname1', runner.hostname
       assert_equal Server.version, runner.version
+      assert_equal 'jocke', runner.username
     end
     
     should "do nothing if the version does not match" do

@@ -15,7 +15,7 @@ end
 
 class Server
   def self.version
-    25
+    26
   end
   
   def self.valid_version?(runner_version)
@@ -75,7 +75,7 @@ get '/runners/total_instances' do
 end
 
 get '/runners/available' do
-  Runner.find_all_available.map { |runner| [ runner[:ip], runner[:hostname], runner[:mac], runner[:idle_instances] ].join(' ') }.join("\n").strip
+  Runner.find_all_available.map { |runner| [ runner[:ip], runner[:hostname], runner[:mac], runner[:username], runner[:idle_instances] ].join(' ') }.join("\n").strip
 end
 
 get '/version' do
