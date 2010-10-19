@@ -24,13 +24,18 @@ class Requester
                                                        :files => files.join(' ') })
     last_results_size = 0
     success = true
+    error_count = 0
     while true
       sleep 1
       
       begin
         @build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
       rescue Exception => ex
-        puts "Failed to get status: #{ex.message}"
+        error_count += 1
+        if error_count > 1
+          puts "Failed to get status: #{ex.message}"
+          error_count = 0
+        end
         next
       end
 

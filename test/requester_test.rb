@@ -105,19 +105,19 @@ class RequesterTest < Test::Unit::TestCase
       requester.run_tests(:rspec, 'spec')
     end
     
-    should "just try again if the request encounters an error while running" do
+    should "just try again if the request encounters an error while running and print on the second time" do
       requester = Requester.new("http://192.168.1.100:2288", 'git@somewhere', 'git')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
       flexmock(HTTParty).should_receive(:post).and_return('5')
             
-      flexmock(HTTParty).should_receive(:get).times(1).with("http://192.168.1.100:2288/builds/5",
+      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
                   :format => :json).and_raise('some connection error')
       flexmock(HTTParty).should_receive(:get).times(1).with("http://192.168.1.100:2288/builds/5",
                   :format => :json).and_return({ "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
 
-      flexmock(requester).should_receive(:sleep).times(2).with(1)
+      flexmock(requester).should_receive(:sleep).times(3).with(1)
       flexmock(requester).should_receive(:puts).once.with("Failed to get status: some connection error")
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....") 
 
