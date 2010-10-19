@@ -201,6 +201,7 @@ while true
   begin  
     runner.run!
   rescue Exception => ex
-    puts "The runner crashed, restarting. Error: #{ex.inspect}"
+    break if [ 'SignalException', 'Interrupt' ].include?(ex.class.to_s)
+    puts "The runner crashed, restarting. Error: #{ex.inspect} #{ex.class}"
   end
 end
