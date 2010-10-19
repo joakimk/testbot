@@ -124,6 +124,23 @@ class RequesterTest < Test::Unit::TestCase
       requester.run_tests(:rspec, 'spec')      
     end
     
+    should "just try again if the status returns as nil" do
+      requester = Requester.new("http://192.168.1.100:2288", 'git@somewhere', 'git')
+
+      flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      
+      flexmock(HTTParty).should_receive(:post).and_return('5')
+            
+      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
+                  :format => :json).and_return(nil,
+                                               { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
+      
+      flexmock(requester).should_receive(:sleep).times(2).with(1)
+      flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+
+      requester.run_tests(:rspec, 'spec')      
+    end
+    
   end
   
   context "result_lines" do
