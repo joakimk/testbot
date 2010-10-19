@@ -15,7 +15,7 @@ end
 
 class Server
   def self.version
-    22
+    24
   end
   
   def self.valid_version?(runner_version)
@@ -55,9 +55,10 @@ put '/jobs/:id' do
   Job.find(:id => params[:id].to_i).update(:result => params[:result]); nil
 end
 
-post '/runners/ping' do
+get '/runners/ping' do
+  return unless Server.valid_version?(params[:version])
   runner = Runner.find(:mac => params[:mac])
-  runner.update(:last_seen_at => Time.now) if runner
+  runner.update(params.merge({ :last_seen_at => Time.now })) if runner
   nil
 end
 

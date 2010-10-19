@@ -142,25 +142,25 @@ class ServerTest < Test::Unit::TestCase
     end
   
     should "only create one record for the same mac" do
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local1', :mac => "00:01:..."
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local2', :mac => "00:01:..."
+      get '/jobs/next', :version => Server.version, :mac => "00:01:..."
+      get '/jobs/next', :version => Server.version, :mac => "00:01:..."
       assert_equal 1, Runner.count
     end
   
     should "not return anything to outdated clients" do
       Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project'
-      get '/jobs/next', :version => "1", :hostname => 'macmini.local', :mac => "00:..."
+      get '/jobs/next', :version => "1", :mac => "00:..."
       assert last_response.ok?
       assert_equal '', last_response.body
     end
     
     should "only give jobs from the same source to a runner" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'rspec', :requester_mac => "bb:bb:bb:bb:bb:bb"      
-      get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
+      get '/jobs/next', :version => Server.version, :mac => "00:..."
       
       # Creating the second job here because of the random lookup.
       job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa"
-      get '/jobs/next?requester_mac=bb:bb:bb:bb:bb:bb', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
+      get '/jobs/next', :version => Server.version, :mac => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
       
       assert last_response.ok?
       assert_equal '', last_response.body
@@ -172,7 +172,7 @@ class ServerTest < Test::Unit::TestCase
       20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa" }
       
       macs = (0...10).map {
-        get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:..."
+        get '/jobs/next', :version => Server.version, :mac => "00:..."
         last_response.body.split(',')[1]
       }
       
@@ -186,7 +186,7 @@ class ServerTest < Test::Unit::TestCase
       20.times { Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "bb:bb:bb:bb:bb:bb" }
       
       files = (0...10).map {
-        get '/jobs/next', :version => Server.version, :hostname => 'macmini.local', :mac => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
+        get '/jobs/next', :version => Server.version, :mac => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
         last_response.body.split(',').last
       }
       
@@ -285,19 +285,38 @@ class ServerTest < Test::Unit::TestCase
     
   end  
     
-  context "POST /runners/ping" do
+  context "GET /runners/ping" do
     
     should "update last_seen_at for the runner" do
       runner = Runner.create(:mac => 'aa:aa:aa:aa:aa:aa')
-      post "/runners/ping", :mac => 'aa:aa:aa:aa:aa:aa'
+      get "/runners/ping", :mac => 'aa:aa:aa:aa:aa:aa', :version => Server.version
       runner.reload
       assert last_response.ok?
       assert (Time.now - 5) < runner[:last_seen_at]
       assert (Time.now + 5) > runner[:last_seen_at]
     end
     
+    should "update data on the runner" do
+      runner = Runner.create(:mac => 'aa:aa:..')
+      get "/runners/ping", :mac => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Server.version
+      runner.reload
+      assert last_response.ok?
+      assert_equal 'aa:aa:..', runner.mac
+      assert_equal 4, runner.max_instances
+      assert_equal 2, runner.idle_instances
+      assert_equal 'hostname1', runner.hostname
+      assert_equal Server.version, runner.version
+    end
+    
+    should "do nothing if the version does not match" do
+      runner = Runner.create(:mac => 'aa:aa:..', :version => Server.version)
+      get "/runners/ping", :mac => 'aa:aa:..', :version => Server.version - 1
+      assert last_response.ok?
+      assert_equal Server.version, runner.reload.version
+    end
+    
     should "do nothing if the runners isnt known yet found" do
-      post "/runners/ping", :mac => 'aa:aa:aa:aa:aa:aa'
+      get "/runners/ping", :mac => 'aa:aa:aa:aa:aa:aa', :version => Server.version
       assert last_response.ok?
     end
     

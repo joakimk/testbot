@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 22
+TESTBOT_VERSION = 24
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -81,10 +81,10 @@ class Runner
       check_for_update if time_for_update?
 
       # Only get jobs from one requester at a time
+      next_params = base_params
       if @instances.size > 0
-        params = "?requester_mac=#{@last_requester_mac}"
+        next_params.merge!({ :requester_mac => @last_requester_mac })
       else
-        params = ''
         @last_requester_mac = nil
       end
       
@@ -92,7 +92,7 @@ class Runner
       clear_completed_instances 
       next unless cpu_available?
       
-      next_job = Server.get("/jobs/next#{params}", :query => query_params) rescue nil
+      next_job = Server.get("/jobs/next", :query => next_params) rescue nil
       next if next_job == nil
       
       job = Job.new(*next_job.split(','))
@@ -159,9 +159,13 @@ class Runner
     end
   end
   
-  def query_params
-    { :version => TESTBOT_VERSION, :mac => Mac.addr, :hostname => (@hostname ||= `hostname`.chomp),
-      :idle_instances => (@@config.max_instances - @instances.size), :max_instances => @@config.max_instances }
+  def ping_params
+    { :hostname => (@hostname ||= `hostname`.chomp), :max_instances => @@config.max_instances,
+      :idle_instances => (@@config.max_instances - @instances.size) }.merge(base_params)
+  end
+  
+  def base_params
+    { :version => TESTBOT_VERSION, :mac => Mac.addr }
   end
   
   def max_instances_running?
@@ -183,7 +187,7 @@ class Runner
   def start_ping
     Thread.new do
       while true
-        Server.post("/runners/ping", :query => { :mac => Mac.addr })
+        Server.get("/runners/ping", :body => ping_params)
         sleep TIME_BETWEEN_PINGS
       end
     end
