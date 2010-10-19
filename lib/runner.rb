@@ -3,7 +3,7 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 
-TESTBOT_VERSION = 24
+TESTBOT_VERSION = 25
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -187,7 +187,10 @@ class Runner
   def start_ping
     Thread.new do
       while true
-        Server.get("/runners/ping", :body => ping_params)
+        begin
+          Server.get("/runners/ping", :body => ping_params)
+        rescue
+        end
         sleep TIME_BETWEEN_PINGS
       end
     end
