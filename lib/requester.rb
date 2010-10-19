@@ -27,7 +27,12 @@ class Requester
     while true
       sleep 1
       
-      @build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
+      begin
+        @build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
+      rescue Exception => ex
+        puts "Failed to get status: #{ex.message}"
+        next
+      end
 
       results = @build['results'][last_results_size..-1]
       puts results unless results == ''
