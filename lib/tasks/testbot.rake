@@ -15,13 +15,13 @@ namespace :testbot do
   task :spec do
     require File.join(File.dirname(__FILE__), '..', "requester.rb")
     requester = Requester.create_by_config("#{RAILS_ROOT}/config/testbot.yml")
-    fail unless run_and_show_results(requester, :rspec, 'spec')
+    exit 1 unless run_and_show_results(requester, :rspec, 'spec')
   end
   
   desc "Run the cucumber features using testbot"
   task :features do
     require File.join(File.dirname(__FILE__), '..', "requester.rb")
     requester = Requester.create_by_config("#{RAILS_ROOT}/config/testbot.yml")
-    fail unless run_and_show_results(requester, :cucumber, 'features')
+    exit 1 unless run_and_show_results(requester, :cucumber, 'features')
   end  
 end

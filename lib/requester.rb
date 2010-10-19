@@ -32,7 +32,7 @@ class Requester
         @build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
       rescue Exception => ex
         error_count += 1
-        if error_count > 1
+        if error_count > 4
           puts "Failed to get status: #{ex.message}"
           error_count = 0
         end
