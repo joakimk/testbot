@@ -85,7 +85,7 @@ To run the cucumber features:
 Running testbot's tests
 ====
 
-    gem install rack-test shoulda flexmock
+    gem install rack-test shoulda flexmock net-ssh
     rake
 
 Realtime runner information
