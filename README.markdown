@@ -6,16 +6,6 @@ SSH
 
 You can specify "ssh_tunnel" in the config which lets you run all communication over ssh. This way you can use your testbot network from anywhere.
 
-How it works
-====
-1. You run something like "rake testbot:spec".
-2. Your project files is synced to a server.
-3. Your local client requests testing jobs based on your tests.
-4. Runners on different computers syncs your project files from the server, runs the testing jobs and returns the results.
-5. The results is returned by the server and displayed.
-
-You can add and remove runners whenever you want. The runners will only run tests on computers that is idle.
-
 Benchmarks
 ====
 [http://gist.github.com/287124](http://gist.github.com/287124)
