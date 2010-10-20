@@ -26,8 +26,8 @@ class RequesterTest < Test::Unit::TestCase
 
     should 'create a requester from config' do
       flexmock(YAML).should_receive(:load_file).once.with("testbot.yml").
-                     and_return({ 'server_uri' => 'http://somewhere:2288', 'server_type' => "rsync", 'server_path' => "user@somewhere:/path", 'ignores' => ".git tmp", 'available_runner_usage' => "50%" })
-      flexmock(Requester).should_receive(:new).once.with('http://somewhere:2288', 'user@somewhere:/path', 'rsync', '.git tmp', '50%')
+                     and_return({ 'server_uri' => 'http://somewhere:2288', 'server_type' => "rsync", 'server_path' => "user@somewhere:/path", 'ignores' => ".git tmp", 'available_runner_usage' => "50%", 'ssh_tunnel' => 'user@server' })
+      flexmock(Requester).should_receive(:new).once.with('http://somewhere:2288', 'user@somewhere:/path', 'rsync', '.git tmp', '50%', 'user@server')
       Requester.create_by_config("testbot.yml")
     end
 
@@ -137,6 +137,23 @@ class RequesterTest < Test::Unit::TestCase
       
       flexmock(requester).should_receive(:sleep).times(2).with(1)
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+
+      requester.run_tests(:rspec, 'spec')      
+    end
+    
+    should "use SSHTunnel when specified" do
+      requester = Requester.new("http://localhost:2288", 'git@somewhere', 'git', '', '100%', 'user@server')
+
+      flexmock(SSHTunnel).should_receive(:new).once.with("server", "user").and_return(ssh_tunnel = Object.new)
+      flexmock(ssh_tunnel).should_receive(:open).once
+
+      flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb' ])
+      
+      flexmock(HTTParty).should_receive(:post).and_return('5')
+            
+      flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
+      flexmock(requester).should_receive(:sleep)
+      flexmock(requester).should_receive(:puts)
 
       requester.run_tests(:rspec, 'spec')      
     end

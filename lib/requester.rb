@@ -1,15 +1,18 @@
 require 'rubygems'
 require 'httparty'
 require 'macaddr'
+require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 
 class Requester
   
-  def initialize(server_uri, server_path, server_type, ignores = '', available_runner_usage = '100%')
-    @server_uri, @server_path, @server_type, @ignores, @available_runner_usage =
-     server_uri, server_path, server_type, ignores, available_runner_usage
+  def initialize(server_uri, server_path, server_type, ignores = '', available_runner_usage = '100%', ssh_opts = nil)
+    @server_uri, @server_path, @server_type, @ignores, @available_runner_usage, @ssh_opts =
+     server_uri, server_path, server_type, ignores, available_runner_usage, ssh_opts
   end
   
   def run_tests(type, dir)
+    SSHTunnel.new(*@ssh_opts.split('@').reverse).open if @ssh_opts
+
     if @server_type == 'rsync'
       ignores = @ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
       system "rake testbot:before_request &> /dev/null; rsync -az --delete -e ssh #{ignores} . #{@server_path}"
@@ -53,7 +56,7 @@ class Requester
   
   def self.create_by_config(path)
     config = YAML.load_file(path)
-    Requester.new(config['server_uri'], config['server_path'], config['server_type'], config['ignores'], config['available_runner_usage'])
+    Requester.new(config['server_uri'], config['server_path'], config['server_type'], config['ignores'], config['available_runner_usage'], config['ssh_tunnel'])
   end
   
   def result_lines
