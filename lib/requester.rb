@@ -1,29 +1,31 @@
 require 'rubygems'
 require 'httparty'
 require 'macaddr'
+require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 
 class Requester
   
-  def initialize(server_uri, server_path, server_type, ignores = '', available_runner_usage = '100%', ssh_opts = nil)
-    @server_uri, @server_path, @server_type, @ignores, @available_runner_usage, @ssh_opts =
-     server_uri, server_path, server_type, ignores, available_runner_usage, ssh_opts
+  attr_reader :config
+  
+  def initialize(config = {})
+    @config = OpenStruct.new(config)
   end
   
   def run_tests(type, dir)
-    SSHTunnel.new(*@ssh_opts.split('@').reverse).open if @ssh_opts
+    SSHTunnel.new(*config.ssh_tunnel.split('@').reverse).open if config.ssh_tunnel
 
-    if @server_type == 'rsync'
-      ignores = @ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      system "rake testbot:before_request &> /dev/null; rsync -az --delete -e ssh #{ignores} . #{@server_path}"
+    if config.server_type == 'rsync'
+      ignores = config.ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
+      system "rake testbot:before_request &> /dev/null; rsync -az --delete -e ssh #{ignores} . #{config.server_path}"
     end
     
     files = find_tests(type, dir)
-    build_id = HTTParty.post("#{@server_uri}/builds", :body => { :root => @server_path,
-                                                       :server_type => @server_type,
+    build_id = HTTParty.post("#{config.server_uri}/builds", :body => { :root => config.server_path,
+                                                       :server_type => config.server_type,
                                                        :type => type.to_s,
                                                        :requester_mac => Mac.addr,
-                                                       :available_runner_usage => @available_runner_usage,
+                                                       :available_runner_usage => config.available_runner_usage,
                                                        :files => files.join(' ') })
     last_results_size = 0
     success = true
@@ -32,7 +34,7 @@ class Requester
       sleep 1
       
       begin
-        @build = HTTParty.get("#{@server_uri}/builds/#{build_id}", :format => :json)
+        @build = HTTParty.get("#{config.server_uri}/builds/#{build_id}", :format => :json)
         next unless @build
       rescue Exception => ex
         error_count += 1
@@ -55,8 +57,7 @@ class Requester
   end
   
   def self.create_by_config(path)
-    config = YAML.load_file(path)
-    Requester.new(config['server_uri'], config['server_path'], config['server_type'], config['ignores'], config['available_runner_usage'], config['ssh_tunnel'])
+    Requester.new(YAML.load_file(path))
   end
   
   def result_lines
