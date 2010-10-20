@@ -17,6 +17,6 @@ ignores: log/* .git
 # instance or higher to create more jobs than there are instances.
 available_runner_usage: 100%
 
-# To tunnel traffic through SSH
+# To tunnel traffic through SSH (uses 2299 to allow a runner and requester on the same box)
 # ssh_tunnel: user@server
-# server_uri: http://localhost:2288
+# server_uri: http://localhost:2299

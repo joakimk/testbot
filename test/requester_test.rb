@@ -141,10 +141,10 @@ class RequesterTest < Test::Unit::TestCase
       requester.run_tests(:rspec, 'spec')      
     end
     
-    should "use SSHTunnel when specified" do
+    should "use SSHTunnel when specified (with a port that does not collide with the runner)" do
       requester = Requester.new(:ssh_tunnel => 'user@server')
 
-      flexmock(SSHTunnel).should_receive(:new).once.with("server", "user").and_return(ssh_tunnel = Object.new)
+      flexmock(SSHTunnel).should_receive(:new).once.with("server", "user", 2299).and_return(ssh_tunnel = Object.new)
       flexmock(ssh_tunnel).should_receive(:open).once
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb' ])

@@ -13,7 +13,10 @@ class Requester
   end
   
   def run_tests(type, dir)
-    SSHTunnel.new(*config.ssh_tunnel.split('@').reverse).open if config.ssh_tunnel
+    if config.ssh_tunnel
+      user, host = config.ssh_tunnel.split('@')
+      SSHTunnel.new(host, user, 2299).open 
+    end
 
     if config.server_type == 'rsync'
       ignores = config.ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')

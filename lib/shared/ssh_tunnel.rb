@@ -3,14 +3,14 @@ require 'net/ssh'
 
 class SSHTunnel
   
-  def initialize(host, user)
-    @host, @user = host, user
+  def initialize(host, user, local_port = 2288)
+    @host, @user, @local_port = host, user, local_port
   end
   
   def open
     Thread.new do
       Net::SSH.start(@host, @user) do |ssh|
-        ssh.forward.local(2288, 'localhost', 2288)
+        ssh.forward.local(@local_port, 'localhost', 2288)
         ssh.loop { @up = true }
       end
     end
