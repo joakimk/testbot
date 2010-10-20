@@ -16,3 +16,7 @@ ignores: log/* .git
 # Set to a lower percentage to not use every available
 # instance or higher to create more jobs than there are instances.
 available_runner_usage: 100%
+
+# To tunnel traffic through SSH
+# ssh_tunnel: user@server
+# server_uri: http://localhost:2288

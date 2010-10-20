@@ -3,12 +3,12 @@ could be used for other frameworks or even other languages.
 
 Concept
 ====
-This is designed to be a simple way to use all the idle computers resources on your local network to
-speedup test runtimes. One of the goals is to only require that you to have one central server which
-all other computers can access.
+This is designed to be a simple way to use all the idle computers resources reduce test runtimes.
 
-As the runners pull down and run code that can be posted by anyone with access to the central server you
-will have to have trust everyone using it.
+As the runners pull down and run code that can be posted by anyone with access to your central server you will have to have trust everyone using it.
+
+*Using only ssh:*
+You can specify "ssh_tunnel" in the config which lets you run all communication over ssh. This way you can use your testbot network from anywhere.
 
 How it works
 ====
@@ -119,10 +119,6 @@ Tips
 
 I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
 [http://www.rubyenterpriseedition.com/](http://www.rubyenterpriseedition.com/).
-
-Add "server_type: git" to testbot.yml and change "server_path" to your git repo to
-greatly improve startup speed. This is probably not practical if you want to run
-uncommited code, but great for CI servers.
 
 I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
 to install anything on the computers. Adding a new computer is as simple as setting it to

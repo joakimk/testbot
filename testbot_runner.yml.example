@@ -1,3 +1,7 @@
-server: user@server
+server_uri: http://localhost:2288
 max_instances: 1
 automatic_updates: false
+
+# To tunnel traffic through SSH
+# ssh_tunnel: user@server
+# server_uri: http://localhost:2288
