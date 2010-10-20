@@ -2,6 +2,7 @@ require 'rubygems'
 require 'httparty'
 require 'macaddr'
 require 'ostruct'
+require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 
 TESTBOT_VERSION = 26
 TIME_BETWEEN_POLLS = 1
@@ -205,7 +206,8 @@ Dir.entries(".").find_all { |name| name.include?('instance') && ( name[-1,1] == 
 
 runner = Runner.new
 while true
-  begin  
+  SSHTunnel.new(*@@config.ssh_tunnel.split('@').reverse).open if @@config.ssh_tunnel
+  begin
     runner.run!
   rescue Exception => ex
     break if [ 'SignalException', 'Interrupt' ].include?(ex.class.to_s)
