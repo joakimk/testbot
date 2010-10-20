@@ -17,6 +17,7 @@ class SSHTunnel
     
     while true
       break if @up
+      sleep 0.5
     end
   end
   
