@@ -4,6 +4,12 @@ require 'daemons'
 
 pwd = Dir.pwd
 runner_path = File.expand_path(File.join(File.dirname(__FILE__),'..','lib','runner.rb'))
+pid_path = File.expand_path(File.join(File.dirname(__FILE__),'..','runner.rb.pid'))
+
+if File.exists?(pid_path) && File.read(pid_path).chomp == '0'
+  File.delete(pid_path)
+end
+
 Daemons.run_proc('runner.rb') do
   Dir.chdir(pwd)
   exec "ruby #{runner_path}"
