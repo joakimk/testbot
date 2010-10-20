@@ -1,5 +1,4 @@
-This is a rails plugin for reducing test runtime by distributing test load. With some modifications it
-could be used for other frameworks or even other languages.
+This is a rails plugin for reducing test runtime by distributing test load that can be run entirely through SSH. With some modifications it could be used for other frameworks or even other languages.
 
 SSH
 ====
