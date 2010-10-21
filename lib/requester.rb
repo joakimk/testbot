@@ -15,7 +15,11 @@ class Requester
   def run_tests(type, dir)
     if config.ssh_tunnel
       user, host = config.ssh_tunnel.split('@')
-      SSHTunnel.new(host, user, 2299).open 
+      port = (type == :rspec) ? 2299 : 2230
+      SSHTunnel.new(host, user, port).open
+      server_uri = "http://127.0.0.1:#{port}"
+    else
+      server_uri = config.server_uri
     end
 
     if config.server_type == 'rsync'
@@ -24,12 +28,15 @@ class Requester
     end
     
     files = find_tests(type, dir)
-    build_id = HTTParty.post("#{config.server_uri}/builds", :body => { :root => config.server_path,
-                                                       :server_type => config.server_type,
-                                                       :type => type.to_s,
-                                                       :requester_mac => Mac.addr,
-                                                       :available_runner_usage => config.available_runner_usage,
-                                                       :files => files.join(' ') })
+    
+    build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.server_path,
+                                                     :server_type => config.server_type,
+                                                     :type => type.to_s,
+                                                     :requester_mac => Mac.addr,
+                                                     :available_runner_usage => config.available_runner_usage,
+                                                     :files => files.join(' ') })
+                                                     
+
     last_results_size = 0
     success = true
     error_count = 0
@@ -37,7 +44,7 @@ class Requester
       sleep 1
       
       begin
-        @build = HTTParty.get("#{config.server_uri}/builds/#{build_id}", :format => :json)
+        @build = HTTParty.get("#{server_uri}/builds/#{build_id}", :format => :json)
         next unless @build
       rescue Exception => ex
         error_count += 1

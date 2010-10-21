@@ -148,12 +148,27 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(ssh_tunnel).should_receive(:open).once
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb' ])
-      flexmock(HTTParty).should_receive(:post).and_return('5')
+      flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2299/builds", any).and_return('5')
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
 
       requester.run_tests(:rspec, 'spec')      
+    end
+    
+    should "use another port for cucumber to be able to run at the same time as rspec" do
+      requester = Requester.new(:ssh_tunnel => 'user@server')
+
+      flexmock(SSHTunnel).should_receive(:new).once.with("server", "user", 2230).and_return(ssh_tunnel = Object.new)
+      flexmock(ssh_tunnel).should_receive(:open).once
+
+      flexmock(requester).should_receive(:find_tests).and_return([ 'features/some.feature' ])
+      flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2230/builds", any).and_return('5')
+      flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
+      flexmock(requester).should_receive(:sleep)
+      flexmock(requester).should_receive(:puts)
+
+      requester.run_tests(:cucumber, 'features')
     end
     
   end
