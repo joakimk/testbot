@@ -4,7 +4,7 @@ require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 
-TESTBOT_VERSION = 26
+TESTBOT_VERSION = 27
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -205,8 +205,12 @@ Dir.entries(".").find_all { |name| name.include?('instance') && ( name[-1,1] == 
 }
 
 runner = Runner.new
+SSHTunnel.new(*@@config.ssh_tunnel.split('@').reverse).open if @@config.ssh_tunnel
 while true
-  SSHTunnel.new(*@@config.ssh_tunnel.split('@').reverse).open if @@config.ssh_tunnel
+  # Make sure the jobs for this runner is taken by another runner if it crashes or
+  # is restarted
+  sleep 15
+
   begin
     runner.run!
   rescue Exception => ex
