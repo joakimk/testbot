@@ -1,4 +1,6 @@
-server_uri: http://server:2288
+# Used for prefixing project files so that you can run
+# multiple projects in the same testbot network.
+project: auktion
 
 # Using rsync
 # The folder where your files are synced to and then
@@ -19,3 +21,6 @@ available_runner_usage: 100%
 
 # To tunnel traffic through SSH
 # ssh_tunnel: user@server
+
+# To use http without a tunnel
+server_uri: http://server:2288

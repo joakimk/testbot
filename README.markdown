@@ -1,4 +1,4 @@
-This is a rails plugin for reducing test runtime by distributing test load that can be run entirely through SSH. With some modifications it could be used for other frameworks or even other languages.
+This is a rails plugin for reducing test runtime by distributing test load that can be run entirely through SSH. It supports RSpec and Cucumber. With some modifications it could be used for other frameworks or even other languages.
 
 SSH
 ====
@@ -97,8 +97,6 @@ Gotchas
 ====
 
 * When you run your tests in smaller sets you can become unaware of dependency errors in your suite.
-
-* Testbot currently assumes that you only use it with one project. For example, it only keeps one cache of the project folder. This is because I haven't had a need for more yet, but if you do, tell me and I'll add some scoping. Or you could send me a pull request.
 
 * As the runners pull down and run code that can be posted by anyone with access to your central server you will have to have trust everyone using it.
 

@@ -24,7 +24,7 @@ class Requester
 
     if config.server_type == 'rsync'
       ignores = config.ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      system "rake testbot:before_request &> /dev/null; rsync -az --delete -e ssh #{ignores} . #{config.server_path}"
+      system "rsync -az --delete -e ssh #{ignores} . #{config.server_path}"
     end
     
     files = find_tests(type, dir)
@@ -32,7 +32,7 @@ class Requester
     build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.server_path,
                                                      :server_type => config.server_type,
                                                      :type => type.to_s,
-                                                     :project => Dir.pwd.split('/').last,
+                                                     :project => config.project,
                                                      :requester_mac => Mac.addr,
                                                      :available_runner_usage => config.available_runner_usage,
                                                      :files => files.join(' ') })

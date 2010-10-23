@@ -37,8 +37,7 @@ class RequesterTest < Test::Unit::TestCase
 
     should "should be able to create a build" do
       flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
-      flexmock(Dir).should_receive(:pwd).and_return('/home/user/projects/things')
-      requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :server_path => 'git@somewhere', :server_type => 'git', :available_runner_usage => '60%')
+      requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :server_path => 'git@somewhere', :server_type => 'git', :available_runner_usage => '60%', :project => 'things')
       flexmock(requester).should_receive(:find_tests).with(:rspec, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:2288/builds",
                                         :body => { :type => "rspec",
@@ -92,7 +91,7 @@ class RequesterTest < Test::Unit::TestCase
       requester.run_tests(:rspec, 'spec')
     end
     
-    should "prepare and sync the files to the server when the server_type is rsync" do
+    should "sync the files to the server when the server_type is rsync" do
       requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :server_path => 'user@somewhere:/path', :server_type => 'rsync', :ignores => '.git tmp')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
@@ -102,7 +101,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
                   :format => :json).and_return({ "done" => true, "results" => "" })
       
-      flexmock(requester).should_receive('system').with("rake testbot:before_request &> /dev/null; rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . user@somewhere:/path")
+      flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . user@somewhere:/path")
       
       requester.run_tests(:rspec, 'spec')
     end
