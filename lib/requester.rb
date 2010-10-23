@@ -4,10 +4,11 @@ require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 
+
 class Requester
   
   attr_reader :config
-  
+
   TYPES = {
     :rspec => { :port => 2299, :pattern => '**/**/*_spec.rb' },
     :cucumber => { :port => 2230, :pattern => '**/**/*.feature' },

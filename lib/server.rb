@@ -15,7 +15,7 @@ end
 
 class Server
   def self.version
-    29
+    30
   end
   
   def self.valid_version?(runner_version)

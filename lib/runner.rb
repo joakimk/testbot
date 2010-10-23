@@ -4,7 +4,7 @@ require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 
-TESTBOT_VERSION = 29
+TESTBOT_VERSION = 30
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -53,6 +53,8 @@ class Job
       result += `#{base_environment} export RSPEC_COLOR=true; script/spec -O spec/spec.opts #{@files}  2>&1`
     elsif @type == 'cucumber'
       result += `#{base_environment} export AUTOTEST=1; script/cucumber -f progress --backtrace -r features/support -r features/step_definitions #{@files} -t ~@disabled_in_cruise 2>&1`
+    elsif @type == 'test'
+      result += `#{base_environment} ruby -Itest -e '%w(#{@files}).each { |file| require(file) }' 2>&1`
     else
       raise "Unknown job type! (#{@type})"
     end
