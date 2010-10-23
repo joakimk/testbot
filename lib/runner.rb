@@ -4,7 +4,7 @@ require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 
-TESTBOT_VERSION = 28
+TESTBOT_VERSION = 29
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60

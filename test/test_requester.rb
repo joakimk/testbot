@@ -30,7 +30,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(Requester).should_receive(:new).once.with({ :server_uri => 'http://somewhere:2288', :server_type => 'rsync', :server_path => 'user@somewhere:/path', :ignores => '.git tmp', :available_runner_usage => '50%', :ssh_tunnel => 'user@server' })
       Requester.create_by_config("testbot.yml")
     end
-
+    
   end
    
   context "run_tests" do
