@@ -1,3 +1,7 @@
+0.2.1
+
+Added support for Test:Unit and multiple projects.
+
 0.2.0
 
 Added "ssh_tunnel" so that you don't have to be able to access the http server directly.
