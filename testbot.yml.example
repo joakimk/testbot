@@ -1,6 +1,6 @@
 # Used for prefixing project files so that you can run
 # multiple projects in the same testbot network.
-project: auktion
+project: project_name
 
 # Using rsync
 # The folder where your files are synced to and then
