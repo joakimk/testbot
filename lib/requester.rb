@@ -13,9 +13,7 @@ class Requester
     @config = OpenStruct.new(config)
   end
   
-  def run_tests(type, dir)
-    adapter = Adapter.find(type)
-    
+  def run_tests(adapter, dir)
     if config.ssh_tunnel
       user, host = config.ssh_tunnel.split('@')
       SSHTunnel.new(host, user, adapter.requester_port).open
@@ -33,7 +31,7 @@ class Requester
     
     build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.server_path,
                                                      :server_type => config.server_type,
-                                                     :type => type.to_s,
+                                                     :type => adapter.type.to_s,
                                                      :project => config.project,
                                                      :requester_mac => Mac.addr,
                                                      :available_runner_usage => config.available_runner_usage,
@@ -99,5 +97,5 @@ end
 
 if ENV['INTEGRATION_TEST']
   requester = Requester.create_by_config('config/testbot.yml')
-  requester.run_tests(:rspec, 'spec')
+  requester.run_tests(RSpecAdapter, 'spec')
 end

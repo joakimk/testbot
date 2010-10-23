@@ -16,7 +16,7 @@ def requester_with_result(results)
 end
   
 def build_with_result(results)
-  requester_with_result(results).run_tests(:rspec, 'spec')
+  requester_with_result(results).run_tests(RSpecAdapter, 'spec')
 end
 
 
@@ -40,7 +40,7 @@ class RequesterTest < Test::Unit::TestCase
       requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :server_path => 'git@somewhere', :server_type => 'git', :available_runner_usage => '60%', :project => 'things')
       flexmock(requester).should_receive(:find_tests).with(RSpecAdapter, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:2288/builds",
-                                        :body => { :type => "rspec",
+                                        :body => { :type => "spec",
                                                    :root => "git@somewhere",
                                                    :project => "things",
                                                    :server_type => "git",
@@ -53,7 +53,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
       
-      assert_equal true, requester.run_tests(:rspec, 'spec')
+      assert_equal true, requester.run_tests(RSpecAdapter, 'spec')
     end
 
     should "keep calling the server for results until done" do
@@ -71,7 +71,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....")
       flexmock(requester).should_receive(:puts).once.with("job 1 done: ....")
 
-      requester.run_tests(:rspec, 'spec')
+      requester.run_tests(RSpecAdapter, 'spec')
     end
     
     should "not print empty lines when there is no result" do
@@ -88,7 +88,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:sleep).times(2).with(1)
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
       
-      requester.run_tests(:rspec, 'spec')
+      requester.run_tests(RSpecAdapter, 'spec')
     end
     
     should "sync the files to the server when the server_type is rsync" do
@@ -103,7 +103,7 @@ class RequesterTest < Test::Unit::TestCase
       
       flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . user@somewhere:/path")
       
-      requester.run_tests(:rspec, 'spec')
+      requester.run_tests(RSpecAdapter, 'spec')
     end
     
     should "just try again if the request encounters an error while running and print on the fith time" do
@@ -122,7 +122,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:puts).once.with("Failed to get status: some connection error")
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....") 
 
-      requester.run_tests(:rspec, 'spec')      
+      requester.run_tests(RSpecAdapter, 'spec')      
     end
     
     should "just try again if the status returns as nil" do
@@ -139,7 +139,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:sleep).times(2).with(1)
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
 
-      requester.run_tests(:rspec, 'spec')      
+      requester.run_tests(RSpecAdapter, 'spec')      
     end
     
     should "use SSHTunnel when specified (with a port that does not collide with the runner)" do
@@ -154,7 +154,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
 
-      requester.run_tests(:rspec, 'spec')      
+      requester.run_tests(RSpecAdapter, 'spec')      
     end
     
     should "use another port for cucumber to be able to run at the same time as rspec" do
@@ -169,7 +169,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
 
-      requester.run_tests(:cucumber, 'features')
+      requester.run_tests(CucumberAdapter, 'features')
     end
     
     should "use another port for Test::Unit" do
@@ -184,7 +184,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
 
-      requester.run_tests(:test, 'test')
+      requester.run_tests(TestUnitAdapter, 'test')
     end
     
   end
@@ -194,7 +194,7 @@ class RequesterTest < Test::Unit::TestCase
     should "return all lines with results in them" do
       results = "one\ntwo..\n... 0 failures\nthree"
       requester = requester_with_result(results)
-      requester.run_tests(:rspec, 'spec')
+      requester.run_tests(RSpecAdapter, 'spec')
       assert_equal [ '... 0 failures' ], requester.result_lines
     end
     

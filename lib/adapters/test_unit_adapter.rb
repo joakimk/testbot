@@ -12,4 +12,20 @@ class TestUnitAdapter
     2231
   end
   
+  def self.pluralized
+    'tests'
+  end
+  
+  def self.base_path
+    'test'
+  end  
+  
+  def self.name
+    'Test::Unit'
+  end
+  
+  def self.type
+    :test
+  end  
+  
 end

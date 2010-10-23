@@ -12,4 +12,20 @@ class RSpecAdapter
     2299
   end
   
+  def self.pluralized
+    'specs'
+  end
+  
+  def self.base_path
+    'spec'
+  end  
+  
+  def self.name
+    'RSpec'
+  end
+  
+  def self.type
+    :spec
+  end
+  
 end

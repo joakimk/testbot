@@ -12,4 +12,20 @@ class CucumberAdapter
     2230
   end
   
+  def self.pluralized
+    'features'
+  end
+  
+  def self.base_path
+    'features'
+  end
+  
+  def self.name
+    'Cucumber'
+  end
+  
+  def self.type
+    :cucumber
+  end
+  
 end

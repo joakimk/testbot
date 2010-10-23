@@ -13,7 +13,7 @@ class RuntimeTest < Test::Unit::TestCase
     
     should "create file groups based on the number of instances" do
       groups = Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
-                                      'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'rspec')
+                                      'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'spec')
 
       assert_equal 2, groups.size
       assert_equal [ 'spec/models/house2_spec.rb', 'spec/models/house_spec.rb' ], groups[0]
@@ -23,7 +23,7 @@ class RuntimeTest < Test::Unit::TestCase
     should "create a small grop when there isn't enough specs to fill a normal one" do
       groups = Runtime.build_groups(["spec/models/car_spec.rb", "spec/models/car2_spec.rb",   
                                      "spec/models/house_spec.rb", "spec/models/house2_spec.rb",
-                                     "spec/models/house3_spec.rb"], 3, 'rspec')
+                                     "spec/models/house3_spec.rb"], 3, 'spec')
       
       assert_equal 3, groups.size
       assert_equal [ "spec/models/car_spec.rb" ], groups[2]
@@ -31,24 +31,24 @@ class RuntimeTest < Test::Unit::TestCase
 
     should "remove files in the database that isn't present now" do
       Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
-                             'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'rspec')
+                             'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'spec')
                              
      Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
-                            'spec/models/house_spec.rb' ], 2, 'rspec')
+                            'spec/models/house_spec.rb' ], 2, 'spec')
       
-      assert_equal 3, Runtime.filter([ 'type = ?', 'rspec' ]).count
+      assert_equal 3, Runtime.filter([ 'type = ?', 'spec' ]).count
       assert_equal nil, Runtime.find([ 'path = ?', 'spec/models/house2_spec.rb' ])
     end
     
     should "set time to the average for new files" do
-      Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb' ], 2, 'rspec')
+      Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb' ], 2, 'spec')
       first, second = Runtime.all
       
       first.update(:time => 30)
       second.update(:time => 10)
 
       Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
-                             'spec/models/house_spec.rb'], 2, 'rspec')
+                             'spec/models/house_spec.rb'], 2, 'spec')
       
       r1, r2, r3 = Runtime.all
       assert_equal 30, r1.time
@@ -58,11 +58,11 @@ class RuntimeTest < Test::Unit::TestCase
     
     should "use times when building groups" do
       Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
-                             'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'rspec')
+                             'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'spec')
       
       Runtime.first.update(:time => 40)
       groups = Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
-                                      'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'rspec')
+                                      'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'spec')
       
       assert_equal [ 'spec/models/car_spec.rb' ], groups[0]
       assert_equal [ 'spec/models/house_spec.rb', 'spec/models/car2_spec.rb', 'spec/models/house2_spec.rb' ], groups[1]
@@ -74,9 +74,9 @@ class RuntimeTest < Test::Unit::TestCase
     
     # should "update times on files based on the job completion time" do
     #   groups = Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
-    #                                   'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'rspec')
+    #                                   'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'spec')
     # 
-    #    Runtime.store_results(groups.first, 100, 'rspec')
+    #    Runtime.store_results(groups.first, 100, 'spec')
     #   
     #    r1, r2, r3, r4 = Runtime.all
     #    assert_equal groups.first[1], r3.path
@@ -91,7 +91,7 @@ class RuntimeTest < Test::Unit::TestCase
     
     # should "increase or decrease the files times but not entirely reset them" do
     #   groups = Runtime.build_groups([ 'spec/models/car_spec.rb', 'spec/models/car2_spec.rb',
-    #                                   'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'rspec')
+    #                                   'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], 2, 'spec')
     # 
     #   r1, r2, r3, r4 = Runtime.all
     #   
@@ -104,8 +104,8 @@ class RuntimeTest < Test::Unit::TestCase
     #   r2.update(:time => 150)
     #   
     #   # 200 / 2 instances = 100
-    #   Runtime.store_results(groups.first, 200, 'rspec')
-    #   Runtime.store_results(groups.last, 200, 'rspec')
+    #   Runtime.store_results(groups.first, 200, 'spec')
+    #   Runtime.store_results(groups.last, 200, 'spec')
     # 
     #   r1, r2, r3, r4 = Runtime.all
     #   
