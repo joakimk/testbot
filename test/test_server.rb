@@ -24,7 +24,7 @@ class ServerTest < Test::Unit::TestCase
     
     should "create a build and return its id" do
        flexmock(Runner).should_receive(:total_instances).and_return(2)
-       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb"
+       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things'
        
        first_build = Build.first
        assert last_response.ok?
@@ -34,6 +34,7 @@ class ServerTest < Test::Unit::TestCase
        assert_equal 'rspec', first_build[:type]
        assert_equal 'rsync', first_build[:server_type]
        assert_equal 'bb:bb:bb:bb:bb:bb', first_build[:requester_mac]
+       assert_equal 'things', first_build[:project]
        assert_equal '', first_build[:results]
     end
         
@@ -44,7 +45,7 @@ class ServerTest < Test::Unit::TestCase
         ["spec/models/house_spec.rb", "spec/models/house2_spec.rb"]
       ])
       
-      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb"
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'rspec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things'
       
       assert_equal 2, Job.count
       first_job, last_job = Job.all
@@ -55,6 +56,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'rspec', first_job[:type]
       assert_equal 'rsync', first_job[:server_type]
       assert_equal 'bb:bb:bb:bb:bb:bb', first_job[:requester_mac]
+      assert_equal 'things', first_job[:project]
       assert_equal Build.first[:id], first_job[:build_id]
     end
     
@@ -98,21 +100,21 @@ class ServerTest < Test::Unit::TestCase
   context "GET /jobs/next" do
   
     should "be able to return a job and mark it as taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync', :requester_mac => "bb:bb:bb:bb:bb:bb"
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => 'rsync', :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things'
       
       get '/jobs/next', :version => Server.version
       assert last_response.ok?      
       
-      assert_equal [ job1[:id], "bb:bb:bb:bb:bb:bb", "server:/project", "rspec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
+      assert_equal [ job1[:id], "bb:bb:bb:bb:bb:bb", "things", "server:/project", "rspec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
       assert job1.reload[:taken_at] != nil
     end
   
     should "not return a job that has already been taken" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now, :type => 'rspec'
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa"
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa", :project => 'things'
       get '/jobs/next', :version => Server.version
       assert last_response.ok?
-      assert_equal [ job2[:id], "aa:aa:aa:aa:aa:aa", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
+      assert_equal [ job2[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
       assert job2.reload[:taken_at] != nil
     end
 
@@ -155,7 +157,7 @@ class ServerTest < Test::Unit::TestCase
     end
     
     should "only give jobs from the same source to a runner" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'rspec', :requester_mac => "bb:bb:bb:bb:bb:bb"      
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'rspec', :requester_mac => "bb:bb:bb:bb:bb:bb"
       get '/jobs/next', :version => Server.version, :mac => "00:..."
       
       # Creating the second job here because of the random lookup.
@@ -196,14 +198,14 @@ class ServerTest < Test::Unit::TestCase
     
     should "return taken jobs to other runners if the runner hasn't been seen for 10 seconds or more" do
       missing_runner = Runner.create(:last_seen_at => Time.now - 15)
-      old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa", :taken_by_id => missing_runner.id, :taken_at => Time.now - 30
+      old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'rspec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa", :taken_by_id => missing_runner.id, :taken_at => Time.now - 30, :project => 'things'
       
       new_runner = Runner.create(:mac => "00:01")
       get '/jobs/next', :version => Server.version, :mac => "00:01"
       assert_equal new_runner.id, old_taken_job.reload.taken_by_id
       
       assert last_response.ok?
-      assert_equal [ old_taken_job[:id], "aa:aa:aa:aa:aa:aa", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
+      assert_equal [ old_taken_job[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "rspec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
     end
   
   end

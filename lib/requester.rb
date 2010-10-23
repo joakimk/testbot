@@ -32,6 +32,7 @@ class Requester
     build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.server_path,
                                                      :server_type => config.server_type,
                                                      :type => type.to_s,
+                                                     :project => Dir.pwd.split('/').last,
                                                      :requester_mac => Mac.addr,
                                                      :available_runner_usage => config.available_runner_usage,
                                                      :files => files.join(' ') })

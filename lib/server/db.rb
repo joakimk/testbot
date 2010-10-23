@@ -7,6 +7,7 @@ DB.create_table :builds do
   String :files
   String :results, :default => ''
   String :root
+  String :project
   String :type
   String :server_type
   String :requester_mac
@@ -19,6 +20,7 @@ DB.create_table :jobs do
   String :files
   String :result
   String :root
+  String :project
   String :type
   String :server_type
   String :requester_mac

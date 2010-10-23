@@ -1,5 +1,3 @@
-
-
 class Build < Sequel::Model
 
   def self.create_and_build_jobs(hash)
@@ -14,6 +12,7 @@ class Build < Sequel::Model
     groups.each do |group|
       Job.create(:files => group.join(' '),
                  :root => self[:root],
+                 :project => self[:project],
                  :type => self[:type],
                  :server_type => self[:server_type],
                  :requester_mac => self[:requester_mac],

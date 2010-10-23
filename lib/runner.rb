@@ -4,7 +4,7 @@ require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 
-TESTBOT_VERSION = 27
+TESTBOT_VERSION = 28
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -37,17 +37,17 @@ end
 
 class Job
 
-  attr_reader :server_type, :root, :requester_mac
+  attr_reader :server_type, :root, :project, :requester_mac
   
-  def initialize(id, requester_mac, root, type, server_type, files)
-    @id, @requester_mac, @root, @type, @server_type, @files = id, requester_mac, root, type, server_type, files
+  def initialize(id, requester_mac, project, root, type, server_type, files)
+    @id, @requester_mac, @project, @root, @type, @server_type, @files = id, requester_mac, project, root, type, server_type, files
   end
   
   def run(instance)
     puts "Running job #{@id} from #{@requester_mac} (#{@server_type})... "
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
-    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd instance_#{@server_type};"
+    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project}_#{@server_type};"
     
     if @type == 'rspec'
       result += `#{base_environment} export RSPEC_COLOR=true; script/spec -O spec/spec.opts #{@files}  2>&1`
@@ -111,17 +111,17 @@ class Runner
       end
     end
   end
-      
+
   private
   
   def fetch_code(job)
     if job.server_type == 'rsync'
-      system "rsync -az --delete -e ssh #{job.root}/ instance_rsync"
+      system "rsync -az --delete -e ssh #{job.root}/ #{job.project}_rsync"
     elsif job.server_type == 'git'
-      if File.exists?("instance_git")
-        system "cd instance_git; git pull; cd .."
+      if File.exists?("#{job.project}_git")
+        system "cd #{job.project}_git; git pull; cd .."
       else
-        system "git clone #{job.root} instance_git"
+        system "git clone #{job.root} #{job.project}_git"
       end
     else
       raise "Unknown root type! (#{job.server_type})"
@@ -129,7 +129,7 @@ class Runner
   end
   
   def before_run(job)
-    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@@config.max_instances}; export TEST_SERVER_TYPE=#{job.server_type}; cd instance_#{job.server_type}; rake testbot:before_run"
+    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@@config.max_instances}; export TEST_SERVER_TYPE=#{job.server_type}; cd #{job.project}_#{job.server_type}; rake testbot:before_run"
   end
   
   def first_job_from_requester?
@@ -199,8 +199,8 @@ class Runner
    
 end
 
-# Remove legacy instanceX style folders
-Dir.entries(".").find_all { |name| name.include?('instance') && ( name[-1,1] == '0' || name[-1,1].to_i != 0) }.each { |folder|
+# Remove legacy instance* style folders
+Dir.entries(".").find_all { |name| name.include?('instance') }.each { |folder|
   system "rm -rf #{folder}"
 }
 
@@ -209,7 +209,7 @@ SSHTunnel.new(*@@config.ssh_tunnel.split('@').reverse).open if @@config.ssh_tunn
 while true
   # Make sure the jobs for this runner is taken by another runner if it crashes or
   # is restarted
-  sleep 15
+  sleep 15 unless ENV['INTEGRATION_TEST']
 
   begin
     runner.run!
