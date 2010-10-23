@@ -3,8 +3,9 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
+require File.dirname(__FILE__) + '/adapters/adapter'
 
-TESTBOT_VERSION = 30
+TESTBOT_VERSION = 31
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -49,16 +50,9 @@ class Job
     result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
     base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project}_#{@server_type};"
     
-    if @type == 'rspec'
-      result += `#{base_environment} export RSPEC_COLOR=true; script/spec -O spec/spec.opts #{@files}  2>&1`
-    elsif @type == 'cucumber'
-      result += `#{base_environment} export AUTOTEST=1; script/cucumber -f progress --backtrace -r features/support -r features/step_definitions #{@files} -t ~@disabled_in_cruise 2>&1`
-    elsif @type == 'test'
-      result += `#{base_environment} ruby -Itest -e '%w(#{@files}).each { |file| require(file) }' 2>&1`
-    else
-      raise "Unknown job type! (#{@type})"
-    end
-    
+    adapter = Adapter.find(@type)
+    result += `#{base_environment} #{adapter.command(@files)} 2>&1`
+
     Server.put("/jobs/#{@id}", :body => { :result => result })
     puts "Job #{@id} finished."
   end

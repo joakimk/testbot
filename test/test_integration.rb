@@ -9,6 +9,10 @@ class IntegrationTest < Test::Unit::TestCase
   should "be able to send a build request, have it run and show the results" do
     system "mkdir -p tmp/runner; cp -rf test/fixtures/local tmp/local"
     system "cd tmp/runner; INTEGRATION_TEST=true ../../bin/runner start &>/dev/null"
+    # For debug
+    # Thread.new do
+    #   system "cd tmp/runner; INTEGRATION_TEST=true ../../bin/runner run"
+    # end
     system "mkdir tmp/server; INTEGRATION_TEST=true bin/server start &>/dev/null"
     sleep 0.5
     result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../lib/requester.rb`

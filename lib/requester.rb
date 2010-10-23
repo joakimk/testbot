@@ -3,28 +3,23 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
-
+require File.dirname(__FILE__) + '/adapters/adapter'
 
 class Requester
   
   attr_reader :config
 
-  TYPES = {
-    :rspec => { :port => 2299, :pattern => '**/**/*_spec.rb' },
-    :cucumber => { :port => 2230, :pattern => '**/**/*.feature' },
-    :test => { :port => 2231, :pattern => '**/**/*_test.rb' }
-  }
-  
   def initialize(config = {})
     @config = OpenStruct.new(config)
   end
   
   def run_tests(type, dir)
+    adapter = Adapter.find(type)
+    
     if config.ssh_tunnel
       user, host = config.ssh_tunnel.split('@')
-      port = TYPES[type][:port]
-      SSHTunnel.new(host, user, port).open
-      server_uri = "http://127.0.0.1:#{port}"
+      SSHTunnel.new(host, user, adapter.requester_port).open
+      server_uri = "http://127.0.0.1:#{adapter.requester_port}"
     else
       server_uri = config.server_uri
     end
@@ -33,8 +28,8 @@ class Requester
       ignores = config.ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
       system "rsync -az --delete -e ssh #{ignores} . #{config.server_path}"
     end
-    
-    files = find_tests(type, dir)
+        
+    files = find_tests(adapter, dir)
     
     build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.server_path,
                                                      :server_type => config.server_type,
@@ -53,7 +48,7 @@ class Requester
       
       begin
         @build = HTTParty.get("#{server_uri}/builds/#{build_id}", :format => :json)
-        next unless @build
+        next unless @build && @build['results']
       rescue Exception => ex
         error_count += 1
         if error_count > 4
@@ -96,8 +91,8 @@ class Requester
     line =~ /(\d{2,}|[1-9]) (fail|error)/
   end
   
-  def find_tests(type, dir)
-    Dir["#{dir}/#{TYPES[type][:pattern]}"]
+  def find_tests(adapter, dir)
+    Dir["#{dir}/#{adapter.file_pattern}"]
   end
   
 end
