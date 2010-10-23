@@ -1,4 +1,4 @@
-This is a rails plugin for reducing test runtime by distributing test load that can be run entirely through SSH. It supports RSpec and Cucumber. With some modifications it could be used for other frameworks or even other languages.
+This is a rails plugin for reducing test runtime by distributing test load that can be run entirely through SSH. It supports RSpec, Test::Unit and Cucumber. With some modifications it could be used for other frameworks or even other languages.
 
 SSH
 ====
@@ -63,13 +63,18 @@ Install required gems and download testbot:
 The first time you run your tests the runners will sync the project so you can expect it to take a bit
 more time than usual.
 
-To run the rspec specs:
+To run the RSpec specs:
 
     rake testbot:spec
 
-To run the cucumber features:
+To run the Test::Unit tests:
+
+    rake testbot:test
+
+To run the Cucumber features:
 
     rake testbot:features
+    
 
 Running testbot's tests
 ====
