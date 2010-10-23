@@ -3,7 +3,7 @@ require 'sinatra'
 require 'yaml'
 require 'json'
 require File.join(File.dirname(__FILE__), 'server/job.rb')
-require File.join(File.dirname(__FILE__), 'server/runtime.rb')
+require File.join(File.dirname(__FILE__), 'server/runtime.rb') unless defined?(Runtime)
 require File.join(File.dirname(__FILE__), 'server/runner.rb')
 require File.join(File.dirname(__FILE__), 'server/build.rb')
 

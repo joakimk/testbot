@@ -76,6 +76,7 @@ Running testbot's tests
 
     gem install rack-test shoulda flexmock net-ssh
     rake
+    autotest -f # [grosser/autotest](http://github.com/grosser/autotest)
 
 Realtime runner information
 ====
