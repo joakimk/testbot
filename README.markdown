@@ -98,6 +98,9 @@ Gotchas
 
 * When you run your tests in smaller sets you can become unaware of dependency errors in your suite.
 
+* The runner processes does not handle if a single user runs different projects at the same time. Code
+  fetching and initialization is then only done for one of the projects.
+
 * As the runners pull down and run code that can be posted by anyone with access to your central server you will have to have trust everyone using it.
 
 Tips
