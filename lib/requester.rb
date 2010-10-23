@@ -8,6 +8,12 @@ class Requester
   
   attr_reader :config
   
+  TYPES = {
+    :rspec => { :port => 2299, :pattern => '**/**/*_spec.rb' },
+    :cucumber => { :port => 2230, :pattern => '**/**/*.feature' },
+    :test => { :port => 2231, :pattern => '**/**/*_test.rb' }
+  }
+  
   def initialize(config = {})
     @config = OpenStruct.new(config)
   end
@@ -15,7 +21,7 @@ class Requester
   def run_tests(type, dir)
     if config.ssh_tunnel
       user, host = config.ssh_tunnel.split('@')
-      port = (type == :rspec) ? 2299 : 2230
+      port = TYPES[type][:port]
       SSHTunnel.new(host, user, port).open
       server_uri = "http://127.0.0.1:#{port}"
     else
@@ -90,14 +96,7 @@ class Requester
   end
   
   def find_tests(type, dir)
-    root = "#{dir}/"
-    if type == :rspec
-      Dir["#{root}**/**/*_spec.rb"]
-    elsif type == :cucumber
-      Dir["#{root}**/**/*.feature"]
-    else
-      raise "unsupported type: #{type}"
-    end
+    Dir["#{dir}/#{TYPES[type][:pattern]}"]
   end
   
 end

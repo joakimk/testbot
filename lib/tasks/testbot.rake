@@ -19,13 +19,18 @@ namespace :testbot do
     success
   end
   
-  desc "Run the rspec tests using testbot"
+  desc "Run the RSpec tests using testbot"
   task :spec, :custom_path do |_, args|
     exit 1 unless run_and_show_results(:rspec, 'spec', args[:custom_path])
   end
   
-  desc "Run the cucumber features using testbot"
+  desc "Run the Cucumber features using testbot"
   task :features, :custom_path do |_, args|
     exit 1 unless run_and_show_results(:cucumber, 'features', args[:custom_path])
   end  
+
+  desc "Run the Test::Unit tests using testbot"
+  task :test, :custom_path do |_, args|
+    exit 1 unless run_and_show_results(:test, 'test', args[:custom_path])
+  end
 end
