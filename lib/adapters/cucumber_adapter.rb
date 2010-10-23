@@ -17,7 +17,7 @@ class CucumberAdapter
   end
   
   def self.base_path
-    'features'
+    pluralized
   end
   
   def self.name
@@ -25,7 +25,7 @@ class CucumberAdapter
   end
   
   def self.type
-    :cucumber
+    pluralized
   end
   
 end

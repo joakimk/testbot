@@ -17,15 +17,15 @@ class TestUnitAdapter
   end
   
   def self.base_path
-    'test'
-  end  
+    type
+  end
   
   def self.name
     'Test::Unit'
   end
   
   def self.type
-    :test
+    'test'
   end  
   
 end

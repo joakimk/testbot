@@ -17,15 +17,15 @@ class RSpecAdapter
   end
   
   def self.base_path
-    'spec'
-  end  
+    type
+  end
   
   def self.name
     'RSpec'
   end
   
   def self.type
-    :spec
+    'spec'
   end
   
 end
