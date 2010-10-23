@@ -5,17 +5,13 @@ require 'ftools'
 
 namespace :testbot do
   task :before_request do
-    # Save the local test database so that it can be used on the testbot runner machines.
-    rails_root = File.expand_path(File.join(File.dirname(__FILE__),'../..'))
-    config_path = "#{rails_root}/config/testbot.yml"
-    test_database_name = YAML.load_file(config_path)["local_test_database"]
-    raise "Missing 'local_test_database' in config/testbot.yml!'" if test_database_name.to_s == ""
-    system "mysqldump --compact -u root #{test_database_name} > #{rails_root}/tmp/test_database.sql"
-    system "chmod -R 755 #{rails_root}/tmp"
+    # Resets config.yml from config.yml.in
+    # Will probably add ERB support later
+    # system %{cat config/testbot.yml.in | ruby -e "STDIN.readlines.each { |line| puts line.gsub('USERNAME', ENV['USER']) }" > config/testbot.yml}
   end
   
   task :before_run do
-    use_git = (ENV['TEST_SERVER_TYPE'] == 'git')    
+    # use_git = (ENV['TEST_SERVER_TYPE'] == 'git')
 
     # Create database.yml
     database_yml = <<-DB_CONFIG
@@ -36,12 +32,7 @@ DB_CONFIG
       test_env_number = (instance == 0) ? '' : instance + 1
       system "mysqladmin -u root -f drop !APPNAME!_testbot_test#{test_env_number}  > /dev/null 2>&1"
       system "mysqladmin -u root -f create !APPNAME!_testbot_test#{test_env_number} > /dev/null 2>&1"
-      
-      if use_git
-        system "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; rake db:test:load"
-      else
-        system "mysql -u root !APPNAME!_testbot_test#{test_env_number} < tmp/test_database.sql"
-      end
+      system "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; rake db:test:load"
     end
 
     # Build gems
