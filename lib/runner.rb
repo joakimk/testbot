@@ -5,7 +5,7 @@ require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 require File.dirname(__FILE__) + '/adapters/adapter'
 
-TESTBOT_VERSION = 31
+TESTBOT_VERSION = 32
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
