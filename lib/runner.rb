@@ -37,12 +37,15 @@ class CpuUsage
 end
 
 class Job
-
   attr_reader :server_type, :root, :project, :requester_mac
-  
+    
   def initialize(id, requester_mac, project, root, type, server_type, ruby_interpreter, files)
     @id, @requester_mac, @project, @root, @type, @server_type, @ruby_interpreter, @files = 
          id, requester_mac, project, root, type, server_type, ruby_interpreter, files
+  end
+  
+  def jruby?
+    @ruby_interpreter == 'jruby'
   end
   
   def run(instance)
@@ -52,10 +55,20 @@ class Job
     base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project}_#{@server_type};"
     
     adapter = Adapter.find(@type)
-    result += `#{base_environment} #{adapter.command(@ruby_interpreter, @files)} 2>&1`
+    result += `#{base_environment} #{adapter.command(ruby_cmd, @files)} 2>&1`
 
     Server.put("/jobs/#{@id}", :body => { :result => result })
     puts "Job #{@id} finished."
+  end
+  
+  private
+  
+  def ruby_cmd
+    if @ruby_interpreter == 'jruby' && @@config.jruby_opts
+      'jruby ' + @@config.jruby_opts
+    else
+      @ruby_interpreter
+    end
   end
 end
 
@@ -82,6 +95,7 @@ class Runner
       next_params = base_params
       if @instances.size > 0
         next_params.merge!({ :requester_mac => @last_requester_mac })
+        next_params.merge!({ :no_jruby => true }) if max_jruby_instances?
       else
         @last_requester_mac = nil
       end
@@ -100,7 +114,7 @@ class Runner
       end
       
       @instances << [ Thread.new { job.run(free_instance_number) },
-                      free_instance_number ]
+                      free_instance_number, job ]
       @last_requester_mac = job.requester_mac
       loop do
         clear_completed_instances
@@ -110,6 +124,11 @@ class Runner
   end
 
   private
+  
+  def max_jruby_instances?
+    return unless @@config.max_jruby_instances
+    @instances.find_all { |thread, n, job| job.jruby? }.size >= @@config.max_jruby_instances
+  end
   
   def fetch_code(job)
     if job.server_type == 'rsync'
@@ -178,7 +197,7 @@ class Runner
 
   def free_instance_number
     0.upto(@@config.max_instances - 1) do |number|
-      return number unless @instances.find { |instance, n| n == number }
+      return number unless @instances.find { |instance, n, job| n == number }
     end
   end
    

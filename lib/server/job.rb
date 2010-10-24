@@ -11,21 +11,24 @@ class Job < Sequel::Model
   end
   
   def self.next(params, remove_addr)
-    params_without_requester_mac = params.reject { |k, v| k == "requester_mac" }
-    runner = Runner.record! params_without_requester_mac.merge({ :ip => remove_addr, :last_seen_at => Time.now })
+    clean_params = params.reject { |k, v| [ "requester_mac", "no_jruby" ].include?(k) }
+    runner = Runner.record! clean_params.merge({ :ip => remove_addr, :last_seen_at => Time.now })
     return unless Server.valid_version?(params[:version])
-    [ next_job_query(params["requester_mac"]).first, runner ]
+    [ next_job_query(params["requester_mac"], params["no_jruby"]).first, runner ]
   end
   
   private
   
-  def self.next_job_query(requester_mac)
+  def self.next_job_query(requester_mac, no_jruby)
     release_jobs_taken_by_missing_runners!
     query = Job.filter("taken_at IS NULL").order("Random()".lit)
-    if requester_mac
-      query.filter("requester_mac = '#{requester_mac}'")
-    else
+    filters = []
+    filters << "requester_mac = '#{requester_mac}'" if requester_mac
+    filters << "jruby = 0" if no_jruby
+    if filters.empty?
       query
+    else
+      query.filter(filters.join(' AND ')) 
     end
   end
   

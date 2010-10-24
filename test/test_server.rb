@@ -170,6 +170,18 @@ class ServerTest < Test::Unit::TestCase
       assert_equal '', last_response.body
     end
     
+    should "not give more jruby jobs to an instance that can't take more" do
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :jruby => true
+      get '/jobs/next', :version => Server.version, :mac => "00:..."
+      
+      # Creating the second job here because of the random lookup.
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => "rsync", :jruby => true
+      get '/jobs/next', :version => Server.version, :mac => "00:...", :no_jruby => "true"
+      
+      assert last_response.ok?
+      assert_equal '', last_response.body
+    end
+    
     should "return the jobs in random order in order to start working for a new requester right away" do
       20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => "rsync", :requester_mac => "bb:bb:bb:bb:bb:bb" }
       
