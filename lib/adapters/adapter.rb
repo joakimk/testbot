@@ -11,7 +11,7 @@ class Adapter
     case type.to_sym
     when :spec
       RSpecAdapter
-    when :cucumber
+    when :features
       CucumberAdapter
     when :test
       TestUnitAdapter
