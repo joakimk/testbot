@@ -1,6 +1,7 @@
 class Build < Sequel::Model
 
   def self.create_and_build_jobs(hash)
+    hash["jruby"] = (hash["jruby"] == "true") ? 1 : 0
     build = create(hash.reject { |k, v| k == 'available_runner_usage' })
     build.create_jobs!(hash['available_runner_usage'])
     build

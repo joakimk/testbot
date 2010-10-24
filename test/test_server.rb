@@ -36,7 +36,7 @@ class ServerTest < Test::Unit::TestCase
        assert_equal 'rsync', first_build[:server_type]
        assert_equal 'bb:bb:bb:bb:bb:bb', first_build[:requester_mac]
        assert_equal 'things', first_build[:project]
-       assert_equal false, first_build[:jruby]
+       assert_equal 0, first_build[:jruby]
        assert_equal '', first_build[:results]
     end
         
@@ -59,7 +59,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'rsync', first_job[:server_type]
       assert_equal 'bb:bb:bb:bb:bb:bb', first_job[:requester_mac]
       assert_equal 'things', first_job[:project]
-      assert_equal true, first_job[:jruby]
+      assert_equal 1, first_job[:jruby]
       assert_equal Build.first[:id], first_job[:build_id]
     end
     
@@ -102,7 +102,7 @@ class ServerTest < Test::Unit::TestCase
   context "GET /jobs/next" do
   
     should "be able to return a job and mark it as taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => 'rsync', :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :jruby => true
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => 'rsync', :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :jruby => 1
       
       get '/jobs/next', :version => Server.version
       assert last_response.ok?      
@@ -171,15 +171,27 @@ class ServerTest < Test::Unit::TestCase
     end
     
     should "not give more jruby jobs to an instance that can't take more" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :jruby => true
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :jruby => 1
       get '/jobs/next', :version => Server.version, :mac => "00:..."
       
       # Creating the second job here because of the random lookup.
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => "rsync", :jruby => true
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => "rsync", :jruby => 1
       get '/jobs/next', :version => Server.version, :mac => "00:...", :no_jruby => "true"
       
       assert last_response.ok?
       assert_equal '', last_response.body
+    end
+    
+    should "still return other jobs when the runner cant take more jruby jobs" do
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :jruby => 1
+      get '/jobs/next', :version => Server.version, :mac => "00:..."
+      
+      # Creating the second job here because of the random lookup.
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => "rsync", :jruby => 0
+      get '/jobs/next', :version => Server.version, :mac => "00:...", :no_jruby => "true"
+      
+      assert last_response.ok?
+      assert_equal job2.id.to_s, last_response.body.split(',')[0]
     end
     
     should "return the jobs in random order in order to start working for a new requester right away" do

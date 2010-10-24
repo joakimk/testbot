@@ -12,7 +12,7 @@ DB.create_table :builds do
   String :type
   String :server_type
   String :requester_mac
-  Boolean :jruby
+  Integer :jruby
   Boolean :done, :default => false
 end
 
@@ -26,9 +26,9 @@ DB.create_table :jobs do
   String :type
   String :server_type
   String :requester_mac
+  Integer :jruby
   Integer :build_id
   Integer :taken_by_id
-  Boolean :jruby
   Datetime :taken_at, :default => nil
 end
 

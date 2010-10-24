@@ -24,7 +24,7 @@ class Job < Sequel::Model
     query = Job.filter("taken_at IS NULL").order("Random()".lit)
     filters = []
     filters << "requester_mac = '#{requester_mac}'" if requester_mac
-    filters << "jruby = 0" if no_jruby
+    filters << "jruby != 1" if no_jruby
     if filters.empty?
       query
     else
