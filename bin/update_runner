@@ -3,7 +3,7 @@
 if File.exists?("bin/runner") && File.exists?("#{ENV['HOME']}/runner_update/bin/runner")
   puts "Updating..."
   system "rm -rf * && cp -rf ~/runner_update/* . && rm -rf ~/runner_update"
-  system "gem install httparty daemons macaddr net-ssh"
+  system "gem install httparty daemons macaddr net-ssh --no-ri --no-rdoc"
   puts "Done, starting runner."
   exec "bin/runner start"
 else
