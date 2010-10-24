@@ -14,6 +14,8 @@ class Requester
   end
   
   def run_tests(adapter, dir)
+    puts if config.simple_output
+    
     if config.ssh_tunnel
       user, host = config.ssh_tunnel.split('@')
       SSHTunnel.new(host, user, adapter.requester_port).open
@@ -59,12 +61,22 @@ class Requester
       end
 
       results = @build['results'][last_results_size..-1]
-      puts results unless results == ''
+      unless results == ''
+        if config.simple_output
+          print results.gsub(/[^\.F]|Finished/, '')
+          STDOUT.flush
+        else
+          puts results
+        end
+      end
+      
       last_results_size = @build['results'].size
       
       success = false if failed_build?(@build)
       break if @build['done']
     end
+    
+    puts if config.simple_output
     
     success
   end

@@ -157,6 +157,27 @@ class RequesterTest < Test::Unit::TestCase
       requester.run_tests(RSpecAdapter, 'spec')      
     end
     
+    should "remove unnessesary output from rspec when told to do so" do
+      requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :simple_output => true)
+
+      flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      
+      flexmock(HTTParty).should_receive(:post).and_return('5')
+            
+      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
+                  :format => :json).and_return(nil,
+                                               { "done" => true, "results" => "testbot4:\n....\n\nFinished in 84.333 seconds\n\n206 examples, 0 failures, 2 pending; testbot4:\n.F..\n\nFinished in 84.333 seconds\n\n206 examples, 0 failures, 2 pending" })
+      
+      flexmock(requester).should_receive(:sleep).times(2).with(1)
+      
+      # Imperfect match, includes "." in 84.333, but good enough.
+      flexmock(requester).should_receive(:print).once.with("......F...") 
+      flexmock(requester).should_receive(:puts)
+      mock_file_sizes
+
+      requester.run_tests(RSpecAdapter, 'spec')
+    end
+    
     should "use SSHTunnel when specified (with a port that does not collide with the runner)" do
       requester = Requester.new(:ssh_tunnel => 'user@server')
 

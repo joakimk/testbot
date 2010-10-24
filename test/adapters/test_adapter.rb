@@ -6,7 +6,7 @@ class AdapterTest < Test::Unit::TestCase
   
   should "be able to find the adapters" do
     assert_equal RSpecAdapter, Adapter.find(:spec)
-    assert_equal CucumberAdapter, Adapter.find(:cucumber)
+    assert_equal CucumberAdapter, Adapter.find(:features)
     assert_equal TestUnitAdapter, Adapter.find(:test)
   end
   

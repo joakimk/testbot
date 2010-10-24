@@ -24,3 +24,6 @@ available_runner_usage: 100%
 
 # To use http without a tunnel
 server_uri: http://server:2288
+
+# Less noice in the output when running tests
+# simple_output: true
