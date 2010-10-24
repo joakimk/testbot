@@ -5,7 +5,7 @@ require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 require File.dirname(__FILE__) + '/adapters/adapter'
 
-TESTBOT_VERSION = 32
+TESTBOT_VERSION = 33
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -40,8 +40,9 @@ class Job
 
   attr_reader :server_type, :root, :project, :requester_mac
   
-  def initialize(id, requester_mac, project, root, type, server_type, files)
-    @id, @requester_mac, @project, @root, @type, @server_type, @files = id, requester_mac, project, root, type, server_type, files
+  def initialize(id, requester_mac, project, root, type, server_type, ruby_interpreter, files)
+    @id, @requester_mac, @project, @root, @type, @server_type, @ruby_interpreter, @files = 
+         id, requester_mac, project, root, type, server_type, ruby_interpreter, files
   end
   
   def run(instance)
@@ -51,7 +52,7 @@ class Job
     base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project}_#{@server_type};"
     
     adapter = Adapter.find(@type)
-    result += `#{base_environment} #{adapter.command(@files)} 2>&1`
+    result += `#{base_environment} #{adapter.command(@ruby_interpreter, @files)} 2>&1`
 
     Server.put("/jobs/#{@id}", :body => { :result => result })
     puts "Job #{@id} finished."

@@ -39,7 +39,8 @@ class Requester
                                                      :requester_mac => Mac.addr,
                                                      :available_runner_usage => config.available_runner_usage,
                                                      :files => files.join(' '),
-                                                     :sizes => sizes.join(' ') })
+                                                     :sizes => sizes.join(' '),
+                                                     :jruby => jruby? })
                                                      
 
     last_results_size = 0
@@ -109,6 +110,10 @@ class Requester
   
   def find_sizes(files)
     files.map { |file| File.stat(file).size }
+  end
+  
+  def jruby?
+    RUBY_PLATFORM =~ /java/ || !!ENV['JRUBY']
   end
   
 end

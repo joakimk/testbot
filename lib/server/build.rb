@@ -16,7 +16,8 @@ class Build < Sequel::Model
                  :type => self[:type],
                  :server_type => self[:server_type],
                  :requester_mac => self[:requester_mac],
-                 :build_id => self[:id])
+                 :build_id => self[:id],
+                 :jruby => self[:jruby])
     end
   end
   

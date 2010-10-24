@@ -24,7 +24,7 @@ class ServerTest < Test::Unit::TestCase
     
     should "create a build and return its id" do
        flexmock(Runner).should_receive(:total_instances).and_return(2)
-       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "10 20"
+       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "10 20", :jruby => false
        
        first_build = Build.first
        assert last_response.ok?
@@ -36,6 +36,7 @@ class ServerTest < Test::Unit::TestCase
        assert_equal 'rsync', first_build[:server_type]
        assert_equal 'bb:bb:bb:bb:bb:bb', first_build[:requester_mac]
        assert_equal 'things', first_build[:project]
+       assert_equal false, first_build[:jruby]
        assert_equal '', first_build[:results]
     end
         
@@ -46,7 +47,7 @@ class ServerTest < Test::Unit::TestCase
         ["spec/models/house_spec.rb", "spec/models/house2_spec.rb"]
       ])
       
-      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "1 1 1 1"
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "1 1 1 1", :jruby => true
       
       assert_equal 2, Job.count
       first_job, last_job = Job.all
@@ -58,6 +59,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'rsync', first_job[:server_type]
       assert_equal 'bb:bb:bb:bb:bb:bb', first_job[:requester_mac]
       assert_equal 'things', first_job[:project]
+      assert_equal true, first_job[:jruby]
       assert_equal Build.first[:id], first_job[:build_id]
     end
     
@@ -100,12 +102,12 @@ class ServerTest < Test::Unit::TestCase
   context "GET /jobs/next" do
   
     should "be able to return a job and mark it as taken" do
-      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => 'rsync', :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things'
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => 'rsync', :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :jruby => true
       
       get '/jobs/next', :version => Server.version
       assert last_response.ok?      
       
-      assert_equal [ job1[:id], "bb:bb:bb:bb:bb:bb", "things", "server:/project", "spec", "rsync", "spec/models/car_spec.rb" ].join(','), last_response.body
+      assert_equal [ job1[:id], "bb:bb:bb:bb:bb:bb", "things", "server:/project", "spec", "rsync", "jruby", "spec/models/car_spec.rb" ].join(','), last_response.body
       assert job1.reload[:taken_at] != nil
     end
   
@@ -114,7 +116,7 @@ class ServerTest < Test::Unit::TestCase
       job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa", :project => 'things'
       get '/jobs/next', :version => Server.version
       assert last_response.ok?
-      assert_equal [ job2[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
+      assert_equal [ job2[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "rsync", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
       assert job2.reload[:taken_at] != nil
     end
 
@@ -205,7 +207,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal new_runner.id, old_taken_job.reload.taken_by_id
       
       assert last_response.ok?
-      assert_equal [ old_taken_job[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "rsync", "spec/models/house_spec.rb" ].join(','), last_response.body
+      assert_equal [ old_taken_job[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "rsync", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
     end
   
   end

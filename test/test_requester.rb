@@ -22,6 +22,10 @@ end
 
 class RequesterTest < Test::Unit::TestCase
   
+  def setup
+    ENV['JRUBY'] = nil
+  end
+  
   def mock_file_sizes
     flexmock(File).should_receive(:stat).and_return(mock = Object.new)
     flexmock(mock).should_receive(:size).and_return(0)
@@ -57,7 +61,8 @@ class RequesterTest < Test::Unit::TestCase
                                                    :requester_mac => 'aa:aa:aa:aa:aa:aa',
                                                    :files => "spec/models/house_spec.rb" +
                                                              " spec/models/car_spec.rb",
-                                                   :sizes => "10 20" })
+                                                   :sizes => "10 20",
+                                                   :jruby => false })
           
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, 'results' => '' })
       flexmock(requester).should_receive(:sleep)
@@ -218,6 +223,23 @@ class RequesterTest < Test::Unit::TestCase
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'test/some_test.rb' ])
       flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2231/builds", any).and_return('5')
+      flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
+      flexmock(requester).should_receive(:sleep)
+      flexmock(requester).should_receive(:puts)
+      mock_file_sizes
+
+      requester.run_tests(TestUnitAdapter, 'test')
+    end
+    
+    should "request a run with jruby if JRUBY is set" do
+      ENV['JRUBY'] = "true"
+      requester = Requester.new
+
+      other_args = { :available_runner_usage=>nil, :type=>"test", :requester_mac=>"00:25:00:a8:c3:00",
+        :sizes=>"0", :files=>"test/some_test.rb", :project=>nil,
+        :server_type=>nil, :root=>nil }
+      flexmock(requester).should_receive(:find_tests).and_return([ 'test/some_test.rb' ])
+      flexmock(HTTParty).should_receive(:post).with(any, :body => other_args.merge({ :jruby => true })).and_return('5')
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)

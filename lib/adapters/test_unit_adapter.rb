@@ -1,7 +1,7 @@
 class TestUnitAdapter
   
-  def self.command(files)
-    "ruby -Itest -e '%w(#{files}).each { |file| require(file) }'"
+  def self.command(ruby_interpreter, files)
+    "#{ruby_interpreter} -Itest -e '%w(#{files}).each { |file| require(file) }'"
   end
   
   def self.file_pattern
