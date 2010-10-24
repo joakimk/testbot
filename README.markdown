@@ -84,9 +84,11 @@ To run with JRuby:
 Running testbot's tests
 ====
 
-    gem install rack-test shoulda flexmock net-ssh
+    gem install rack-test shoulda flexmock
     rake
-    autotest -f -c # [grosser/autotest](http://github.com/grosser/autotest)
+    autotest -f -c
+
+I recommend: [grosser/autotest](http://github.com/grosser/autotest)
 
 Realtime runner information
 ====
