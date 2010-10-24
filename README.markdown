@@ -77,9 +77,9 @@ To run the Cucumber features:
 
 To run with JRuby:
 
- JRUBY=true rake testbot:spec
- # or
- jruby -S rake testbot:spec
+    JRUBY=true rake testbot:spec
+    # or
+    jruby -S rake testbot:spec
 
 Running testbot's tests
 ====
