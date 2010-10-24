@@ -22,6 +22,11 @@ end
 
 class RequesterTest < Test::Unit::TestCase
   
+  def mock_file_sizes
+    flexmock(File).should_receive(:stat).and_return(mock = Object.new)
+    flexmock(mock).should_receive(:size).and_return(0)
+  end
+  
   context "self.create_by_config" do
 
     should 'create a requester from config' do
@@ -38,7 +43,11 @@ class RequesterTest < Test::Unit::TestCase
     should "should be able to create a build" do
       flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
       requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :server_path => 'git@somewhere', :server_type => 'git', :available_runner_usage => '60%', :project => 'things')
-      flexmock(requester).should_receive(:find_tests).with(RSpecAdapter, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      flexmock(requester).should_receive(:find_tests).with(RSpecAdapter, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec/models/car_spec.rb' ])
+      
+      flexmock(File).should_receive(:stat).once.with("spec/models/house_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(10)
+      flexmock(File).should_receive(:stat).once.with("spec/models/car_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(20)
+      
       flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:2288/builds",
                                         :body => { :type => "spec",
                                                    :root => "git@somewhere",
@@ -47,7 +56,8 @@ class RequesterTest < Test::Unit::TestCase
                                                    :available_runner_usage => "60%",
                                                    :requester_mac => 'aa:aa:aa:aa:aa:aa',
                                                    :files => "spec/models/house_spec.rb" +
-                                                             " spec_models/car_spec.rb" })
+                                                             " spec/models/car_spec.rb",
+                                                   :sizes => "10 20" })
           
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, 'results' => '' })
       flexmock(requester).should_receive(:sleep)
@@ -55,7 +65,7 @@ class RequesterTest < Test::Unit::TestCase
       
       assert_equal true, requester.run_tests(RSpecAdapter, 'spec')
     end
-
+    
     should "keep calling the server for results until done" do
       requester = Requester.new(:server_uri => "http://192.168.1.100:2288")
 
@@ -66,6 +76,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
                   :format => :json).and_return({ "done" => false, "results" => "job 2 done: ...." },
                                                { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
+      mock_file_sizes
       
       flexmock(requester).should_receive(:sleep).times(2).with(1)
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....")
@@ -87,6 +98,7 @@ class RequesterTest < Test::Unit::TestCase
 
       flexmock(requester).should_receive(:sleep).times(2).with(1)
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+      mock_file_sizes
       
       requester.run_tests(RSpecAdapter, 'spec')
     end
@@ -102,6 +114,7 @@ class RequesterTest < Test::Unit::TestCase
                   :format => :json).and_return({ "done" => true, "results" => "" })
       
       flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . user@somewhere:/path")
+      mock_file_sizes
       
       requester.run_tests(RSpecAdapter, 'spec')
     end
@@ -121,6 +134,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:sleep).times(6).with(1)
       flexmock(requester).should_receive(:puts).once.with("Failed to get status: some connection error")
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....") 
+      mock_file_sizes
 
       requester.run_tests(RSpecAdapter, 'spec')      
     end
@@ -138,6 +152,7 @@ class RequesterTest < Test::Unit::TestCase
       
       flexmock(requester).should_receive(:sleep).times(2).with(1)
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+      mock_file_sizes
 
       requester.run_tests(RSpecAdapter, 'spec')      
     end
@@ -153,6 +168,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
+      mock_file_sizes
 
       requester.run_tests(RSpecAdapter, 'spec')      
     end
@@ -168,6 +184,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
+      mock_file_sizes
 
       requester.run_tests(CucumberAdapter, 'features')
     end
@@ -183,6 +200,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
+      mock_file_sizes
 
       requester.run_tests(TestUnitAdapter, 'test')
     end

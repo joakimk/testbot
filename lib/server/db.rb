@@ -5,6 +5,7 @@ DB = Sequel.sqlite
 DB.create_table :builds do
   primary_key :id
   String :files
+  String :sizes
   String :results, :default => ''
   String :root
   String :project
@@ -41,9 +42,3 @@ DB.create_table :runners do
   Datetime :last_seen_at
 end
 
-DB.create_table :runtimes do
-  primary_key :id
-  String :type
-  String :path
-  Integer :time
-end

@@ -28,6 +28,7 @@ class Requester
     end
         
     files = find_tests(adapter, dir)
+    sizes = find_sizes(files)
     
     build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.server_path,
                                                      :server_type => config.server_type,
@@ -35,7 +36,8 @@ class Requester
                                                      :project => config.project,
                                                      :requester_mac => Mac.addr,
                                                      :available_runner_usage => config.available_runner_usage,
-                                                     :files => files.join(' ') })
+                                                     :files => files.join(' '),
+                                                     :sizes => sizes.join(' ') })
                                                      
 
     last_results_size = 0
@@ -91,6 +93,10 @@ class Requester
   
   def find_tests(adapter, dir)
     Dir["#{dir}/#{adapter.file_pattern}"]
+  end
+  
+  def find_sizes(files)
+    files.map { |file| File.stat(file).size }
   end
   
 end

@@ -8,7 +8,6 @@ class Job < Sequel::Model
       build.update(:results => build[:results].to_s + hash[:result].to_s,
                    :done => done)
     end
-    Runtime.store_results(self[:files].split(' '), Time.now - self[:taken_at], self[:type])
   end
   
   def self.next(params, remove_addr)

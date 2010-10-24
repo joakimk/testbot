@@ -24,12 +24,13 @@ class ServerTest < Test::Unit::TestCase
     
     should "create a build and return its id" do
        flexmock(Runner).should_receive(:total_instances).and_return(2)
-       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things'
+       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "10 20"
        
        first_build = Build.first
        assert last_response.ok?
        assert_equal first_build[:id].to_s, last_response.body
        assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_build[:files]
+       assert_equal '10 20', first_build[:sizes]
        assert_equal 'server:/path/to/project', first_build[:root]
        assert_equal 'spec', first_build[:type]
        assert_equal 'rsync', first_build[:server_type]
@@ -40,12 +41,12 @@ class ServerTest < Test::Unit::TestCase
         
     should "create jobs from the build based on the number of total instances" do
       flexmock(Runner).should_receive(:total_instances).and_return(2)      
-      flexmock(Runtime).should_receive(:build_groups).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], 2, 'spec').once.and_return([
+      flexmock(Group).should_receive(:build).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], [ 1, 1, 1, 1 ], 2, 'spec').once.and_return([
         ["spec/models/car_spec.rb", "spec/models/car2_spec.rb"],
         ["spec/models/house_spec.rb", "spec/models/house2_spec.rb"]
       ])
       
-      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things'
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "1 1 1 1"
       
       assert_equal 2, Job.count
       first_job, last_job = Job.all
@@ -62,9 +63,8 @@ class ServerTest < Test::Unit::TestCase
     
     should "only use resources according to available_runner_usage" do
       flexmock(Runner).should_receive(:total_instances).and_return(4)
-      flexmock(Runtime).should_receive(:build_groups).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], 2, 'spec').and_return([])
-      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync',
-      :available_runner_usage => "50%"
+      flexmock(Group).should_receive(:build).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], [ 1, 1, 1, 1 ], 2, 'spec').and_return([])
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :server_type => 'rsync', :sizes => "1 1 1 1", :available_runner_usage => "50%"
     end
   
   end
@@ -351,15 +351,6 @@ class ServerTest < Test::Unit::TestCase
       put "/jobs/#{job2[:id]}", :result => 'test run result 2\n'
       assert_equal true, build.reload[:done]
     end
-    
-    # should "store the runtime results" do
-    #   build = Build.create
-    #   job1 = Job.create :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id], :taken_at => Time.now - 30, :type => 'spec'
-    #   put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
-    #         
-    #   assert (13...16).include?(Runtime.find(:path => "spec/models/car_spec.rb", :type => "spec").time)
-    #   assert (13...16).include?(Runtime.find(:path => "spec/models/house_spec.rb", :type => "spec").time)
-    # end
 
   end
   

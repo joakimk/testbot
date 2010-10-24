@@ -7,7 +7,7 @@ class Build < Sequel::Model
   end
   
   def create_jobs!(available_runner_usage)
-    groups = Runtime.build_groups(self[:files].split,
+    groups = Group.build(self[:files].split, self[:sizes].split.map { |size| size.to_i },
                      Runner.total_instances.to_f * (available_runner_usage.to_i / 100.0), self[:type])
     groups.each do |group|
       Job.create(:files => group.join(' '),
