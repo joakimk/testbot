@@ -3,8 +3,9 @@
 project: project_name
 
 # Using rsync
-# The folder where your files are synced to and then
-# fetched from before running the tests.
+# The folder where your files are synced to and then fetched from
+# before running the tests. This must be a user and hostname that
+# every computer that has a runner can access without a password.
 server_type: rsync
 server_path: user@server:/tmp/testbot/!USERNAME!
 
