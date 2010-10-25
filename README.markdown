@@ -124,3 +124,9 @@ I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You
 I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
 to install anything on the computers. Adding a new computer is as simple as setting it to
 boot from network. You can find the base PXE server setup at: [http://gist.github.com/622495](http://gist.github.com/622495).
+
+Presentations featuring testbot
+====
+
+* [SHRUG oct 2010](http://github.com/joakimk/presentations/tree/master/shrug_oct2010_sideprojects)
+* [SHRUG jan 2010](http://github.com/joakimk/presentations/tree/master/shrug_jan2010_faster_testruns)
