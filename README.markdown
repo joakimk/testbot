@@ -1,7 +1,5 @@
 Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber. The basic idea is that you let testbot spread the load of running your tests across multiple machines to make them run faster.
 
-It's really very simple to setup and use.
-
 Try it out on you local machine
 ----
 
@@ -15,15 +13,15 @@ Try it out on you local machine
 
 Benefits of using testbot
 ----
-* You reduce testing time!
-* You do so by sharing CPU resources within your team
-* You can also use spare resources in local (or remote) servers
+* You **reduce** test time!
+* You do so by **sharing CPU resources** within your team
+* You can also **use spare resources** in local (or remote) servers
 
 What testbot does besides just distributing test load
 ----
-* Balances the load so that you get the most use of the hardware you have
-* Provides failover if a computer suddenly dissapears from the network
-* Provides the option of SSH tunneling so that you can work from anywhere
+* **Balances** the load so that you get the most use of the hardware you have
+* Provides **failover** if a computer suddenly dissapears from the network
+* Provides the option of **SSH tunneling** so that you can work from anywhere
 
 --- Old readme
 
