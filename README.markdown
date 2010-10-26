@@ -1,18 +1,28 @@
-Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber. The basic idea is that you let testbot spread the load of running your tests across multiple machines to make them run faster.
+Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber. The basic idea is that you let testbot spread the load of running your tests across multiple machines to make the tests run faster.
 
-Try it out on you local machine
+How it works
 ----
 
-1) Install and start testbot
+Testbot is:
+* A server to create and distribute test jobs
+* A runner to run test jobs and return the results
+* A requester that tells the server which tests to run and displays the results
+
+    Requester -- (files to run) --> Server -- (files to run) --> (many-)Runner(s)
+        ^                           |    ^                                  |
+        |---------------------------|    |----------------------------------|
+                 (results)                            (results)
+
+Try it out (just copy and paste)
+----
+
     gem install testbot
     testbot --server
     testbot --runner --connect http://localhost:2288 --working_dir /tmp/testbot/runner
-
-2) Create a sample rails project and run its tests:
     rails testbotdemo; cd testbotdemo; script/generate scaffold post title:string; rake db:migrate
     testbot --test --connect http://localhost:2288 --server_path /tmp/testbot/upload
 
-That's it. The project files will be synced to /tmp/testbot/upload. The runner will sync the files to /tmp/testbot/runner. The tests will be run, the results returned through the server and displayed.
+That's it. The project files from the demo project are synced to /tmp/testbot/upload. The runner syncs the files to /tmp/testbot/runner. The tests are then run and the results returned through the server and displayed.
 
 Example setup
 ----
@@ -77,7 +87,7 @@ Gotchas
 Tips
 ----
 
-g* I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
+* I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
 [http://www.rubyenterpriseedition.com/](http://www.rubyenterpriseedition.com/).
 
 * I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
