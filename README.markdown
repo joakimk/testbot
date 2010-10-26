@@ -1,13 +1,15 @@
 Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber. The basic idea is that you let testbot spread the load of running your tests across multiple machines to make the tests run faster.
 
+Using 11 machines (25 cores) we got our test suite down to 2 minutes from 30. In this particular case we got about 60% CPU effeciency. [More benchmarks](http://gist.github.com/287124).
+
 How it works
 ----
 
 Testbot is:
 
-* A server to create and distribute test jobs
-* A runner to run test jobs and return the results
-* A requester that tells the server which tests to run and displays the results
+* A **server** to distribute test jobs.
+* A **runner** to run test jobs and return the results.
+* A **requester** that tells the server which tests to run and displays the results.
 
 <pre>
     Requester -- (files to run) --> Server -- (files to run) --> (many-)Runner(s)
@@ -21,9 +23,9 @@ Try it out (just copy and paste)
 
     gem install testbot
     testbot --server
-    testbot --runner --connect http://localhost:2288 --working_dir /tmp/testbot/runner
+    testbot --runner --connect localhost --working_dir /tmp/testbot/runner
     rails testbotdemo; cd testbotdemo; script/generate scaffold post title:string; rake db:migrate
-    testbot --test --connect http://localhost:2288 --server_path /tmp/testbot/upload
+    testbot --test --connect localhost --sync_path /tmp/testbot/upload
 
 That's it. The project files from the demo project are synced to /tmp/testbot/upload. The runner syncs the files to /tmp/testbot/runner. The tests are then run and the results returned through the server and displayed.
 
@@ -37,11 +39,11 @@ Here I make the assumption that you have a user called **testbot** on a server a
     
 On every computer that should share CPU resources run:
 
-    testbot --runner --connect http:://192.168.0.100:2288 --working_dir /tmp/testbot
+    testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot
 
 Testing the network:
 
-    testbot --test --connect http://192.168.0.100:2288 --server_path /home/testbot/cache/$USER
+    testbot --test --connect 192.168.0.100 --sync_path /home/testbot/cache/$USER
     # --test could also be --spec or --features
 
 Using the rails plugin:
@@ -49,21 +51,10 @@ Using the rails plugin:
     rake testbot:setup
     rake testbot:spec (or :test, :features)
 
-Benefits of using testbot
+Features
 ----
-* You **reduce** test time!
-* You do so by **sharing CPU resources** within your team
-* You can also **use spare resources** in local (or remote) servers
-
-What testbot does besides just distributing test load
-----
-* **Balances** the load so that you get the most use of the hardware you have
-* Provides **failover** if a computer suddenly dissapears from the network
-* Provides the option of **SSH tunneling** so that you can work from anywhere
-
-Benchmarks
-----
-[http://gist.github.com/287124](http://gist.github.com/287124)
+* You can add and remove computers at any time. Testbot simply gives uncompleted jobs to other computers.
+* Testbot will try to balance the testload so that every computer finishes running the tests at the same time to reduce the time it takes to run the entire test suite. It does a good job, but it's an area with much potential.
 
 Contributing to testbot
 ----
@@ -80,7 +71,7 @@ Contributing to testbot
 Gotchas
 ----
 
-* When you run your tests in smaller sets you can become unaware of dependency errors in your suite.
+* When you run your tests in smaller sets you may miss dependency errors in your suite.
 
 * The runner processes does not handle if a single user runs different projects at the same time. Code
   fetching and initialization is then only done for one of the projects.
