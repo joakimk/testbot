@@ -9,6 +9,7 @@ Testbot is:
 * A runner to run test jobs and return the results
 * A requester that tells the server which tests to run and displays the results
 
+
     Requester -- (files to run) --> Server -- (files to run) --> (many-)Runner(s)
         ^                           |    ^                                  |
         |---------------------------|    |----------------------------------|
