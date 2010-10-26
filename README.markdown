@@ -52,10 +52,10 @@ Gotchas
 Tips
 ----
 
-I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
+* I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
 [http://www.rubyenterpriseedition.com/](http://www.rubyenterpriseedition.com/).
 
-I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
+* I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
 to install anything on the computers. Adding a new computer is as simple as setting it to
 boot from network. You can find the base PXE server setup at: [http://gist.github.com/622495](http://gist.github.com/622495).
 
