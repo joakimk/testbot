@@ -2,7 +2,9 @@ Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and
 
 It's really very simple to setup and use.
 
-Try it out on you local machine:
+Try it out on you local machine
+====
+
 1) Install and start testbot
     gem install testbot
     testbot --server
