@@ -4,6 +4,7 @@ How it works
 ----
 
 Testbot is:
+
 * A server to create and distribute test jobs
 * A runner to run test jobs and return the results
 * A requester that tells the server which tests to run and displays the results
