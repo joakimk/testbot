@@ -6,10 +6,21 @@ Try it out on you local machine
 1) Install and start testbot
     gem install testbot
     testbot --server
-    testbot --connect http://localhost:2288 --working_dir /tmp/testbot
+    testbot --runner --connect http://localhost:2288 --working_dir /tmp/testbot/runner
 
-2) Add testbot as a gem dependency in rails, run setup and follow the instructions.
-    rake testbot:setup
+2) Create a sample rails project and run its tests:
+    rails testbotdemo; cd testbotdemo; script/generate scaffold post title:string; rake db:migrate
+    testbot --test --connect http://localhost:2288 --server_path /tmp/testbot/upload
+
+That's all. The project files will be synced to /tmp/testbot/upload. The runner will sync the files to /tmp/testbot/runner. The tests will be run, the results returned through the server and displayed.
+
+Using it for real
+----
+
+You probably want to setup a account on a shared computer that everyone can log into
+without a password. This is where you run the server and use for syncing project files.
+
+...
 
 Benefits of using testbot
 ----
@@ -52,7 +63,7 @@ Gotchas
 Tips
 ----
 
-* I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
+g* I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
 [http://www.rubyenterpriseedition.com/](http://www.rubyenterpriseedition.com/).
 
 * I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
