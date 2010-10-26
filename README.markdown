@@ -6,7 +6,7 @@ Try it out on you local machine
 1) Install and start testbot
     gem install testbot
     testbot --server
-    testbot --client http://localhost:2288 --working_dir /tmp/testbot
+    testbot --connect http://localhost:2288 --working_dir /tmp/testbot
 
 2) Add testbot as a gem dependency in rails, run setup and follow the instructions.
     rake testbot:setup
