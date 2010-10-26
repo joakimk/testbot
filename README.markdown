@@ -12,7 +12,7 @@ Testbot is:
 
 * A **server** to distribute test jobs.
 * One or more **runners** to run test jobs and return the results (this is the "slave" process that runs tests).
-* One or more **requesters** that tells the server which tests to run and displays the results (the client you use to run tests, example: **rake testbot:spec**).
+* One or more **requesters** that tells the server which tests to run and displays the results (the client you use to run tests, for example: **rake testbot:spec**).
 
 <pre>
     Requester -- (files to run) --> Server -- (files to run) --> (many-)Runner(s)
