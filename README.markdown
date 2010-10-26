@@ -12,13 +12,19 @@ Try it out on you local machine
     rails testbotdemo; cd testbotdemo; script/generate scaffold post title:string; rake db:migrate
     testbot --test --connect http://localhost:2288 --server_path /tmp/testbot/upload
 
-That's all. The project files will be synced to /tmp/testbot/upload. The runner will sync the files to /tmp/testbot/runner. The tests will be run, the results returned through the server and displayed.
+That's it. The project files will be synced to /tmp/testbot/upload. The runner will sync the files to /tmp/testbot/runner. The tests will be run, the results returned through the server and displayed.
 
 Using it for real
 ----
 
 You probably want to setup a account on a shared computer that everyone can log into
-without a password. This is where you run the server and use for syncing project files.
+without a password. This is where you run the server and sync project files to.
+
+You probably also want to run testbot as a rails plugin. Add it to you gem dependencies
+and run **rake testbot:setup**.
+
+Example setup
+----
 
 ...
 
