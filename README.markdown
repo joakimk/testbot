@@ -1,7 +1,7 @@
 Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber. The basic idea is that you let testbot spread the load of running your tests across multiple machines to make the tests run faster.
 
 I'm currently working on making testbot a gem and making it simpler to use:
-http://github.com/joakimk/testbot/tree/gemify (I'll merge that back to master when it's stable)
+[http://github.com/joakimk/testbot/tree/gemify](http://github.com/joakimk/testbot/tree/gemify) (I'll merge that back to master when it's stable)
 
 Benchmarks
 ====
