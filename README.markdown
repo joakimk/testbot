@@ -14,19 +14,27 @@ Try it out on you local machine
 
 That's it. The project files will be synced to /tmp/testbot/upload. The runner will sync the files to /tmp/testbot/runner. The tests will be run, the results returned through the server and displayed.
 
-Using it for real
-----
-
-You probably want to setup a account on a shared computer that everyone can log into
-without a password. This is where you run the server and sync project files to.
-
-You probably also want to run testbot as a rails plugin. Add it to you gem dependencies
-and run **rake testbot:setup**.
-
 Example setup
 ----
 
-...
+Here I make the assumption that you have a user called **testbot** on a server at **192.168.0.100** that every computer can log into without a password and that you have installed testbot on each computer.
+
+    ssh testbot@192.168.0.100
+    testbot --server
+    
+On every computer that should share CPU resources run:
+
+    testbot --runner --connect http:://192.168.0.100:2288 --working_dir /tmp/testbot
+
+Testing the network:
+
+    testbot --test --connect http://192.168.0.100:2288 --server_path /home/testbot/cache/$USER
+    # --test could also be --spec or --features
+
+Using the rails plugin:
+
+    rake testbot:setup
+    rake testbot:spec (or :test, :features)
 
 Benefits of using testbot
 ----
