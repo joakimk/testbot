@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+require File.join(File.dirname(__FILE__), '../lib/testbot.rb')
+
+def show_help
+  puts "Testbot #{Testbot::VERSION} (test distribution tool)"
+  puts
+  puts "Examples:"
+  puts "  testbot --server"
+  puts "  testbot --connect http://192.168.0.1:2288 --working_dir ~/testbot"
+  puts "  testbot --connect http://127.0.0.1:2288 --working_dir ~/testbot --ssh_tunnel user@testbot_server"
+  puts
+  puts "Options:"
+  puts "  --server                                 # Run as a testbot server"
+#  puts "  --status                                 # Show running background processes"
+#  puts "  --stop <server|runner>                   # Stop a backgrounded server or runner"
+  puts "  --connect <http://<ip>:2288>             # Which server to use"
+  puts "  --working_dir <path>                     # Where to store temporary files"
+  puts "  --ssh_tunnel <user@server>               # Setup a ssh tunnel before connecting"
+  puts "  --foreground                             # Run the process in the foreground"
+#  puts "  --ssh_forward_port <port>                # Port to forward with '--ssh_tunnel' (defaults to 2288)"
+  # puts "  --auto_update                            # Keep testbot updated to the same version as the server."
+  # puts "                                           # (when the server gem version is changed, this runs gem install"
+  # puts "                                           #  with the same version and restarts the test runner)"
+  puts
+  puts "More info: http://github.com/joakimk/testbot"  
+end
+
+show_help unless Testbot.run(ARGV)
