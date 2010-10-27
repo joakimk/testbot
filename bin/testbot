@@ -7,8 +7,8 @@ def show_help
   puts
   puts "Examples:"
   puts "  testbot --server"
-  puts "  testbot --connect http://192.168.0.1:2288 --working_dir ~/testbot"
-  puts "  testbot --connect http://127.0.0.1:2288 --working_dir ~/testbot --ssh_tunnel user@testbot_server"
+  puts "  testbot --runner --connect 192.168.0.100 --working_dir ~/testbot"
+  puts "  testbot --test --connect 192.168.0.100 --sync_path /home/testbot/cache/$USER"
   puts 
   puts
   puts "Options:"
@@ -27,7 +27,7 @@ def show_help
   # puts "                                           # (when the server gem version is changed, this runs gem install"
   # puts "                                           #  with the same version and restarts the test runner)"
   puts
-  puts "More info: http://github.com/joakimk/testbot"  
+  puts "More info: http://github.com/joakimk/testbot"
 end
 
 show_help unless Testbot.run(ARGV)
