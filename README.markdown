@@ -54,18 +54,18 @@ Using the rails plugin:
     rake testbot:setup
     rake testbot:spec (or :test, :features)
 
-Keeping the network updated
+Updating testbot
 ----
 
-To simplify updates of a distributed system like testbot there is a "--auto_update" option for the runner. Using
-this you can manually update the **server** and have all **runner** processes automatically restarted with the
-same version.
+To simplify updates of a distributed system like testbot there is a **--auto_update** option for the runner. Using
+this you can manually update the **server** and automatically have all runner processes updated and restarted with
+same version as the server.
 
 Usage:
-  testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot --auto_update
+    testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot --auto_update
   
 This function assumes that you install testbot in your home ~/.gem so that it can be done without
-using sudo. It will run something like "gem install testbot -v SERVER_VERSION".
+using sudo. It will run something like **gem install testbot -v SERVER_VERSION**.
 
 Features
 ----
