@@ -1,16 +1,21 @@
-require 'rubygems'
-require 'daemons'
+require File.join(File.dirname(__FILE__), '/shared/simple_daemonize')
 
 class Testbot
+  
   VERSION = "0.2.x"
+  SERVER_PID="/tmp/testbot_server.pid"
   
   def self.run(argv)
-    if parse_args(argv)[:server]
+    return false if argv == []
+    opts = parse_args(argv)
+
+    if opts[:server]
       start_server
-      true
-    else
-      false
+    elsif opts[:stop] == 'server'
+      stop_server
     end
+    
+    true
   end
   
   def self.parse_args(argv)
@@ -28,10 +33,17 @@ class Testbot
   end
   
   def self.start_server
-    lib_dir = File.expand_path(File.join(File.dirname(__FILE__),'..','lib'))
-    Daemons.call do
-      Dir.chdir(lib_dir)
-      exec "ruby server.rb -e production"
-    end
+    stop_server
+    pid = SimpleDeamonize.start("ruby #{lib_path}/server.rb -e production", SERVER_PID)
+    puts "Testbot server started (pid: #{pid})"
   end
+  
+  def self.stop_server
+    puts "Testbot server stopped" if SimpleDeamonize.stop(SERVER_PID)
+  end
+  
+  def self.lib_path
+    File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib'))
+  end
+  
 end
