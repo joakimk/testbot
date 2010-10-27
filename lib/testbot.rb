@@ -34,12 +34,12 @@ class Testbot
   
   def self.start_server
     stop_server
-    pid = SimpleDeamonize.start("ruby #{lib_path}/server.rb -e production", SERVER_PID)
+    pid = SimpleDaemonize.start("ruby #{lib_path}/server.rb -e production", SERVER_PID)
     puts "Testbot server started (pid: #{pid})"
   end
   
   def self.stop_server
-    puts "Testbot server stopped" if SimpleDeamonize.stop(SERVER_PID)
+    puts "Testbot server stopped" if SimpleDaemonize.stop(SERVER_PID)
   end
   
   def self.lib_path

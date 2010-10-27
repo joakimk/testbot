@@ -1,4 +1,4 @@
-class SimpleDeamonize
+class SimpleDaemonize
   
   def self.start(cmd, pid_path)    
     pid = fork { 
