@@ -63,14 +63,14 @@ Features
 Contributing to testbot
 ----
 
-1) First, get the tests to run:
+First, get the tests to run:
     gem install rack-test shoulda flexmock
     rake
 
-2) For development I recommend: [grosser/autotest](http://github.com/grosser/autotest)
+For development I recommend: [grosser/autotest](http://github.com/grosser/autotest)
     autotest -f -c
 
-3) Make your change (don't forget to write tests) and send me a pull request.
+Make your change (don't forget to write tests) and send me a pull request.
 
 Gotchas
 ----
