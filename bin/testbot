@@ -7,7 +7,7 @@ def show_help
   puts
   puts "Examples:"
   puts "  testbot --server"
-  puts "  testbot --runner --connect 192.168.0.100 --working_dir ~/testbot"
+  puts "  testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot"
   puts "  testbot --test --connect 192.168.0.100 --sync_path /home/testbot/cache/$USER"
   puts 
   puts
