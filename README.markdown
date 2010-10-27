@@ -58,8 +58,7 @@ Updating testbot
 ----
 
 To simplify updates of a distributed system like testbot there is a **--auto_update** option for the runner. Using
-this you can manually update the **server** and automatically have all runner processes updated and restarted with
-same version as the server.
+this all runners processes will be updated and restarted when you update your server version.
 
 Usage:
     testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot --auto_update
