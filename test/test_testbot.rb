@@ -14,10 +14,10 @@ class TestbotTest < Test::Unit::TestCase
       assert_equal true, Testbot.run([ "--server" ])
     end
     
-    should "stop a server when --stop server is passed" do
+    should "stop a server when --server stop is passed" do
       flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::SERVER_PID).and_return(true)
       flexmock(Testbot).should_receive(:puts).once.with("Testbot server stopped")
-      assert_equal true, Testbot.run([ "--stop", "server" ])
+      assert_equal true, Testbot.run([ "--server", "stop" ])
     end
     
     should "not print when SimpleDaemonize.stop returns false" do

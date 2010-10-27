@@ -13,7 +13,7 @@ def show_help
   puts
   puts "Options:"
   puts "  --server                                 # Run as a testbot server"
-  puts "  --stop <server>                          # Stop a backgrounded server"  
+  puts "  --server stop                            # Stop a backgrounded server"
   # puts "  --runner                                 # Run as a testbot runner"
   # puts "  --test                                   # Run Test::Unit tests with testbot"
 #  puts "  --status                                 # Show running background processes"

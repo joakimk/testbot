@@ -9,9 +9,9 @@ class Testbot
     return false if argv == []
     opts = parse_args(argv)
 
-    if opts[:server]
+    if opts[:server] == true
       start_server
-    elsif opts[:stop] == 'server'
+    elsif opts[:server] == 'stop'
       stop_server
     end
     
