@@ -46,7 +46,9 @@ On every computer that should share CPU resources run:
 
 Testing the network:
 
+    # Within your project run:
     testbot --test --connect 192.168.0.100
+    
     # --test could also be --spec or --features
 
 Using the rails plugin:
