@@ -119,9 +119,3 @@ to install anything on the computers. Adding a new computer is as simple as sett
 boot from network. You can find the base PXE server setup at: [http://gist.github.com/622495](http://gist.github.com/622495).
 
 * Check the [wiki](http://github.com/joakimk/testbot/wiki) for more deployment tips.
-
-Presentations featuring testbot
-----
-
-* [SHRUG oct 2010](http://github.com/joakimk/presentations/tree/master/shrug_oct2010_sideprojects)
-* [SHRUG jan 2010](http://github.com/joakimk/presentations/tree/master/shrug_jan2010_faster_testruns)
