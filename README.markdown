@@ -3,7 +3,9 @@
 
 Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber. The basic idea is that you let testbot spread the load of running your tests across multiple machines to make the tests run faster.
 
-Using 11 machines (25 cores) we got our test suite down to **2 minutes from 30**. In this particular case we got about 60% CPU efficiency. [More benchmarks](http://gist.github.com/287124).
+Using testbot on 11 machines (25 cores) we got our test suite down to **2 minutes from 30**.
+
+You can check the [wiki](http://github.com/joakimk/testbot/wiki) for examples of how testbot is used and more.
 
 How it works
 ----
