@@ -13,6 +13,8 @@ else
   set :port, 2288
 end
 
+disable :logging if ENV['DISABLE_LOGGING']
+
 class Server
   def self.version
     33
@@ -85,3 +87,4 @@ end
 get '/update_uri' do
   config.update_uri
 end
+

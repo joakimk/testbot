@@ -1,9 +1,9 @@
 class SimpleDaemonize
   
-  def self.start(cmd, pid_path)    
+  def self.start(proc, pid_path)    
     pid = fork { 
       STDOUT.reopen "/dev/null"
-      exec(cmd)
+      proc.call
     }
     
     File.open(pid_path, 'w') { |file| file.write(pid) }

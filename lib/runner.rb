@@ -11,10 +11,6 @@ TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
 
-@@config = OpenStruct.new(ENV['INTEGRATION_TEST'] ?
-           { :server_uri => "http://localhost:22880", :automatic_updates => false, :max_instances => 1 } :
-           YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml"))
-
 class CpuUsage
 
  def self.current
@@ -39,9 +35,9 @@ end
 class Job
   attr_reader :server_type, :root, :project, :requester_mac
     
-  def initialize(id, requester_mac, project, root, type, server_type, ruby_interpreter, files)
-    @id, @requester_mac, @project, @root, @type, @server_type, @ruby_interpreter, @files = 
-         id, requester_mac, project, root, type, server_type, ruby_interpreter, files
+  def initialize(runner, id, requester_mac, project, root, type, server_type, ruby_interpreter, files)
+    @runner, @id, @requester_mac, @project, @root, @type, @server_type, @ruby_interpreter, @files =
+         runner, id, requester_mac, project, root, type, server_type, ruby_interpreter, files
   end
   
   def jruby?
@@ -64,8 +60,8 @@ class Job
   private
   
   def ruby_cmd
-    if @ruby_interpreter == 'jruby' && @@config.jruby_opts
-      'jruby ' + @@config.jruby_opts
+    if @ruby_interpreter == 'jruby' && @runner.config.jruby_opts
+      'jruby ' + @runner.config.jruby_opts
     else
       @ruby_interpreter
     end
@@ -74,19 +70,45 @@ end
 
 class Server
   include HTTParty
-  base_uri @@config.server_uri
 end
 
 class Runner
 
-  def initialize
+  def initialize(config)
     @instances = []
     @last_requester_mac = nil
-    @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1    
+    @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1
+    @config = OpenStruct.new(config)
+    Server.base_uri(@config.server_uri)
   end
   
+  attr_reader :config
+  
   def run!
-    start_ping
+    # Remove legacy instance* style folders
+    Dir.entries(".").find_all { |name| name.include?('instance') }.each { |folder|
+      system "rm -rf #{folder}"
+    }
+    
+    SSHTunnel.new(*@config.ssh_tunnel.split('@').reverse).open if @config.ssh_tunnel
+    while true
+      # Make sure the jobs for this runner is taken by another runner if it crashes or
+      # is restarted
+      sleep 15 unless ENV['INTEGRATION_TEST']
+
+      begin
+        start_ping
+        wait_for_jobs
+      rescue Exception => ex
+        break if [ 'SignalException', 'Interrupt' ].include?(ex.class.to_s)
+        puts "The runner crashed, restarting. Error: #{ex.inspect} #{ex.class}"
+      end
+    end
+  end
+
+  private
+  
+  def wait_for_jobs
     loop do
       sleep TIME_BETWEEN_POLLS
       check_for_update if time_for_update?
@@ -107,7 +129,9 @@ class Runner
       next_job = Server.get("/jobs/next", :query => next_params) rescue nil
       next if next_job == nil
       
-      job = Job.new(*next_job.split(','))
+      puts ([ self, next_job.split(',') ].flatten).inspect
+      
+      job = Job.new(*([ self, next_job.split(',') ].flatten))
       if first_job_from_requester?
         fetch_code(job)
         before_run(job)
@@ -122,12 +146,10 @@ class Runner
       end
     end
   end
-
-  private
   
   def max_jruby_instances?
-    return unless @@config.max_jruby_instances
-    @instances.find_all { |thread, n, job| job.jruby? }.size >= @@config.max_jruby_instances
+    return unless @config.max_jruby_instances
+    @instances.find_all { |thread, n, job| job.jruby? }.size >= @config.max_jruby_instances
   end
   
   def fetch_code(job)
@@ -145,7 +167,7 @@ class Runner
   end
   
   def before_run(job)
-    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@@config.max_instances}; export TEST_SERVER_TYPE=#{job.server_type}; cd #{job.project}_#{job.server_type}; rake testbot:before_run"
+    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; export TEST_SERVER_TYPE=#{job.server_type}; cd #{job.project}_#{job.server_type}; rake testbot:before_run"
   end
   
   def first_job_from_requester?
@@ -163,7 +185,7 @@ class Runner
   end
   
   def check_for_update
-    return unless @@config.automatic_updates
+    return unless @config.automatic_updates
     version = Server.get('/version') rescue TESTBOT_VERSION
     return unless version.to_i != TESTBOT_VERSION
     
@@ -177,8 +199,8 @@ class Runner
   end
   
   def ping_params
-    { :hostname => (@hostname ||= `hostname`.chomp), :max_instances => @@config.max_instances,
-      :idle_instances => (@@config.max_instances - @instances.size), :username => ENV['USER'] }.merge(base_params)
+    { :hostname => (@hostname ||= `hostname`.chomp), :max_instances => @config.max_instances,
+      :idle_instances => (@config.max_instances - @instances.size), :username => ENV['USER'] }.merge(base_params)
   end
   
   def base_params
@@ -186,7 +208,7 @@ class Runner
   end
   
   def max_instances_running?
-    @instances.size == @@config.max_instances
+    @instances.size == @config.max_instances
   end
 
   def clear_completed_instances
@@ -196,7 +218,7 @@ class Runner
   end
 
   def free_instance_number
-    0.upto(@@config.max_instances - 1) do |number|
+    0.upto(@config.max_instances - 1) do |number|
       return number unless @instances.find { |instance, n, job| n == number }
     end
   end
@@ -213,24 +235,4 @@ class Runner
     end
   end
    
-end
-
-# Remove legacy instance* style folders
-Dir.entries(".").find_all { |name| name.include?('instance') }.each { |folder|
-  system "rm -rf #{folder}"
-}
-
-runner = Runner.new
-SSHTunnel.new(*@@config.ssh_tunnel.split('@').reverse).open if @@config.ssh_tunnel
-while true
-  # Make sure the jobs for this runner is taken by another runner if it crashes or
-  # is restarted
-  sleep 15 unless ENV['INTEGRATION_TEST']
-
-  begin
-    runner.run!
-  rescue Exception => ex
-    break if [ 'SignalException', 'Interrupt' ].include?(ex.class.to_s)
-    puts "The runner crashed, restarting. Error: #{ex.inspect} #{ex.class}"
-  end
 end
