@@ -53,7 +53,7 @@ Testing the network:
 
 Using the rails plugin:
 
-    # This adds config files and a rake task you can use to prepare the test enviornment on the runners
+    # This adds config files and a rake task you can use to prepare the test environment on the runners
     # (like setting up a database).
     rake testbot:setup
     
