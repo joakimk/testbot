@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), '/shared/simple_daemonize')
+require 'fileutils'
 
 class Testbot
   
@@ -42,10 +43,11 @@ class Testbot
     stop('runner', RUNNER_PID)
     pid = SimpleDaemonize.start(lambda {
       require File.join(File.dirname(__FILE__), '/runner')
+      FileUtils.mkdir_p(opts[:working_dir])
       Dir.chdir(opts[:working_dir])
       port = ENV['INTEGRATION_TEST'] ? 22880 : 2288
       runner = Runner.new(:server_uri => "http://#{opts[:connect]}:#{port}",
-                          :automatic_updates => false, :max_instances => 1)
+                          :automatic_updates => false, :max_instances => opts[:cpus])
      runner.run!
    }, RUNNER_PID)
     puts "Testbot runner started (pid: #{pid})"

@@ -11,17 +11,15 @@ TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
 
-class CpuUsage
+class CPU
 
- def self.current
+ def self.current_usage
    process_usages = `ps -eo pcpu`
    total_usage = process_usages.split("\n").inject(0) { |sum, usage| sum += usage.strip.to_f }
-   (total_usage / number_of_cpus).to_i
+   (total_usage / count).to_i
  end
 
- private
-
- def self.number_of_cpus
+ def self.count
    case RUBY_PLATFORM
      when /darwin/
        `hwprefs cpu_count`.to_i
@@ -79,6 +77,7 @@ class Runner
     @last_requester_mac = nil
     @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1
     @config = OpenStruct.new(config)
+    @config.max_instances = CPU.count unless @config.max_instances
     Server.base_uri(@config.server_uri)
   end
   
@@ -175,7 +174,7 @@ class Runner
   end
   
   def cpu_available?
-    @instances.size > 0 || CpuUsage.current < MAX_CPU_USAGE_WHEN_IDLE
+    @instances.size > 0 || CPU.current_usage < MAX_CPU_USAGE_WHEN_IDLE
   end
   
   def time_for_update?

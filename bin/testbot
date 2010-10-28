@@ -10,16 +10,23 @@ def show_help
   puts "  testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot"
   puts "  testbot --test --connect 192.168.0.100 --sync_path /home/testbot/cache/$USER"
   puts 
-  puts
-  puts "Options:"
+  puts "Types:"
   puts "  --server                                 # Run as a testbot server"
-  puts "  --server stop                            # Stop a backgrounded server"
   puts "  --runner                                 # Run as a testbot runner"
-  puts "  --runner stop                            # Stop a backgrounded runner"
+  puts
+  puts "Server options:"
+  puts "  --server stop                            # Stop a backgrounded server"
+  puts
+  puts "Runner options:"
+  puts "  --runner stop                            # Stop a backgrounded runner"  
+  puts "  --connect <host_or_ip>                   # Which server to use (required)"
+  puts "  --working_dir <path>                     # Where to store temporary files (required)"
+  puts "  --cpus <number>                          # The number of CPU cores to use (uses all by default)"
+  puts
+
   # puts "  --test                                   # Run Test::Unit tests with testbot"
-#  puts "  --status                                 # Show running background processes"
-  # puts "  --connect <http://<ip>:2288>             # Which server to use"
-  # puts "  --working_dir <path>                     # Where to store temporary files"
+  # puts "  --status                                 # Show running background processes"
+
   # puts "  --ssh_tunnel <user@server>               # Setup a ssh tunnel before connecting"
   # puts "  --foreground                             # Run the process in the foreground"
 #  puts "  --ssh_forward_port <port>                # Port to forward with '--ssh_tunnel' (defaults to 2288)"

@@ -7,7 +7,7 @@ class IntegrationTest < Test::Unit::TestCase
 
   # This is slow, and Test:Unit does not have "before/after :all" method, so I'm using a single testcase for multiple tests
   should "be able to send a build request, have it run and show the results" do
-    system "mkdir -p tmp/runner; cp -rf test/fixtures/local tmp/local"
+    system "mkdir -p tmp; cp -rf test/fixtures/local tmp/local"
     system "export INTEGRATION_TEST=true; bin/testbot --runner --connect 127.0.0.1 --working_dir tmp/runner &> /dev/null"
     system "export INTEGRATION_TEST=true; bin/testbot --server &>/dev/null"
  
