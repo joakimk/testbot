@@ -76,7 +76,7 @@ More options
 Could this readme be better somehow?
 ----
 
-Create an [issue](http://github.com/joakimk/testbot/issues) or fork and send me a pull request!
+If there is anything missing or unclear about how to use testbot, you can create an [issue](http://github.com/joakimk/testbot/issues) or fix it yourself and send me a pull request.
 
 Features
 ----
