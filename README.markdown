@@ -26,11 +26,11 @@ Try it out (just copy and paste)
 
     gem install testbot
     testbot --server
-    testbot --runner --connect localhost --working_dir /tmp/testbot/runner
+    testbot --runner --connect localhost
     rails testbotdemo; cd testbotdemo; script/generate scaffold post title:string; rake db:migrate
-    testbot --test --connect localhost --sync_path /tmp/testbot/upload
+    testbot --test --connect localhost
 
-That's it. The project files from the demo project are synced to /tmp/testbot/upload. The runner syncs the files to /tmp/testbot/runner. The tests are then run and the results returned through the server and displayed.
+That's it. The project files from the demo project are synced to /tmp/testbot_cache/$USER (default). The runner syncs the files to /tmp/testbot (default). The tests are then run and the results returned through the server and displayed.
 
 Example setup
 ----
@@ -42,11 +42,11 @@ Here I make the assumption that you have a user called **testbot** on a server a
     
 On every computer that should share CPU resources run:
 
-    testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot
+    testbot --runner --connect 192.168.0.100
 
 Testing the network:
 
-    testbot --test --connect 192.168.0.100 --sync_path /home/testbot/cache/$USER
+    testbot --test --connect 192.168.0.100
     # --test could also be --spec or --features
 
 Using the rails plugin:
@@ -61,7 +61,12 @@ To simplify updates of a distributed system like testbot there is a **--auto_upd
 processes that use this option will be automatically updated and restarted when you change the server version.
 
 Example:
-    testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot --auto_update
+    testbot --runner --connect 192.168.0.100 --auto_update
+
+More options
+----
+
+    testbot (or testbot --help)
 
 Features
 ----

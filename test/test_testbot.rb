@@ -13,6 +13,19 @@ class TestbotTest < Test::Unit::TestCase
       end   
     end
     
+    context "with --help" do
+      should "return false" do
+        assert_equal false, Testbot.run([ '--help' ])
+      end      
+    end
+    
+    context "with --version" do
+      should "print version and return true" do
+        flexmock(Testbot).should_receive(:puts).once.with("Testbot #{Testbot::VERSION}")
+        assert_equal true, Testbot.run([ '--version' ])
+      end
+    end
+        
     context "with --server" do
       should "start a server" do
         flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::SERVER_PID)

@@ -23,10 +23,13 @@ def show_help
   puts "  --working_dir <path>                     # Where to store temporary files (required)"
   puts "  --cpus <number>                          # The number of CPU cores to use (uses all by default)"
   puts
+  puts "Other:"
+  puts "  --help                                   # Show help (this page)"
+  puts "  --version                                # Show the testbot version"
 
   # puts "  --test                                   # Run Test::Unit tests with testbot"
   # puts "  --status                                 # Show running background processes"
-
+  # puts "  --port <number>                          # Use a custom port"
   # puts "  --ssh_tunnel <user@server>               # Setup a ssh tunnel before connecting"
   # puts "  --foreground                             # Run the process in the foreground"
 #  puts "  --ssh_forward_port <port>                # Port to forward with '--ssh_tunnel' (defaults to 2288)"

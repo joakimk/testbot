@@ -11,7 +11,11 @@ class Testbot
     return false if argv == []
     opts = parse_args(argv)
 
-    if opts[:server] == true
+    if opts[:help]
+      return false
+    elsif opts[:version]
+      puts "Testbot #{VERSION}"
+    elsif opts[:server] == true
       start_server
     elsif opts[:server] == 'stop'
       stop('server', SERVER_PID)
