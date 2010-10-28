@@ -73,6 +73,11 @@ More options
 
     testbot (or testbot --help)
 
+Could this readme be better somehow?
+----
+
+Create an [issue](http://github.com/joakimk/testbot/issues) or fork and send me a pull request!
+
 Features
 ----
 * You can add and remove computers at any time. Testbot simply gives abandoned jobs to other computers.
