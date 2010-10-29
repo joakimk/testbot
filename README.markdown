@@ -84,6 +84,11 @@ Features
 * Testbot will try to balance the testload so that every computer finishes running the tests at the same time to reduce the time it takes to run the entire test suite. It does a good job, but has potential for further improvement.
 * You can access your testbot network through SSH by using the built in SSH tunneling code.
 
+Adding support for new test frameworks
+----
+
+You can just add a **lib/adapters/framework_name_adapter.rb** file and update **lib/adapters/adapter.rb**.
+
 Contributing to testbot
 ----
 
