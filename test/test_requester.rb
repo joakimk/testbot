@@ -23,7 +23,7 @@ end
 class RequesterTest < Test::Unit::TestCase
   
   def setup
-    ENV['JRUBY'] = nil
+    ENV['USE_JRUBY'] = nil
   end
   
   def mock_file_sizes
@@ -231,8 +231,8 @@ class RequesterTest < Test::Unit::TestCase
       requester.run_tests(TestUnitAdapter, 'test')
     end
     
-    should "request a run with jruby if JRUBY is set" do
-      ENV['JRUBY'] = "true"
+    should "request a run with jruby if USE_JRUBY is set" do
+      ENV['USE_JRUBY'] = "true"
       requester = Requester.new
 
       other_args = { :available_runner_usage=>nil, :type=>"test", :requester_mac=>"00:25:00:a8:c3:00",

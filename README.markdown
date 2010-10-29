@@ -27,8 +27,14 @@ Try it out (just copy and paste)
     gem install testbot
     testbot --server
     testbot --runner --connect localhost
-    rails testbotdemo; cd testbotdemo; script/generate scaffold post title:string; rake db:migrate
+    rails new testbotdemo; cd testbotdemo; script/rails generate scaffold post title:string; rake db:migrate
     testbot --test --connect localhost
+    
+    # Cleanup
+    testbot --server stop
+    testbot --runner stop
+    cd ..; rm -rf testbotdemo
+    rm -rf /tmp/testbot*
 
 That's it. The project files from the demo project are synced to /tmp/testbot_cache/$USER (default). The runner syncs the files to /tmp/testbot (default). The tests are then run and the results returned through the server and displayed.
 

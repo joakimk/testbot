@@ -31,7 +31,7 @@ class Requester
         
     files = find_tests(adapter, dir)
     sizes = find_sizes(files)
-    
+
     build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.server_path,
                                                      :server_type => config.server_type,
                                                      :type => adapter.type.to_s,
@@ -113,7 +113,7 @@ class Requester
   end
   
   def jruby?
-    RUBY_PLATFORM =~ /java/ || !!ENV['JRUBY']
+    RUBY_PLATFORM =~ /java/ || !!ENV['USE_JRUBY']
   end
   
 end
