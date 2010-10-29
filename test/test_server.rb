@@ -113,7 +113,7 @@ class ServerTest < Test::Unit::TestCase
   
     should "not return a job that has already been taken" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now, :type => 'spec'
-      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa", :project => 'things'
+      job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :server_type => "rsync", :requester_mac => "aa:aa:aa:aa:aa:aa", :project => 'things', :jruby => 0
       get '/jobs/next', :version => Server.version
       assert last_response.ok?
       assert_equal [ job2[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "rsync", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
