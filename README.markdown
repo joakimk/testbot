@@ -27,7 +27,7 @@ Try it out (just copy and paste)
     gem install testbot
     testbot --server
     testbot --runner --connect localhost
-    rails new testbotdemo &> /dev/null; cd testbotdemo; script/rails generate scaffold post title:string &> /dev/null; rake db:migrate db:test:prepare &> /dev/null
+    rails new testbotdemo; cd testbotdemo; script/rails generate scaffold post title:string; rake db:migrate db:test:prepare
     testbot --test --connect localhost
     
     # Cleanup
