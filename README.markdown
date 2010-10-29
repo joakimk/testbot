@@ -34,7 +34,7 @@ Try it out (just copy and paste)
     testbot --server stop
     testbot --runner stop
     cd ..; rm -rf testbotdemo
-    rm -rf /tmp/testbot*
+    rm -rf /tmp/testbot
 
 That's it. The project files from the demo project are synced to /tmp/testbot/$USER (default). The runner syncs the files to /tmp/testbot/project_rsync (default). The tests are then run and the results returned through the server and displayed.
 
