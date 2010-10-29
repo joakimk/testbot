@@ -6,6 +6,7 @@ class Testbot
   VERSION = "0.2.x"
   SERVER_PID="/tmp/testbot_server.pid"
   RUNNER_PID="/tmp/testbot_runner.pid"
+  DEFAULT_WORKING_DIR="/tmp/testbot"
   
   def self.run(argv)
     return false if argv == []
@@ -47,8 +48,9 @@ class Testbot
     stop('runner', RUNNER_PID)
     pid = SimpleDaemonize.start(lambda {
       require File.join(File.dirname(__FILE__), '/runner')
-      FileUtils.mkdir_p(opts[:working_dir])
-      Dir.chdir(opts[:working_dir])
+      working_dir = opts[:working_dir] || DEFAULT_WORKING_DIR
+      FileUtils.mkdir_p(working_dir)
+      Dir.chdir(working_dir)
       port = ENV['INTEGRATION_TEST'] ? 22880 : 2288
       runner = Runner.new(:server_uri => "http://#{opts[:connect]}:#{port}",
                           :automatic_updates => false, :max_instances => opts[:cpus])
@@ -72,7 +74,7 @@ class Testbot
   end
   
   def self.valid_runner_opts?(opts)
-    opts[:connect].is_a?(String) && opts[:working_dir].is_a?(String)
+    opts[:connect].is_a?(String)
   end
   
   def self.lib_path

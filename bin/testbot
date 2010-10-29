@@ -7,7 +7,7 @@ def show_help
   puts
   puts "Examples:"
   puts "  testbot --server"
-  puts "  testbot --runner --connect 192.168.0.100 --working_dir /tmp/testbot"
+  puts "  testbot --runner --connect 192.168.0.100"
   puts "  testbot --test --connect 192.168.0.100 --sync_path /home/testbot/cache/$USER"
   puts 
   puts "Types:"
@@ -20,8 +20,8 @@ def show_help
   puts "Runner options:"
   puts "  --runner stop                            # Stop a backgrounded runner"  
   puts "  --connect <host_or_ip>                   # Which server to use (required)"
-  puts "  --working_dir <path>                     # Where to store temporary files (required)"
-  puts "  --cpus <number>                          # The number of CPU cores to use (uses all by default)"
+  puts "  --working_dir <path>                     # Where to store temporary files (defaults to #{Testbot::DEFAULT_WORKING_DIR})"
+  puts "  --cpus <number>                          # The number of CPU cores to use (all by default)"
   puts
   puts "Other:"
   puts "  --help                                   # Show help (this page)"

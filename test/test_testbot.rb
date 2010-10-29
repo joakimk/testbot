@@ -61,12 +61,11 @@ class TestbotTest < Test::Unit::TestCase
         assert_equal true, Testbot.run([ "--runner", "stop" ])
       end
       
-      should "do return false with unsufficient args" do
-        assert_equal false, Testbot.run([ "--runner", "--connect", "192.168.0.100", "--working_dir" ])
-        assert_equal false, Testbot.run([ "--runner", "--connect", "192.168.0.100" ])        
-        assert_equal false, Testbot.run([ "--runner", "--connect", "--working_dir", "/tmp/testbot" ])
-        assert_equal false, Testbot.run([ "--runner", "--working_dir", "/tmp/testbot" ])
+      should "do return false without connect" do
+        assert_equal false, Testbot.run([ "--runner", "--connect" ])
+        assert_equal false, Testbot.run([ "--runner" ])
       end
+      
     end
 
   end
