@@ -9,7 +9,7 @@ class IntegrationTest < Test::Unit::TestCase
   should "be able to send a build request, have it run and show the results" do
     system "mkdir -p tmp; cp -rf test/fixtures/local tmp/local"
     system "export INTEGRATION_TEST=true; bin/testbot --runner --connect 127.0.0.1 --working_dir tmp/runner &> /dev/null"
-    system "export INTEGRATION_TEST=true; bin/testbot --server &>/dev/null"
+    system "export INTEGRATION_TEST=true; bin/testbot --server &> /dev/null"
  
     # For debug
     # Thread.new do
@@ -20,7 +20,7 @@ class IntegrationTest < Test::Unit::TestCase
     # end
 
     sleep 1.0
-    result = `cd tmp/local; INTEGRATION_TEST=true ruby ../../lib/requester.rb`
+    result = `cd tmp/local; INTEGRATION_TEST=true ../../bin/testbot --spec --connect 127.0.0.1 --server_path ../server --ignores "log/* tmp/*"`
   
     # Should include the result from script/spec
     #puts result.inspect

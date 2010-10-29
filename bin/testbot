@@ -8,25 +8,35 @@ def show_help
   puts "Examples:"
   puts "  testbot --server"
   puts "  testbot --runner --connect 192.168.0.100"
-  puts "  testbot --test --connect 192.168.0.100 --sync_path /home/testbot/cache/$USER"
+  puts "  testbot --test --connect 192.168.0.100"
   puts 
   puts "Types:"
-  puts "  --server                                 # Run as a testbot server"
-  puts "  --runner                                 # Run as a testbot runner"
+  puts "  --server\t\t\t# Run testbot server"
+  puts "  --runner\t\t\t# Run testbot runner"
   puts
-  puts "Server options:"
-  puts "  --server stop                            # Stop a backgrounded server"
+  Adapter.all.each do |adapter|
+    puts "  --#{adapter.type}\t\t\t# Run #{adapter.name} tests"
+  end
   puts
-  puts "Runner options:"
-  puts "  --runner stop                            # Stop a backgrounded runner"  
-  puts "  --connect <host_or_ip>                   # Which server to use (required)"
-  puts "  --working_dir <path>                     # Where to store temporary files (defaults to #{Testbot::DEFAULT_WORKING_DIR})"
-  puts "  --cpus <number>                          # The number of CPU cores to use (all by default)"
+  puts "Options for the server:"
+  puts "  --server stop\t\t\t# Stop a backgrounded server"
+  puts
+  puts "Options for the runner:"
+  puts "  --runner stop\t\t\t# Stop a backgrounded runner"  
+  puts "  --connect <host_or_ip>\t# Which server to use (required)"
+  puts "  --working_dir <path>\t\t# Where to store temporary files (default: #{Testbot::DEFAULT_WORKING_DIR})"
+  puts "  --cpus <number>\t\t# The number of CPU cores to use (default: use all)"
+  puts
+  puts "Options when running tests:"
+  puts "  --connect <host_or_ip>\t# Which server to use (required)"
+  puts "  --ignores \"<ignores>\"\t\t# Files to ignores when syncing (default: include all)"
+  puts "  --server_path <path>\t\t# Sync path on the server (default: #{Testbot::DEFAULT_SERVER_PATH})"
   puts
   puts "Other:"
-  puts "  --help                                   # Show help (this page)"
-  puts "  --version                                # Show the testbot version"
+  puts "  --help\t\t\t# Show help (this page)"
+  puts "  --version\t\t\t# Show the testbot version"
 
+#  puts " --use_git_ignore                          # Don't rsync files that are ignored by git"
   # puts "  --test                                   # Run Test::Unit tests with testbot"
   # puts "  --status                                 # Show running background processes"
   # puts "  --port <number>                          # Use a custom port"

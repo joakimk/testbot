@@ -1,4 +1,6 @@
 require File.join(File.dirname(__FILE__), '/shared/simple_daemonize')
+require File.join(File.dirname(__FILE__), '/adapters/adapter')
+require File.join(File.dirname(__FILE__), '/requester')
 require 'fileutils'
 
 class Testbot
@@ -7,6 +9,8 @@ class Testbot
   SERVER_PID="/tmp/testbot_server.pid"
   RUNNER_PID="/tmp/testbot_runner.pid"
   DEFAULT_WORKING_DIR="/tmp/testbot"
+  DEFAULT_SERVER_PATH="/tmp/testbot_cache/#{ENV['USER']}"
+  SERVER_PORT = ENV['INTEGRATION_TEST'] ? 22880 : 2288
   
   def self.run(argv)
     return false if argv == []
@@ -25,6 +29,8 @@ class Testbot
       start_runner(opts)
     elsif opts[:runner] == 'stop'
       stop('runner', RUNNER_PID)
+    elsif adapter = Adapter.all.find { |adapter| opts[adapter.type.to_sym] }
+      start_requester(opts, adapter)
     end
     
     true
@@ -51,8 +57,7 @@ class Testbot
       working_dir = opts[:working_dir] || DEFAULT_WORKING_DIR
       FileUtils.mkdir_p(working_dir)
       Dir.chdir(working_dir)
-      port = ENV['INTEGRATION_TEST'] ? 22880 : 2288
-      runner = Runner.new(:server_uri => "http://#{opts[:connect]}:#{port}",
+      runner = Runner.new(:server_uri => "http://#{opts[:connect]}:#{SERVER_PORT}",
                           :automatic_updates => false, :max_instances => opts[:cpus])
      runner.run!
    }, RUNNER_PID)
@@ -71,6 +76,11 @@ class Testbot
   
   def self.stop(name, pid)
     puts "Testbot #{name} stopped" if SimpleDaemonize.stop(pid)
+  end
+  
+  def self.start_requester(opts, adapter)
+    requester = Requester.new(:server_uri => "http://#{opts[:connect]}:#{SERVER_PORT}", :server_type => 'rsync', :server_path => (opts[:server_path] || DEFAULT_SERVER_PATH), :ignores => opts[:ignores].to_s, :available_runner_usage => "100%", :project => "project")
+    requester.run_tests(adapter, adapter.base_path)
   end
   
   def self.valid_runner_opts?(opts)

@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '../lib/testbot.rb')
+require File.join(File.dirname(__FILE__), '../lib/testbot')
 require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'
@@ -61,13 +61,39 @@ class TestbotTest < Test::Unit::TestCase
         assert_equal true, Testbot.run([ "--runner", "stop" ])
       end
       
-      should "do return false without connect" do
+      should "return false without connect" do
         assert_equal false, Testbot.run([ "--runner", "--connect" ])
         assert_equal false, Testbot.run([ "--runner" ])
       end
-      
     end
 
+    Adapter.all.each do |adapter|
+      context "with --#{adapter.type}" do
+        should "start a #{adapter.name} requester and return true" do
+          flexmock(Requester).should_receive(:new).once.with(:server_uri => "http://192.168.0.100:2288",
+              :server_type => 'rsync', :server_path => "/tmp/testbot_cache/#{ENV['USER']}",
+              :ignores => '', :available_runner_usage => "100%", :project => "project").and_return(mock = Object.new)
+          flexmock(mock).should_receive(:run_tests).once.with(adapter, adapter.base_path)
+          assert_equal true, Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100" ])
+        end
+        
+        should "accept a custom server_path" do
+          flexmock(Requester).should_receive(:new).once.with(:server_uri => "http://192.168.0.100:2288",
+              :server_type => 'rsync', :server_path => "/somewhere/else",
+              :ignores => '', :available_runner_usage => "100%", :project => "project").and_return(mock = Object.new)
+          flexmock(mock).should_receive(:run_tests)
+          Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--server_path', '/somewhere/else' ])
+        end
+        
+        should "accept ignores" do
+          flexmock(Requester).should_receive(:new).once.with(:server_uri => "http://192.168.0.100:2288",
+              :server_type => 'rsync', :server_path => "/tmp/testbot_cache/#{ENV['USER']}",
+              :ignores => 'tmp log', :available_runner_usage => "100%", :project => "project").and_return(mock = Object.new)
+          flexmock(mock).should_receive(:run_tests)
+          Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ignores', 'tmp log' ])
+        end
+      end
+    end
   end
     
   context "self.parse_args" do

@@ -15,7 +15,7 @@ class Requester
   
   def run_tests(adapter, dir)
     puts if config.simple_output
-    
+
     if config.ssh_tunnel
       user, host = config.ssh_tunnel.split('@')
       SSHTunnel.new(host, user, adapter.requester_port).open
@@ -116,9 +116,4 @@ class Requester
     RUBY_PLATFORM =~ /java/ || !!ENV['JRUBY']
   end
   
-end
-
-if ENV['INTEGRATION_TEST']
-  requester = Requester.create_by_config('config/testbot.yml')
-  requester.run_tests(RSpecAdapter, 'spec')
 end
