@@ -3,7 +3,19 @@ require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'
 
+module TestbotTestHelpers
+
+  def requester_attributes
+    { :server_uri => "http://192.168.0.100:2288",
+      :server_type => 'rsync', :server_path => "/tmp/testbot_cache/#{ENV['USER']}",
+      :ignores => '', :available_runner_usage => "100%", :project => "project" }
+  end  
+  
+end
+
 class TestbotTest < Test::Unit::TestCase
+    
+  include TestbotTestHelpers
     
   context "self.run" do
 
@@ -66,29 +78,28 @@ class TestbotTest < Test::Unit::TestCase
         assert_equal false, Testbot.run([ "--runner" ])
       end
     end
-
+    
     Adapter.all.each do |adapter|
       context "with --#{adapter.type}" do
         should "start a #{adapter.name} requester and return true" do
-          flexmock(Requester).should_receive(:new).once.with(:server_uri => "http://192.168.0.100:2288",
-              :server_type => 'rsync', :server_path => "/tmp/testbot_cache/#{ENV['USER']}",
-              :ignores => '', :available_runner_usage => "100%", :project => "project").and_return(mock = Object.new)
+          flexmock(Requester).should_receive(:new).once.
+                              with(requester_attributes).and_return(mock = Object.new)
           flexmock(mock).should_receive(:run_tests).once.with(adapter, adapter.base_path)
           assert_equal true, Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100" ])
         end
         
         should "accept a custom server_path" do
-          flexmock(Requester).should_receive(:new).once.with(:server_uri => "http://192.168.0.100:2288",
-              :server_type => 'rsync', :server_path => "/somewhere/else",
-              :ignores => '', :available_runner_usage => "100%", :project => "project").and_return(mock = Object.new)
+          flexmock(Requester).should_receive(:new).once.
+                              with(requester_attributes.merge({ :server_path => "/somewhere/else" })).
+                              and_return(mock = Object.new)
           flexmock(mock).should_receive(:run_tests)
           Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--server_path', '/somewhere/else' ])
         end
         
         should "accept ignores" do
-          flexmock(Requester).should_receive(:new).once.with(:server_uri => "http://192.168.0.100:2288",
-              :server_type => 'rsync', :server_path => "/tmp/testbot_cache/#{ENV['USER']}",
-              :ignores => 'tmp log', :available_runner_usage => "100%", :project => "project").and_return(mock = Object.new)
+          flexmock(Requester).should_receive(:new).once.
+                              with(requester_attributes.merge({ :ignores => "tmp log" })).
+                              and_return(mock = Object.new)
           flexmock(mock).should_receive(:run_tests)
           Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ignores', 'tmp log' ])
         end
