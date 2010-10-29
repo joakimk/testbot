@@ -7,7 +7,7 @@ module TestbotTestHelpers
 
   def requester_attributes
     { :server_uri => "http://192.168.0.100:2288",
-      :server_type => 'rsync', :server_path => "/tmp/testbot_cache/#{ENV['USER']}",
+      :server_type => 'rsync', :server_path => "/tmp/testbot/#{ENV['USER']}",
       :ignores => '', :available_runner_usage => "100%", :project => "project" }
   end  
   

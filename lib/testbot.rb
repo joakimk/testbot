@@ -9,7 +9,7 @@ class Testbot
   SERVER_PID="/tmp/testbot_server.pid"
   RUNNER_PID="/tmp/testbot_runner.pid"
   DEFAULT_WORKING_DIR="/tmp/testbot"
-  DEFAULT_SERVER_PATH="/tmp/testbot_cache/#{ENV['USER']}"
+  DEFAULT_SERVER_PATH="/tmp/testbot/#{ENV['USER']}"
   SERVER_PORT = ENV['INTEGRATION_TEST'] ? 22880 : 2288
   
   def self.run(argv)
