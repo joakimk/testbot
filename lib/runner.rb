@@ -133,7 +133,7 @@ class Runner
       job = Job.new(*([ self, next_job.split(',') ].flatten))
       if first_job_from_requester?
         fetch_code(job)
-        before_run(job)
+        before_run(job) if File.exists?("lib/tasks/testbot.rake")
       end
       
       @instances << [ Thread.new { job.run(free_instance_number) },

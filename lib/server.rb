@@ -13,7 +13,7 @@ else
   set :port, 2288
 end
 
-#disable :logging if ENV['DISABLE_LOGGING']
+disable :logging if ENV['DISABLE_LOGGING']
 
 class Server
   def self.version
