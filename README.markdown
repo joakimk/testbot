@@ -84,11 +84,6 @@ Features
 * Testbot will try to balance the testload so that every computer finishes running the tests at the same time to reduce the time it takes to run the entire test suite. It does a good job, but has potential for further improvement.
 * You can access your testbot network through SSH by using the built in SSH tunneling code.
 
-Adding support for more test frameworks
-----
-
-Add a **lib/adapters/framework_name_adapter.rb** file and update **lib/adapters/adapter.rb**.
-
 Contributing to testbot
 ----
 
@@ -102,6 +97,11 @@ For development I recommend: [grosser/autotest](http://github.com/grosser/autote
 Make your change (don't forget to write tests) and send me a pull request.
 
 You can also contribute by adding to the [wiki](http://github.com/joakimk/testbot/wiki).
+
+Adding support for more test frameworks
+----
+
+Add a **lib/adapters/framework_name_adapter.rb** file and update **lib/adapters/adapter.rb**.
 
 Gotchas
 ----
