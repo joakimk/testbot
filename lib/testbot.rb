@@ -5,7 +5,7 @@ require 'fileutils'
 
 class Testbot
   
-  VERSION = "0.2.x"
+  VERSION = "0.2.4"
   SERVER_PID="/tmp/testbot_server.pid"
   RUNNER_PID="/tmp/testbot_runner.pid"
   DEFAULT_WORKING_DIR="/tmp/testbot"
