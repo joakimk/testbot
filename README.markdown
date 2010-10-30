@@ -50,7 +50,7 @@ That's it. The project files from the demo project are synced to /tmp/testbot/$U
 Example setup
 ----
 
-Here I make the assumption that you have a user called **testbot** on a server at **192.168.0.100** that every computer can log into without a password and that you have installed testbot on each computer.
+Here I make the assumption that you have a user called **testbot** on a server at **192.168.0.100** that every computer [can log into without a password](http://github.com/joakimk/testbot/wiki/SSH-Public-Key-Authentication) and that you have **installed testbot** on each computer.
 
     ssh testbot@192.168.0.100
     testbot --server
