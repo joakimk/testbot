@@ -21,6 +21,11 @@ Testbot is:
                  (results)                            (results)
 </pre>
 
+Benefits
+----
+
+One of the main benefits of testbot compared to other test distribution tools is that it **only requires you to be able to access one central server**. Because of this new users are easy to add and you can use testbot from anywhere using SSH tunneling (built in support).
+
 Installing
 ----
 
