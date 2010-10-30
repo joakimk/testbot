@@ -3,7 +3,12 @@
 require File.join(File.dirname(__FILE__), '../lib/testbot.rb')
 
 def show_help
-  puts "Testbot #{Testbot::VERSION} (test distribution tool)"
+  puts "Testbot #{Testbot::VERSION}"
+  puts
+  puts "Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber."
+  puts
+  puts "More info: http://github.com/joakimk/testbot"
+  puts "Wiki:      http://github.com/joakimk/testbot/wiki"
   puts
   puts "Examples:"
   puts "  testbot --server"
@@ -39,8 +44,6 @@ def show_help
   # puts "  --auto_update                            # Keep testbot updated to the same version as the server."
   # puts "                                           # (when the server gem version is changed, this runs gem install"
   # puts "                                           #  with the same version and restarts the test runner)"
-  puts
-  puts "More info: http://github.com/joakimk/testbot"
 end
 
 show_help unless Testbot.run(ARGV)
