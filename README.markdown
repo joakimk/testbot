@@ -8,7 +8,7 @@ Using testbot on 11 machines (25 cores) we got our test suite down to **2 minute
 Benefits
 ----
 
-One of the main benefits of testbot compared to other test distribution tools is that it **only requires you to be able to access one central server**. Because of this it's easy to add new users and you can use testbot from anywhere using SSH tunneling (built in support).g
+One of the main benefits of testbot compared to other test distribution tools is that it **only requires you to be able to access one central server**. Because of this it's easy to add new users and you can use testbot from anywhere using SSH tunneling (built in support).
 
 How it works
 ----
