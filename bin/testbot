@@ -11,23 +11,18 @@ def show_help
   puts "  testbot --test --connect 192.168.0.100"
   puts 
   puts "Types:"
-  puts "  --server\t\t\t# Run testbot server"
-  puts "  --runner\t\t\t# Run testbot runner"
-  puts
+  puts "  --server <start|stop>"
+  puts "  --runner <start|stop>"
   Adapter.all.each do |adapter|
     puts "  --#{adapter.type}\t\t\t# Run #{adapter.name} tests"
   end
   puts
-  puts "Options for the server:"
-  puts "  --server stop\t\t\t# Stop a backgrounded server"
-  puts
-  puts "Options for the runner:"
-  puts "  --runner stop\t\t\t# Stop a backgrounded runner"  
+  puts "Runner options:"
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
   puts "  --working_dir <path>\t\t# Where to store temporary files (default: #{Testbot::DEFAULT_WORKING_DIR})"
   puts "  --cpus <number>\t\t# The number of CPU cores to use (default: use all)"
   puts
-  puts "Options when running tests:"
+  puts "Test options:"
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
   puts "  --ignores \"<ignores>\"\t\t# Files to ignores when syncing (default: include all)"
   puts "  --server_path <path>\t\t# Sync path on the server (default: #{Testbot::DEFAULT_SERVER_PATH})"

@@ -20,11 +20,11 @@ class Testbot
       return false
     elsif opts[:version]
       puts "Testbot #{VERSION}"
-    elsif opts[:server] == true
+    elsif opts[:server] == true || opts[:server] == 'start'
       start_server
     elsif opts[:server] == 'stop'
       stop('server', SERVER_PID)
-    elsif opts[:runner] == true
+    elsif opts[:runner] == true || opts[:runner] == 'start'
       return false unless valid_runner_opts?(opts)
       start_runner(opts)
     elsif opts[:runner] == 'stop'

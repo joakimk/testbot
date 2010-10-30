@@ -45,6 +45,13 @@ class TestbotTest < Test::Unit::TestCase
         flexmock(Testbot).should_receive(:puts).once.with("Testbot server started (pid: 1234)")
         assert_equal true, Testbot.run([ "--server" ])
       end
+      
+      should "start a server when start is passed" do
+        flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::SERVER_PID)
+        flexmock(SimpleDaemonize).should_receive(:start).once
+        flexmock(Testbot).should_receive(:puts)
+        assert_equal true, Testbot.run([ "--server", "start" ])
+      end
     
       should "stop a server when stop is passed" do
         flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::SERVER_PID).and_return(true)
@@ -65,6 +72,13 @@ class TestbotTest < Test::Unit::TestCase
         flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::RUNNER_PID).and_return(1234)
         flexmock(Testbot).should_receive(:puts).once.with("Testbot runner started (pid: 1234)")
         assert_equal true, Testbot.run([ "--runner", "--connect", "192.168.0.100", "--working_dir", "/tmp/testbot" ])
+      end
+      
+      should "start a server when start is passed" do
+        flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::RUNNER_PID)
+        flexmock(SimpleDaemonize).should_receive(:start).once
+        flexmock(Testbot).should_receive(:puts)
+        assert_equal true, Testbot.run([ "--runner", "start", "--connect", "192.168.0.100" ])
       end
       
       should "stop a runner when stop is passed" do
