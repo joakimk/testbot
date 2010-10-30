@@ -21,10 +21,14 @@ Testbot is:
                  (results)                            (results)
 </pre>
 
-Try it out (just copy and paste)
+Installing
 ----
 
     gem install testbot
+
+Try it out (just copy and paste)
+----
+
     testbot --server
     testbot --runner --connect localhost
     rails new testbotdemo; cd testbotdemo; script/rails generate scaffold post title:string; rake db:migrate db:test:prepare
