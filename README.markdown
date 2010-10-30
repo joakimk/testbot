@@ -7,22 +7,6 @@ Using testbot on 11 machines (25 cores) we got our test suite down to **2 minute
 
 One of the main benefits of testbot compared to other test distribution tools is that it **only requires you to be able to access one central server**. Because of this it's easy to add new users and you can use testbot from anywhere using SSH tunneling (built in support).
 
-How it works
-----
-
-Testbot is:
-
-* A **server** to distribute test jobs.
-* One or more **runners** to run test jobs and return the results (this is the "slave" process that runs tests).
-* One or more **requesters** that tells the server which tests to distribute and displays the results (the client you use to run tests, for example: **rake testbot:spec**).
-
-<pre>
-    Requester -- (files to run) --> Server -- (files to run) --> (many-)Runner(s)
-        ^                           |    ^                                  |
-        |---------------------------|    |----------------------------------|
-                 (results)                            (results)
-</pre>
-
 Installing
 ----
 
@@ -43,6 +27,22 @@ Try it out
     rm -rf /tmp/testbot
 
 That's it. The project files from the demo project are synced to /tmp/testbot/$USER (default). The runner syncs the files to /tmp/testbot/project_rsync (default). The tests are then run and the results returned through the server and displayed.
+
+How it works
+----
+
+Testbot is:
+
+* A **server** to distribute test jobs.
+* One or more **runners** to run test jobs and return the results (this is the "slave" process that runs tests).
+* One or more **requesters** that tells the server which tests to distribute and displays the results (the client you use to run tests, for example: **rake testbot:spec**).
+
+<pre>
+    Requester -- (files to run) --> Server -- (files to run) --> (many-)Runner(s)
+        ^                           |    ^                                  |
+        |---------------------------|    |----------------------------------|
+                 (results)                            (results)
+</pre>
 
 Example setup
 ----
