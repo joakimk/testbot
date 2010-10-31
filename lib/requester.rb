@@ -87,7 +87,7 @@ class Requester
   end
   
   def result_lines
-    @build['results'].find_all { |line| line_is_result?(line) }.map { |line| line.chomp }
+    @build['results'].split("\n").find_all { |line| line_is_result?(line) }.map { |line| line.chomp }
   end
   
   private

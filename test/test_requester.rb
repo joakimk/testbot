@@ -3,6 +3,12 @@ require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'
 
+# Probably a bug in flexmock, for 1.9.2
+unless defined?(Test::Unit::AssertionFailedError)
+  class Test::Unit::AssertionFailedError
+  end
+end
+
 def requester_with_result(results)
   requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :server_path => 'git@somewhere', :server_type => 'git')
 
@@ -141,7 +147,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....") 
       mock_file_sizes
 
-      requester.run_tests(RSpecAdapter, 'spec')      
+      requester.run_tests(RSpecAdapter, 'spec')
     end
     
     should "just try again if the status returns as nil" do
