@@ -25,12 +25,9 @@ class Server
   end
 end
 
-before do
-  @@config ||= ENV['INTEGRATION_TEST'] ? { :update_uri => '' } : YAML.load_file("#{ENV['HOME']}/.testbot_server.yml")
-end
-
 class Sinatra::Application
   def config
+    @@config ||= ENV['INTEGRATION_TEST'] ? { :update_uri => '' } : YAML.load_file("#{ENV['HOME']}/.testbot_server.yml")
     OpenStruct.new(@@config)
   end  
 end
