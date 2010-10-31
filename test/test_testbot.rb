@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '../lib/testbot') unless defined?(Testbot)
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/testbot')) unless defined?(Testbot)
 require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'

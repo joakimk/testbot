@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "lib/testbot"
+require File.expand_path("lib/testbot")
 
 Gem::Specification.new do |s|
   s.name        = "testbot"
