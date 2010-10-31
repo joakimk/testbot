@@ -39,12 +39,15 @@ class Testbot
   def self.parse_args(argv)
     last_setter = nil
     hash = {}
+    str = ''
     argv.each_with_index do |arg, i|
       if arg.include?('--')
+        str = ''
         last_setter = arg.split('--').last.to_sym
         hash[last_setter] = true if (i == argv.size - 1) || argv[i+1].include?('--')
       else
-        hash[last_setter] = arg
+        str += ' ' + arg
+        hash[last_setter] = str.strip
       end
     end
     hash

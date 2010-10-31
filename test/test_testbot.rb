@@ -115,7 +115,7 @@ class TestbotTest < Test::Unit::TestCase
                               with(requester_attributes.merge({ :ignores => "tmp log" })).
                               and_return(mock = Object.new)
           flexmock(mock).should_receive(:run_tests)
-          Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ignores', 'tmp log' ])
+          Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ignores', 'tmp', 'log' ])
         end
       end
     end
