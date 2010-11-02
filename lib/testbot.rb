@@ -1,6 +1,7 @@
 require File.join(File.dirname(__FILE__), '/shared/simple_daemonize')
 require File.join(File.dirname(__FILE__), '/adapters/adapter')
 require File.join(File.dirname(__FILE__), '/requester')
+require File.join(File.dirname(__FILE__), '/server')
 require 'fileutils'
 
 class Testbot
@@ -20,8 +21,8 @@ class Testbot
       return false
     elsif opts[:version]
       puts "Testbot #{VERSION}"
-    elsif opts[:server] == true || opts[:server] == 'start'
-      start_server
+    elsif opts[:server] == true || [ 'run', 'start' ].include?(opts[:server])
+      start_server(opts[:server])
     elsif opts[:server] == 'stop'
       stop('server', SERVER_PID)
     elsif opts[:runner] == true || opts[:runner] == 'start'
@@ -67,14 +68,18 @@ class Testbot
     puts "Testbot runner started (pid: #{pid})"
   end
   
-  def self.start_server
+  def self.start_server(type)
     stop('server', SERVER_PID)
-    pid = SimpleDaemonize.start(lambda {
-      ENV['DISABLE_LOGGING'] = "true"
-      require File.join(File.dirname(__FILE__), '/server')
+    
+    if type == 'run'
       Sinatra::Application.run! :environment => "production"
-    }, SERVER_PID)
-    puts "Testbot server started (pid: #{pid})"
+    else
+      pid = SimpleDaemonize.start(lambda {
+        ENV['DISABLE_LOGGING'] = "true"
+        Sinatra::Application.run! :environment => "production"
+      }, SERVER_PID)
+      puts "Testbot server started (pid: #{pid})"
+    end
   end
   
   def self.stop(name, pid)

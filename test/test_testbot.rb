@@ -64,6 +64,13 @@ class TestbotTest < Test::Unit::TestCase
         flexmock(Testbot).should_receive(:puts).never
         Testbot.run([ "--stop", "server" ])
       end
+      
+      should "start it in the foreground with run" do
+        flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::SERVER_PID)
+        flexmock(SimpleDaemonize).should_receive(:start).never
+        flexmock(Sinatra::Application).should_receive(:run!).once.with(:environment => "production")
+        assert_equal true, Testbot.run([ "--server", 'run' ])
+      end
     end
   
     context "with --runner" do

@@ -16,7 +16,7 @@ def show_help
   puts "  testbot --test --connect 192.168.0.100"
   puts 
   puts "Types:"
-  puts "  --server <start|stop>"
+  puts "  --server <start|stop|run>"
   puts "  --runner <start|stop>"
   Adapter.all.each do |adapter|
     puts "  --#{adapter.type}\t\t\t# Run #{adapter.name} tests"
@@ -40,7 +40,6 @@ def show_help
   # puts "  --status                                 # Show running background processes"
   # puts "  --port <number>                          # Use a custom port"
   # puts "  --ssh_tunnel <user@server>               # Setup a ssh tunnel before connecting"
-  # puts "  --foreground                             # Run the process in the foreground"
   # puts "  --auto_update                            # Keep testbot updated to the same version as the server."
   # puts "                                           # (when the server gem version is changed, this runs gem install"
   # puts "                                           #  with the same version and restarts the test runner)"
