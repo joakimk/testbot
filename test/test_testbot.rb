@@ -98,6 +98,14 @@ class TestbotTest < Test::Unit::TestCase
         assert_equal false, Testbot.run([ "--runner", "--connect" ])
         assert_equal false, Testbot.run([ "--runner" ])
       end
+      
+      should "start it in the foreground with run" do
+        flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::RUNNER_PID)
+        flexmock(SimpleDaemonize).should_receive(:start).never
+        flexmock(Runner).should_receive(:new).once.and_return(mock = Object.new)
+        flexmock(mock).should_receive(:run!).once
+        assert_equal true, Testbot.run([ "--runner", 'run', '--connect', '192.168.0.100' ])
+      end      
     end
     
     Adapter.all.each do |adapter|

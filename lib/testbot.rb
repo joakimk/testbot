@@ -2,6 +2,7 @@ require File.join(File.dirname(__FILE__), '/shared/simple_daemonize')
 require File.join(File.dirname(__FILE__), '/adapters/adapter')
 require File.join(File.dirname(__FILE__), '/requester')
 require File.join(File.dirname(__FILE__), '/server')
+require File.join(File.dirname(__FILE__), '/runner')
 require 'fileutils'
 
 class Testbot
@@ -21,11 +22,11 @@ class Testbot
       return false
     elsif opts[:version]
       puts "Testbot #{VERSION}"
-    elsif opts[:server] == true || [ 'run', 'start' ].include?(opts[:server])
+    elsif [ true, 'run', 'start' ].include?(opts[:server])
       start_server(opts[:server])
     elsif opts[:server] == 'stop'
       stop('server', SERVER_PID)
-    elsif opts[:runner] == true || opts[:runner] == 'start'
+    elsif [ true, 'run', 'start' ].include?(opts[:runner])
       return false unless valid_runner_opts?(opts)
       start_runner(opts)
     elsif opts[:runner] == 'stop'
@@ -56,16 +57,22 @@ class Testbot
   
   def self.start_runner(opts)
     stop('runner', RUNNER_PID)
-    pid = SimpleDaemonize.start(lambda {
-      require File.join(File.dirname(__FILE__), '/runner')
+    
+    proc = lambda {
       working_dir = opts[:working_dir] || DEFAULT_WORKING_DIR
       FileUtils.mkdir_p(working_dir)
       Dir.chdir(working_dir)
       runner = Runner.new(:server_uri => "http://#{opts[:connect]}:#{SERVER_PORT}",
                           :automatic_updates => false, :max_instances => opts[:cpus])
-     runner.run!
-   }, RUNNER_PID)
-    puts "Testbot runner started (pid: #{pid})"
+      runner.run!
+    }
+    
+    if opts[:runner] == 'run'
+      proc.call
+    else
+      pid = SimpleDaemonize.start(proc, RUNNER_PID)
+      puts "Testbot runner started (pid: #{pid})"
+    end
   end
   
   def self.start_server(type)
