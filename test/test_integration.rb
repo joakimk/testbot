@@ -10,13 +10,13 @@ class IntegrationTest < Test::Unit::TestCase
     system "mkdir -p tmp; cp -rf test/fixtures/local tmp/local"
     system "export INTEGRATION_TEST=true; bin/testbot --runner --connect 127.0.0.1 --working_dir tmp/runner &> /dev/null"
     system "export INTEGRATION_TEST=true; bin/testbot --server &> /dev/null"
- 
+     
     # For debug
     # Thread.new do
-    #   system "export INTEGRATION_TEST=true; bin/testbot --runner --connect 127.0.0.1 --working_dir tmp/runner --foreground"
+    #   system "export INTEGRATION_TEST=true; bin/testbot --runner run --connect 127.0.0.1 --working_dir tmp/runner"
     # end
     # Thread.new do
-    #   system "export INTEGRATION_TEST=true; bin/testbot --server --foreground"
+    #   system "export INTEGRATION_TEST=true; bin/testbot --server run"
     # end
 
     sleep 1.0

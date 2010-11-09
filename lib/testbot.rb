@@ -1,8 +1,5 @@
 require File.join(File.dirname(__FILE__), '/shared/simple_daemonize')
 require File.join(File.dirname(__FILE__), '/adapters/adapter')
-require File.join(File.dirname(__FILE__), '/requester')
-require File.join(File.dirname(__FILE__), '/server')
-require File.join(File.dirname(__FILE__), '/runner')
 require 'fileutils'
 
 class Testbot
@@ -23,15 +20,18 @@ class Testbot
     elsif opts[:version]
       puts "Testbot #{VERSION}"
     elsif [ true, 'run', 'start' ].include?(opts[:server])
+      require File.join(File.dirname(__FILE__), '/server')
       start_server(opts[:server])
     elsif opts[:server] == 'stop'
       stop('server', SERVER_PID)
     elsif [ true, 'run', 'start' ].include?(opts[:runner])
+      require File.join(File.dirname(__FILE__), '/runner')
       return false unless valid_runner_opts?(opts)
       start_runner(opts)
     elsif opts[:runner] == 'stop'
       stop('runner', RUNNER_PID)
     elsif adapter = Adapter.all.find { |adapter| opts[adapter.type.to_sym] }
+      require File.join(File.dirname(__FILE__), '/requester')
       start_requester(opts, adapter)
     end
     
