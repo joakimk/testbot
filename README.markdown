@@ -15,9 +15,11 @@ Try it out
 
     testbot --server
     testbot --runner --connect localhost
-    mkdir -p testbotdemo/test; cd testbotdemo; echo 'puts "first test was run"' > test/first_test.rb; echo 'puts "second test was run"' > test/second_test.rb
+    mkdir -p testbotdemo/test; cd testbotdemo
+    echo 'require "test/unit"' > test/demo_test.rb
+    echo 'class DemoTest < Test::Unit::TestCase; def test_first; end; end' >> test/demo_test.rb
     testbot --test --connect localhost
-    
+        
     # Cleanup
     testbot --server stop
     testbot --runner stop
