@@ -26,23 +26,27 @@ def show_help
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
   puts "  --working_dir <path>\t\t# Where to store temporary files (default: #{Testbot::DEFAULT_WORKING_DIR})"
   puts "  --cpus <number>\t\t# The number of CPU cores to use (default: use all)"
+  puts "  --ssh_tunnel <user@server>\t# Use a ssh tunnel"
   puts
   puts "Test options:"
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
   puts "  --ignores <ignores>\t\t# Files to ignores when syncing (default: include all)"
   puts "  --server_path <path>\t\t# Sync path on the server (default: #{Testbot::DEFAULT_SERVER_PATH})"
+  puts "  --ssh_tunnel <user@server>\t# Use a ssh tunnel"
   puts
   puts "Other:"
   puts "  --help\t\t\t# Show help (this page)"
   puts "  --version\t\t\t# Show the testbot version"
 
+  # puts "  --auto_update                            # Keep testbot updated to the same version as the server."
+  # puts "                                           # (when the server gem version is changed,"
+  # puts "                                           #  this runs gem install with the same version"
+  # puts "                                           #  and restarts the test runner)"
+
+  # TODO:
   # puts " --use_git_ignore                          # Don't rsync files that are ignored by git"
   # puts "  --status                                 # Show running background processes"
   # puts "  --port <number>                          # Use a custom port"
-  # puts "  --ssh_tunnel <user@server>               # Setup a ssh tunnel before connecting"
-  # puts "  --auto_update                            # Keep testbot updated to the same version as the server."
-  # puts "                                           # (when the server gem version is changed, this runs gem install"
-  # puts "                                           #  with the same version and restarts the test runner)"
 end
 
 show_help unless Testbot.run(ARGV)

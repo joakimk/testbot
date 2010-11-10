@@ -2,13 +2,15 @@ require File.expand_path(File.join(File.dirname(__FILE__), '../lib/testbot')) un
 require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'
+require File.join(File.dirname(__FILE__), '../lib/requester')
+require File.join(File.dirname(__FILE__), '../lib/server')
 
 module TestbotTestHelpers
 
   def requester_attributes
     { :server_uri => "http://192.168.0.100:2288",
       :server_type => 'rsync', :server_path => "/tmp/testbot/#{ENV['USER']}",
-      :ignores => '', :available_runner_usage => "100%", :project => "project" }
+      :ignores => '', :available_runner_usage => "100%", :project => "project", :ssh_tunnel => nil }
   end  
   
 end
@@ -81,7 +83,7 @@ class TestbotTest < Test::Unit::TestCase
         assert_equal true, Testbot.run([ "--runner", "--connect", "192.168.0.100", "--working_dir", "/tmp/testbot" ])
       end
       
-      should "start a server when start is passed" do
+      should "start a runner when start is passed" do
         flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::RUNNER_PID)
         flexmock(SimpleDaemonize).should_receive(:start).once
         flexmock(Testbot).should_receive(:puts)
@@ -105,7 +107,7 @@ class TestbotTest < Test::Unit::TestCase
         flexmock(Runner).should_receive(:new).once.and_return(mock = Object.new)
         flexmock(mock).should_receive(:run!).once
         assert_equal true, Testbot.run([ "--runner", 'run', '--connect', '192.168.0.100' ])
-      end      
+      end
     end
     
     Adapter.all.each do |adapter|
@@ -131,6 +133,14 @@ class TestbotTest < Test::Unit::TestCase
                               and_return(mock = Object.new)
           flexmock(mock).should_receive(:run_tests)
           Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ignores', 'tmp', 'log' ])
+        end
+        
+        should "accept ssh tunnel" do
+          flexmock(Requester).should_receive(:new).once.
+                              with(requester_attributes.merge({ :ssh_tunnel => "user@server" })).
+                              and_return(mock = Object.new)
+          flexmock(mock).should_receive(:run_tests)
+          Testbot.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ssh_tunnel', 'user@server' ])
         end
       end
     end

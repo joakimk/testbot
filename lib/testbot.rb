@@ -63,7 +63,8 @@ class Testbot
       FileUtils.mkdir_p(working_dir)
       Dir.chdir(working_dir)
       runner = Runner.new(:server_uri => "http://#{opts[:connect]}:#{SERVER_PORT}",
-                          :automatic_updates => false, :max_instances => opts[:cpus])
+                          :automatic_updates => false, :max_instances => opts[:cpus],
+                          :ssh_tunnel => opts[:ssh_tunnel])
       runner.run!
     }
     
@@ -94,7 +95,7 @@ class Testbot
   end
   
   def self.start_requester(opts, adapter)
-    requester = Requester.new(:server_uri => "http://#{opts[:connect]}:#{SERVER_PORT}", :server_type => 'rsync', :server_path => (opts[:server_path] || DEFAULT_SERVER_PATH), :ignores => opts[:ignores].to_s, :available_runner_usage => "100%", :project => "project")
+    requester = Requester.new(:server_uri => "http://#{opts[:connect]}:#{SERVER_PORT}", :server_type => 'rsync', :server_path => (opts[:server_path] || DEFAULT_SERVER_PATH), :ignores => opts[:ignores].to_s, :available_runner_usage => "100%", :project => "project", :ssh_tunnel => opts[:ssh_tunnel])
     requester.run_tests(adapter, adapter.base_path)
   end
   
