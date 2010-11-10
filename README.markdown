@@ -109,7 +109,7 @@ Make your change (don't forget to write tests) and send me a pull request.
 
 You can also contribute by adding to the [wiki](http://github.com/joakimk/testbot/wiki).
 
-Adding support for more test frameworks
+Adding support for more test frameworks (and programming languages? ;)
 ----
 
 Add a **lib/adapters/framework_name_adapter.rb** file, update **lib/adapters/adapter.rb** and this readme.
