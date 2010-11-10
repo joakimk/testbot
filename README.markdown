@@ -15,7 +15,7 @@ Try it out
 
     testbot --server
     testbot --runner --connect localhost
-    rails new testbotdemo; cd testbotdemo; script/rails generate scaffold post title:string; rake db:migrate db:test:prepare
+    mkdir -p testbotdemo/test; cd testbotdemo; echo 'puts "first test was run"' > test/first_test.rb; echo 'puts "second test was run"' > test/second_test.rb
     testbot --test --connect localhost
     
     # Cleanup

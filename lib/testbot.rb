@@ -20,7 +20,6 @@ class Testbot
     elsif opts[:version]
       puts "Testbot #{VERSION}"
     elsif [ true, 'run', 'start' ].include?(opts[:server])
-      require File.join(File.dirname(__FILE__), '/server')
       start_server(opts[:server])
     elsif opts[:server] == 'stop'
       stop('server', SERVER_PID)
@@ -80,10 +79,12 @@ class Testbot
     stop('server', SERVER_PID)
     
     if type == 'run'
+      require File.join(File.dirname(__FILE__), '/server')
       Sinatra::Application.run! :environment => "production"
     else
       pid = SimpleDaemonize.start(lambda {
         ENV['DISABLE_LOGGING'] = "true"
+        require File.join(File.dirname(__FILE__), '/server')
         Sinatra::Application.run! :environment => "production"
       }, SERVER_PID)
       puts "Testbot server started (pid: #{pid})"
