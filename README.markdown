@@ -74,7 +74,7 @@ Updating testbot
 
 To simplify updates there is a **--auto_update** option for the runner. The runner processes that use this option will be automatically updated and restarted when you change the server version.
 
-This requires testbot to be installed **without sudo** as the update simply does "gem install testbot -v new_version". I recommend using [RVM](http://rvm.beginrescueend.com/) (as it handles paths correctly).
+This requires testbot to be installed **without sudo** as the update simply runs "gem install testbot -v new_version". I recommend using [RVM](http://rvm.beginrescueend.com/) (it handles paths correctly).
 
 Example:
     testbot --runner --connect 192.168.0.100 --auto_update
