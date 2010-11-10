@@ -20,4 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency('sequel', '>= 3.16.0')
   s.add_dependency('sqlite3-ruby', '>= 1.3.2')
   s.add_dependency('json', '>= 1.4.6')
+  
+  # Because sinatra's "disable :logging" does not work with WEBrick.
+  s.add_dependency('mongrel', '>= 1.1.5')  
 end
