@@ -3,8 +3,6 @@
 
 Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber. The basic idea is that you let testbot spread the load of running your tests across multiple machines to make the tests run faster.
 
-One of the main benefits of testbot compared to other test distribution tools is that it **only requires you to be able to access one central server**. Because of this it's easy to add new users and you can use testbot from anywhere using SSH tunneling (built in support).
-
 Using testbot on 11 machines (25 cores) we got our test suite down to **2 minutes from 30**. [More examples of how testbot is used](http://github.com/joakimk/testbot/wiki/How-testbot-is-being-used).
 
 Installing
@@ -74,8 +72,9 @@ Using the rails plugin:
 Updating testbot
 ----
 
-To simplify updates of a distributed system like testbot there is a **--auto_update** option for the runner. The runner
-processes that use this option will be automatically updated and restarted when you change the server version.
+To simplify updates there is a **--auto_update** option for the runner. The runner processes that use this option will be automatically updated and restarted when you change the server version.
+
+This requires testbot to be installed **without sudo** as the update simply does "gem install testbot -v new_version". I recommend using [RVM](http://rvm.beginrescueend.com/) (as it handles paths correctly).
 
 Example:
     testbot --runner --connect 192.168.0.100 --auto_update
@@ -88,7 +87,7 @@ More options
 Could this readme be better somehow?
 ----
 
-If there is anything missing or unclear about how to use testbot you can create an [issue](http://github.com/joakimk/testbot/issues) (or fix it yourself and send me a pull request).
+If there is anything missing or unclear you can create an [issue](http://github.com/joakimk/testbot/issues) (or send me a pull request).
 
 Features
 ----
@@ -115,24 +114,7 @@ Adding support for more test frameworks
 
 Add a **lib/adapters/framework_name_adapter.rb** file, update **lib/adapters/adapter.rb** and this readme.
 
-Gotchas
+More
 ----
 
-* When you run your tests in smaller sets you may miss dependency errors in your suite.
-
-* The runner processes does not handle if a single user runs different projects at the same time. Code
-  fetching and initialization is then only done for one of the projects.
-
-* As the runners pull down and run code that can be posted by anyone with access to your central server you will have to have trust everyone using it.
-
-Tips
-----
-
-* I've seen about 20% faster test runtimes when using Ruby Enterprise Edition. You can find it at:
-[http://www.rubyenterpriseedition.com/](http://www.rubyenterpriseedition.com/).
-
-* I'm using a ubuntu based PXE (network-boot) server to run some of our testbots without having
-to install anything on the computers. Adding a new computer is as simple as setting it to
-boot from network. You can find the base PXE server setup at: [http://gist.github.com/622495](http://gist.github.com/622495).
-
-* Check the [wiki](http://github.com/joakimk/testbot/wiki) for more deployment tips.
+* Check the [wiki](http://github.com/joakimk/testbot/wiki) for more info.
