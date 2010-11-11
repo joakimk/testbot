@@ -1,0 +1,35 @@
+# Used for prefixing project files so that you can run
+# multiple projects in the same testbot network.
+<%- if project != 'project' -%>
+project: <%= project %>
+<%- else -%>
+# project: project
+<%- end -%>
+
+# The folder where your files are synced to and then fetched from
+# before running the tests. This must be a user and hostname that
+# every computer that has a runner can access without a password.
+<%- if options.server_path -%>
+server_path: <%= options.server_path %>
+<%- else -%>
+# server_path: testbot@<%= options.connect %>:/tmp/testbot/<%= ENV['USER'] %>
+<%- end -%>
+<%- if options.ignores -%>
+ignores: <%= options.ignores %>
+<%- else -%>
+# ignores:
+<%- end -%>
+
+# Set to a lower percentage to not use every available
+# instance or higher to create more jobs than there are instances.
+available_runner_usage: 100%
+
+# To tunnel traffic through SSH
+<%- if options.ssh_tunnel -%>
+ssh_tunnel: <%= options.ssh_tunnel %>
+<%- else -%>
+# ssh_tunnel: user@server
+<%- end -%>
+
+# To use http without a tunnel
+server_uri: http://<%= options.connect %>:2288
