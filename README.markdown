@@ -56,14 +56,13 @@ On every computer that should share CPU resources run:
 
     testbot --runner --connect 192.168.0.100
 
-Testing the network:
-
-    # Within your project run:
+Within your project run:
+    
     testbot --test --connect 192.168.0.100
     
     # --test could also be --spec or --features
 
-Using the rails plugin:
+Or use the rails plugin:
 
     # This adds config files and a rake task you can use to prepare the test environment on the runners
     # (like setting up a database).
