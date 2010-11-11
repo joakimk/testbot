@@ -62,12 +62,15 @@ Within your project run:
     
     # --test could also be --spec or --features
 
-Or use the rails plugin:
+Or use the rails plugin in rails 3:
 
-    # This adds config files and a rake task you can use to prepare the test environment on the runners
-    # (like setting up a database).
-    rake testbot:setup
+    # Add testbot to your Gemfile:
+    gem 'testbot'
     
+    # Generate config and rake tasks
+    rails g testbot --connect 192.168.0.100
+
+    # Run tests
     rake testbot:spec (or :test, :features)
 
 Updating testbot

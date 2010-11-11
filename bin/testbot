@@ -49,4 +49,4 @@ def show_help
   # puts "  --port <number>                          # Use a custom port"
 end
 
-show_help unless Testbot.run(ARGV)
+show_help unless Testbot::CLI.run(ARGV)
