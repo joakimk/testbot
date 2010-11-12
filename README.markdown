@@ -56,22 +56,22 @@ On every computer that should share CPU resources run:
 
     testbot --runner --connect 192.168.0.100
 
-Within your project run:
+Running tests:
     
     testbot --test --connect 192.168.0.100
-    
     # --test could also be --spec or --features
 
-Or use the rails plugin in rails 3:
+Using testbot with Rails 2:
 
-    # Add testbot to your Gemfile:
-    gem 'testbot'
-    
-    # Generate config and rake tasks
+    # ...
+
+Using testbot with Rails 3:
+
     rails g testbot --connect 192.168.0.100
-
-    # Run tests
     rake testbot:spec (or :test, :features)
+
+    # Gemfile:
+    gem 'testbot'
 
 Updating testbot
 ----
