@@ -30,9 +30,9 @@ def show_help
   puts
   puts "Test options:"
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
-  puts "  --ignores <ignores>\t\t# Files to ignores when syncing (default: include all)"
-  puts "  --server_path <path>\t\t# Sync path on the server (default: #{Testbot::DEFAULT_SERVER_PATH})"
-  puts "  --ssh_tunnel <user@server>\t# Use a ssh tunnel"
+  puts "  --rsync_ignores <ignores>\t\t# Files to ignore when syncing (default: include all)"
+  puts "  --rsync_path <path>\t\t# Sync path on the server (default: #{Testbot::DEFAULT_SERVER_PATH})"
+  puts "  --ssh_tunnel\t# Use a ssh tunnel (uses the same user and server as rsync)"
   puts
   puts "Other:"
   puts "  --help\t\t\t# Show help (this page)"
@@ -42,11 +42,14 @@ def show_help
   # puts "                                           # (when the server gem version is changed,"
   # puts "                                           #  this runs gem install with the same version"
   # puts "                                           #  and restarts the test runner)"
+  # puts "  --rsync_user <username>                  # Use a custom rsync user (default: testbot)"
+  # puts "  --rsync_server <server>                  # Use a custom rsync server (defaults to the same as --connect)"
 
   # TODO:
   # puts " --use_git_ignore                          # Don't rsync files that are ignored by git"
   # puts "  --status                                 # Show running background processes"
   # puts "  --port <number>                          # Use a custom port"
+
 end
 
 show_help unless Testbot::CLI.run(ARGV)

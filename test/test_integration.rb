@@ -20,7 +20,7 @@ class IntegrationTest < Test::Unit::TestCase
     # end
 
     sleep 1.0
-    result = `cd tmp/local; INTEGRATION_TEST=true ../../bin/testbot --spec --connect 127.0.0.1 --server_path ../server --ignores "log/* tmp/*"`
+    result = `cd tmp/local; INTEGRATION_TEST=true ../../bin/testbot --spec --connect 127.0.0.1 --rsync_path ../server --rsync_ignores "log/* tmp/*"`
   
     # Should include the result from script/spec
     #puts result.inspect

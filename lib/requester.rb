@@ -4,6 +4,7 @@ require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 require File.dirname(__FILE__) + '/adapters/adapter'
+require File.dirname(__FILE__) + '/testbot'
 
 class Requester
   
@@ -17,7 +18,7 @@ class Requester
     puts if config.simple_output
 
     if config.ssh_tunnel
-      user, host = config.ssh_tunnel.split('@')
+      user, host = Testbot::DEFAULT_USER, config.server_host
       SSHTunnel.new(host, user, adapter.requester_port).open
       server_uri = "http://127.0.0.1:#{adapter.requester_port}"
     else
@@ -25,14 +26,14 @@ class Requester
     end
 
     if config.server_type == 'rsync'
-      ignores = config.ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      system "rsync -az --delete -e ssh #{ignores} . #{config.server_path}"
+      rsync_ignores = config.rsync_ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
+      system "rsync -az --delete -e ssh #{rsync_ignores} . #{config.rsync_path}"
     end
         
     files = find_tests(adapter, dir)
     sizes = find_sizes(files)
 
-    build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.server_path,
+    build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.rsync_path,
                                                      :server_type => config.server_type,
                                                      :type => adapter.type.to_s,
                                                      :project => config.project,

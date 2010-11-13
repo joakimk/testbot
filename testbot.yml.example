@@ -7,14 +7,14 @@ project: project_name
 # before running the tests. This must be a user and hostname that
 # every computer that has a runner can access without a password.
 server_type: rsync
-server_path: user@server:/tmp/testbot/!USERNAME!
+rsync_path: user@server:/tmp/testbot/!USERNAME!
 
 # Using git
 # server_type: git
-# server_path: git@server:/path/to/repo
+# rsync_path: git@server:/path/to/repo
 
 # Only used for rsync, but the current version requires it.
-ignores: log/* .git
+rsync_ignores: log/* .git
 
 # Set to a lower percentage to not use every available
 # instance or higher to create more jobs than there are instances.

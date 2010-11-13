@@ -11,8 +11,9 @@ module Testbot
 
     def requester_attributes
       { :server_uri => "http://192.168.0.100:2288",
-        :server_type => 'rsync', :server_path => "/tmp/testbot/#{ENV['USER']}",
-        :ignores => '', :available_runner_usage => "100%", :project => "project", :ssh_tunnel => nil }
+        :server_host => "192.168.0.100",
+        :server_type => 'rsync', :rsync_path => "/tmp/testbot/#{ENV['USER']}",
+        :rsync_ignores => '', :available_runner_usage => "100%", :project => "project", :ssh_tunnel => nil }
     end  
   
   end
@@ -121,28 +122,28 @@ module Testbot
             assert_equal true, CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100" ])
           end
         
-          should "accept a custom server_path" do
+          should "accept a custom rsync_path" do
             flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :server_path => "/somewhere/else" })).
+                                with(requester_attributes.merge({ :rsync_path => "/somewhere/else" })).
                                 and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
-            CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--server_path', '/somewhere/else' ])
+            CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--rsync_path', '/somewhere/else' ])
           end
         
-          should "accept ignores" do
+          should "accept rsync_ignores" do
             flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :ignores => "tmp log" })).
+                                with(requester_attributes.merge({ :rsync_ignores => "tmp log" })).
                                 and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
-            CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ignores', 'tmp', 'log' ])
+            CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--rsync_ignores', 'tmp', 'log' ])
           end
         
           should "accept ssh tunnel" do
             flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :ssh_tunnel => "user@server" })).
+                                with(requester_attributes.merge({ :ssh_tunnel => true })).
                                 and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
-            CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ssh_tunnel', 'user@server' ])
+            CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ssh_tunnel' ])
           end
         end
       end

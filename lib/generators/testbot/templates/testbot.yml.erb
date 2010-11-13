@@ -7,17 +7,16 @@ project: <%= project %>
 <%- end -%>
 
 # The folder where your files are synced to and then fetched from
-# before running the tests. This must be a user and hostname that
-# every computer that has a runner can access without a password.
-<%- if options.server_path -%>
-server_path: <%= options.server_path %>
+# before running the tests.
+<%- if options.rsync_path -%>
+rsync_path: <%= options.rsync_path %>
 <%- else -%>
-# server_path: testbot@<%= options.connect %>:/tmp/testbot/<%= ENV['USER'] %>
+# rsync_path: <%= Testbot::DEFAULT_SERVER_PATH %>
 <%- end -%>
-<%- if options.ignores -%>
-ignores: <%= options.ignores %>
+<%- if options.rsync_ignores -%>
+rsync_ignores: <%= options.rsync_ignores %>
 <%- else -%>
-# ignores:
+# rsync_ignores:
 <%- end -%>
 
 # Set to a lower percentage to not use every available
