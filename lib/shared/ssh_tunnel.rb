@@ -27,7 +27,7 @@ class SSHTunnel
     @thread.kill! if @thread
     @thread = Thread.new do
       Net::SSH.start(@host, @user, { :timeout => 1 }) do |ssh|
-        ssh.forward.local(@local_port, 'localhost', 2288)
+        ssh.forward.local(@local_port, 'localhost', Testbot::SERVER_PORT)
         ssh.loop {  @up = true }
       end
     end    

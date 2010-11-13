@@ -6,11 +6,12 @@ require File.join(File.dirname(__FILE__), 'server/job.rb')
 require File.join(File.dirname(__FILE__), 'server/group.rb') unless defined?(Group)
 require File.join(File.dirname(__FILE__), 'server/runner.rb')
 require File.join(File.dirname(__FILE__), 'server/build.rb')
+require File.expand_path(File.join(File.dirname(__FILE__), 'testbot'))
 
 if ENV['INTEGRATION_TEST']
   set :port, 22880
 else
-  set :port, 2288
+  set :port, Testbot::SERVER_PORT
 end
 
 disable :logging if ENV['DISABLE_LOGGING']

@@ -22,7 +22,7 @@ class Requester
       SSHTunnel.new(host, user, adapter.requester_port).open
       server_uri = "http://127.0.0.1:#{adapter.requester_port}"
     else
-      server_uri = config.server_uri
+      server_uri = "http://#{config.server_host}:#{Testbot::SERVER_PORT}"
     end
 
     if config.rsync_path

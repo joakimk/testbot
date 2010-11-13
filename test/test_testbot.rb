@@ -10,8 +10,7 @@ module Testbot
   module TestHelpers
 
     def requester_attributes
-      { :server_uri => "http://192.168.0.100:2288",
-        :server_host => "192.168.0.100",
+      { :server_host => "192.168.0.100",
         :rsync_path => "/tmp/testbot/#{ENV['USER']}",
         :rsync_ignores => '', :available_runner_usage => "100%", :project => "project", :ssh_tunnel => nil }
     end  
@@ -152,8 +151,8 @@ module Testbot
     context "self.parse_args" do
 
       should 'convert ARGV arguments to a hash' do
-        hash = CLI.parse_args("--runner --connect http://127.0.0.1:2288 --working_dir ~/testbot --ssh_tunnel user@testbot_server".split)
-        assert_equal ({ :runner => true, :connect => "http://127.0.0.1:2288", :working_dir => "~/testbot", :ssh_tunnel => "user@testbot_server" }), hash
+        hash = CLI.parse_args("--runner --connect http://127.0.0.1:#{Testbot::SERVER_PORT} --working_dir ~/testbot --ssh_tunnel user@testbot_server".split)
+        assert_equal ({ :runner => true, :connect => "http://127.0.0.1:#{Testbot::SERVER_PORT}", :working_dir => "~/testbot", :ssh_tunnel => "user@testbot_server" }), hash
       end
     
       should "handle just a key without a value" do

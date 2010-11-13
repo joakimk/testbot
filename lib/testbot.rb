@@ -100,8 +100,7 @@ module Testbot
     end
   
     def self.start_requester(opts, adapter)
-      requester = Requester.new(:server_uri => "http://#{opts[:connect]}:#{Testbot::SERVER_PORT}",
-                                :server_host => opts[:connect],
+      requester = Requester.new(:server_host => opts[:connect],
                                 :rsync_path => (opts[:rsync_path] || Testbot::DEFAULT_SERVER_PATH),
                                 :rsync_ignores => opts[:rsync_ignores].to_s, :available_runner_usage => "100%",
                                 :project => "project", :ssh_tunnel => opts[:ssh_tunnel])

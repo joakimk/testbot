@@ -10,14 +10,14 @@ unless defined?(Test::Unit::AssertionFailedError)
 end
 
 def requester_with_result(results)
-  requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :rsync_path => 'user@server:/tmp/somewhere')
+  requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => 'user@server:/tmp/somewhere')
 
   flexmock(requester).should_receive(:find_tests).and_return([])
   flexmock(HTTParty).should_receive(:post).and_return('5')
   flexmock(requester).should_receive(:sleep).once
   flexmock(requester).should_receive(:puts).once
   flexmock(requester).should_receive(:system)
-  flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
+  flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
               :format => :json).and_return({ "done" => true, "results" => results })
   requester
 end
@@ -41,8 +41,8 @@ class RequesterTest < Test::Unit::TestCase
 
     should 'create a requester from config' do
       flexmock(YAML).should_receive(:load_file).once.with("testbot.yml").
-                     and_return({ :server_uri => 'http://somewhere:2288', :rsync_path => 'user@somewhere:/path', :rsync_ignores => ".git tmp", :available_runner_usage => '50%', :ssh_tunnel => false, :server_host => 'somewhere' })
-      flexmock(Requester).should_receive(:new).once.with({ :server_uri => 'http://somewhere:2288', :rsync_path => 'user@somewhere:/path', :rsync_ignores => '.git tmp', :available_runner_usage => '50%', :ssh_tunnel => false, :server_host => 'somewhere' })
+                     and_return({ :server_host => 'hostname', :rsync_path => 'user@somewhere:/path', :rsync_ignores => ".git tmp", :available_runner_usage => '50%', :ssh_tunnel => false })
+      flexmock(Requester).should_receive(:new).once.with({ :server_host => 'hostname', :rsync_path => 'user@somewhere:/path', :rsync_ignores => '.git tmp', :available_runner_usage => '50%', :ssh_tunnel => false })
       Requester.create_by_config("testbot.yml")
     end
     
@@ -52,13 +52,13 @@ class RequesterTest < Test::Unit::TestCase
 
     should "should be able to create a build" do
       flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
-      requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :rsync_path => 'user@somewhere:/path', :available_runner_usage => '60%', :project => 'things')
+      requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => 'user@somewhere:/path', :available_runner_usage => '60%', :project => 'things')
       flexmock(requester).should_receive(:find_tests).with(RSpecAdapter, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec/models/car_spec.rb' ])
       
       flexmock(File).should_receive(:stat).once.with("spec/models/house_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(10)
       flexmock(File).should_receive(:stat).once.with("spec/models/car_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(20)
       
-      flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:2288/builds",
+      flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds",
                                         :body => { :type => "spec",
                                                    :root => "user@somewhere:/path",
                                                    :project => "things",
@@ -78,13 +78,13 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "keep calling the server for results until done" do
-      requester = Requester.new(:server_uri => "http://192.168.1.100:2288")
+      requester = Requester.new(:server_host => "192.168.1.100")
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
       flexmock(HTTParty).should_receive(:post).and_return('5')
             
-      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
+      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                   :format => :json).and_return({ "done" => false, "results" => "job 2 done: ...." },
                                                { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
       mock_file_sizes
@@ -97,13 +97,13 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "not print empty lines when there is no result" do
-      requester = Requester.new(:server_uri => "http://192.168.1.100:2288")
+      requester = Requester.new(:server_host => "192.168.1.100")
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
       flexmock(HTTParty).should_receive(:post).and_return('5')
             
-      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
+      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                   :format => :json).and_return({ "done" => false, "results" => "" },
                                                { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
 
@@ -115,13 +115,13 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "sync the files to the server" do
-      requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :rsync_path => 'user@somewhere:/path', :rsync_ignores => '.git tmp')
+      requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => 'user@somewhere:/path', :rsync_ignores => '.git tmp')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
       flexmock(HTTParty).should_receive(:post).and_return('5')      
       flexmock(requester).should_receive(:sleep).once
-      flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:2288/builds/5",
+      flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                   :format => :json).and_return({ "done" => true, "results" => "" })
       
       flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . user@somewhere:/path")
@@ -131,15 +131,15 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "just try again if the request encounters an error while running and print on the fith time" do
-      requester = Requester.new(:server_uri => "http://192.168.1.100:2288")
+      requester = Requester.new(:server_host => "192.168.1.100")
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
       flexmock(HTTParty).should_receive(:post).and_return('5')
             
-      flexmock(HTTParty).should_receive(:get).times(5).with("http://192.168.1.100:2288/builds/5",
+      flexmock(HTTParty).should_receive(:get).times(5).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                   :format => :json).and_raise('some connection error')
-      flexmock(HTTParty).should_receive(:get).times(1).with("http://192.168.1.100:2288/builds/5",
+      flexmock(HTTParty).should_receive(:get).times(1).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                   :format => :json).and_return({ "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
 
       flexmock(requester).should_receive(:sleep).times(6).with(1)
@@ -151,13 +151,13 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "just try again if the status returns as nil" do
-      requester = Requester.new(:server_uri => "http://192.168.1.100:2288")
+      requester = Requester.new(:server_host => "192.168.1.100")
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
       flexmock(HTTParty).should_receive(:post).and_return('5')
             
-      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
+      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                   :format => :json).and_return(nil,
                                                { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
       
@@ -169,13 +169,13 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "remove unnessesary output from rspec when told to do so" do
-      requester = Requester.new(:server_uri => "http://192.168.1.100:2288", :simple_output => true)
+      requester = Requester.new(:server_host => "192.168.1.100", :simple_output => true)
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
       flexmock(HTTParty).should_receive(:post).and_return('5')
             
-      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:2288/builds/5",
+      flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                   :format => :json).and_return(nil,
                                                { "done" => true, "results" => "testbot4:\n....\n\nFinished in 84.333 seconds\n\n206 examples, 0 failures, 2 pending; testbot4:\n.F..\n\nFinished in 84.333 seconds\n\n206 examples, 0 failures, 2 pending" })
       
