@@ -34,7 +34,7 @@ def show_help
   puts "  --rsync_ignores <ignores>\t# Files to ignore when syncing (default: include all)"
   puts "  --rsync_path <path>\t\t# Sync path on the server (default: #{Testbot::DEFAULT_SERVER_PATH})"
   puts "  --ssh_tunnel\t\t\t# Use a ssh tunnel"
-  puts "  --user <username>\t\t# Use a custom rsync / ssh tunnel user (default: testbot)"
+  puts "  --user <username>\t\t# Use a custom rsync / ssh tunnel user (default: #{Testbot::DEFAULT_USER})"
   puts
   puts "Other:"
   puts "  --help\t\t\t# Show help (this page)"
