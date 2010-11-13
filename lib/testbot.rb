@@ -67,7 +67,7 @@ module Testbot
         Dir.chdir(working_dir)
         runner = Runner.new(:server_host => opts[:connect],
                             :automatic_updates => false, :max_instances => opts[:cpus],
-                            :ssh_tunnel => opts[:ssh_tunnel])
+                            :ssh_tunnel => opts[:ssh_tunnel], :user => opts[:user])
         runner.run!
       }
     
@@ -103,7 +103,8 @@ module Testbot
       requester = Requester.new(:server_host => opts[:connect],
                                 :rsync_path => (opts[:rsync_path] || Testbot::DEFAULT_SERVER_PATH),
                                 :rsync_ignores => opts[:rsync_ignores].to_s, :available_runner_usage => "100%",
-                                :project => "project", :ssh_tunnel => opts[:ssh_tunnel])
+                                :project => "project", :ssh_tunnel => opts[:ssh_tunnel],
+                                :user => opts[:user])
       requester.run_tests(adapter, adapter.base_path)
     end
   

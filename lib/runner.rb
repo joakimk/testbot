@@ -96,7 +96,7 @@ class Runner
       system "rm -rf #{folder}"
     }
     
-    SSHTunnel.new(@config.server_host, Testbot::DEFAULT_USER).open if @config.ssh_tunnel
+    SSHTunnel.new(@config.server_host, @config.server_user || Testbot::DEFAULT_USER).open if @config.ssh_tunnel
     while true
       # Make sure the jobs for this runner is taken by another runner if it crashes or
       # is restarted

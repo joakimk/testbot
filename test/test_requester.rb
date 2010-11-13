@@ -115,7 +115,7 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "sync the files to the server" do
-      requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => 'user@somewhere:/path', :rsync_ignores => '.git tmp')
+      requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => '/path', :rsync_ignores => '.git tmp')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
       
@@ -124,7 +124,7 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                   :format => :json).and_return({ "done" => true, "results" => "" })
       
-      flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . user@somewhere:/path")
+      flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . testbot@192.168.1.100:/path")
       mock_file_sizes
       
       requester.run_tests(RSpecAdapter, 'spec')
@@ -190,7 +190,7 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "use SSHTunnel when specified (with a port that does not collide with the runner)" do
-      requester = Requester.new(:ssh_tunnel => 'user@server', :server_host => "somewhere")
+      requester = Requester.new(:ssh_tunnel => true, :server_host => "somewhere")
 
       flexmock(SSHTunnel).should_receive(:new).once.with("somewhere", "testbot", 2299).and_return(ssh_tunnel = Object.new)
       flexmock(ssh_tunnel).should_receive(:open).once
@@ -202,7 +202,26 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:puts)
       mock_file_sizes
 
-      requester.run_tests(RSpecAdapter, 'spec')      
+      requester.run_tests(RSpecAdapter, 'spec')
+    end
+    
+    should "use another user for rsync and ssh_tunnel when specified" do
+      requester = Requester.new(:ssh_tunnel => true, :server_host => "somewhere",
+                                :server_user => "cruise", :rsync_path => "/tmp/testbot/foo")
+
+      flexmock(SSHTunnel).should_receive(:new).once.with("somewhere", "cruise", 2299).and_return(ssh_tunnel = Object.new)
+      flexmock(ssh_tunnel).should_receive(:open).once
+
+      flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb' ])
+      flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2299/builds", any).and_return('5')
+      flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
+      flexmock(requester).should_receive(:sleep)
+      flexmock(requester).should_receive(:puts)
+      
+      flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh  . cruise@somewhere:/tmp/testbot/foo")
+      mock_file_sizes
+
+      requester.run_tests(RSpecAdapter, 'spec')
     end
     
     should "use another port for cucumber to be able to run at the same time as rspec" do
@@ -222,7 +241,7 @@ class RequesterTest < Test::Unit::TestCase
     end
     
     should "use another port for Test::Unit" do
-      requester = Requester.new(:ssh_tunnel => 'user@server', :server_host => "somewhere")
+      requester = Requester.new(:ssh_tunnel => true, :server_host => "somewhere")
 
       flexmock(SSHTunnel).should_receive(:new).once.with("somewhere", "testbot", 2231).and_return(ssh_tunnel = Object.new)
       flexmock(ssh_tunnel).should_receive(:open).once

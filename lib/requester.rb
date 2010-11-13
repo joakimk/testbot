@@ -18,8 +18,7 @@ class Requester
     puts if config.simple_output
 
     if config.ssh_tunnel
-      user, host = Testbot::DEFAULT_USER, config.server_host
-      SSHTunnel.new(host, user, adapter.requester_port).open
+      SSHTunnel.new(config.server_host, server_user, adapter.requester_port).open
       server_uri = "http://127.0.0.1:#{adapter.requester_port}"
     else
       server_uri = "http://#{config.server_host}:#{Testbot::SERVER_PORT}"
@@ -27,7 +26,8 @@ class Requester
 
     if config.rsync_path
       rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      system "rsync -az --delete -e ssh #{rsync_ignores} . #{config.rsync_path}"
+      rsync_uri = ENV['INTEGRATION_TEST'] ? config.rsync_path : "#{server_user}@#{config.server_host}:#{config.rsync_path}"
+      system "rsync -az --delete -e ssh #{rsync_ignores} . #{rsync_uri}"
     end
         
     files = find_tests(adapter, dir)
@@ -91,6 +91,10 @@ class Requester
   end
   
   private
+  
+  def server_user
+    config.server_user || Testbot::DEFAULT_USER
+  end
   
   def root(config)
     config.rsync_path
