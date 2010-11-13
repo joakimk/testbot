@@ -4,7 +4,7 @@ require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 require File.dirname(__FILE__) + '/adapters/adapter'
-require File.dirname(__FILE__) + '/testbot'
+require File.expand_path(File.dirname(__FILE__) + '/testbot')
 
 class Requester
   
@@ -25,16 +25,15 @@ class Requester
       server_uri = config.server_uri
     end
 
-    if config.server_type == 'rsync'
-      rsync_ignores = config.rsync_ignores.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
+    if config.rsync_path
+      rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
       system "rsync -az --delete -e ssh #{rsync_ignores} . #{config.rsync_path}"
     end
         
     files = find_tests(adapter, dir)
     sizes = find_sizes(files)
 
-    build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => config.rsync_path,
-                                                     :server_type => config.server_type,
+    build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => root(config),
                                                      :type => adapter.type.to_s,
                                                      :project => config.project,
                                                      :requester_mac => Mac.addr,
@@ -92,6 +91,11 @@ class Requester
   end
   
   private
+  
+  def root(config)
+    config.rsync_path
+    #TODO: "#{Testbot::DEFAULT_USER}@#{config.server_host}:#{config.rsync_path}"
+  end
   
   def failed_build?(build)
     result_lines.any? { |line| line_is_failure?(line) }

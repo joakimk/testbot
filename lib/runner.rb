@@ -31,11 +31,11 @@ class CPU
 end
 
 class Job
-  attr_reader :server_type, :root, :project, :requester_mac
+  attr_reader :root, :project, :requester_mac
     
-  def initialize(runner, id, requester_mac, project, root, type, server_type, ruby_interpreter, files)
-    @runner, @id, @requester_mac, @project, @root, @type, @server_type, @ruby_interpreter, @files =
-         runner, id, requester_mac, project, root, type, server_type, ruby_interpreter, files
+  def initialize(runner, id, requester_mac, project, root, type, ruby_interpreter, files)
+    @runner, @id, @requester_mac, @project, @root, @type, @ruby_interpreter, @files =
+         runner, id, requester_mac, project, root, type, ruby_interpreter, files
   end
   
   def jruby?
@@ -43,10 +43,10 @@ class Job
   end
   
   def run(instance)
-    puts "Running job #{@id} from #{@requester_mac} (#{@server_type})... "
+    puts "Running job #{@id} from #{@requester_mac}... "
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
-    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project}_#{@server_type};"
+    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project}_rsync;"
     
     adapter = Adapter.find(@type)
     result += `#{base_environment} #{adapter.command(ruby_cmd, @files)} 2>&1`
@@ -152,21 +152,11 @@ class Runner
   end
   
   def fetch_code(job)
-    if job.server_type == 'rsync'
-      system "rsync -az --delete -e ssh #{job.root}/ #{job.project}_rsync"
-    elsif job.server_type == 'git'
-      if File.exists?("#{job.project}_git")
-        system "cd #{job.project}_git; git pull; cd .."
-      else
-        system "git clone #{job.root} #{job.project}_git"
-      end
-    else
-      raise "Unknown root type! (#{job.server_type})"
-    end
+    system "rsync -az --delete -e ssh #{job.root}/ #{job.project}_rsync"
   end
   
   def before_run(job)
-    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; export TEST_SERVER_TYPE=#{job.server_type}; cd #{job.project}_#{job.server_type}; rake testbot:before_run"
+    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}_rsync; rake testbot:before_run"
   end
   
   def first_job_from_requester?

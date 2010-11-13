@@ -1,5 +1,4 @@
 server_uri: http://localhost:22880
-server_type: rsync
 rsync_path: ../server
 available_runner_usage: 100%
 rsync_ignores: log/* tmp/*

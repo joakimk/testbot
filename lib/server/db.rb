@@ -10,7 +10,6 @@ DB.create_table :builds do
   String :root
   String :project
   String :type
-  String :server_type
   String :requester_mac
   Integer :jruby
   Boolean :done, :default => false
@@ -24,7 +23,6 @@ DB.create_table :jobs do
   String :root
   String :project
   String :type
-  String :server_type
   String :requester_mac
   Integer :jruby
   Integer :build_id

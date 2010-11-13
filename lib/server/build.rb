@@ -15,7 +15,6 @@ class Build < Sequel::Model
                  :root => self[:root],
                  :project => self[:project],
                  :type => self[:type],
-                 :server_type => self[:server_type],
                  :requester_mac => self[:requester_mac],
                  :build_id => self[:id],
                  :jruby => self[:jruby])

@@ -11,8 +11,6 @@ namespace :testbot do
   end
   
   task :before_run do
-    # use_git = (ENV['TEST_SERVER_TYPE'] == 'git')
-
     # Create database.yml
     database_yml = <<-DB_CONFIG
 test:

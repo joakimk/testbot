@@ -12,7 +12,7 @@ module Testbot
     def requester_attributes
       { :server_uri => "http://192.168.0.100:2288",
         :server_host => "192.168.0.100",
-        :server_type => 'rsync', :rsync_path => "/tmp/testbot/#{ENV['USER']}",
+        :rsync_path => "/tmp/testbot/#{ENV['USER']}",
         :rsync_ignores => '', :available_runner_usage => "100%", :project => "project", :ssh_tunnel => nil }
     end  
   
