@@ -26,7 +26,7 @@ Try it out
     cd ..; rm -rf testbotdemo
     rm -rf /tmp/testbot
 
-The project files from the demo project are synced to /tmp/testbot/$USER (default). The runner syncs the files to /tmp/testbot/project_rsync (default). The tests are then run and the results returned through the server and displayed.
+The project files from the demo project are synced to /tmp/testbot/$USER (default). The runner syncs the files to /tmp/testbot/project (default). The tests are then run and the results returned through the server and displayed.
 
 How it works
 ----

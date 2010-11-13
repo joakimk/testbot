@@ -46,7 +46,7 @@ class Job
     puts "Running job #{@id} from #{@requester_mac}... "
     test_env_number = (instance == 0) ? '' : instance + 1
     result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
-    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project}_rsync;"
+    base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project};"
     
     adapter = Adapter.find(@type)
     result += `#{base_environment} #{adapter.command(ruby_cmd, @files)} 2>&1`
@@ -91,8 +91,9 @@ class Runner
   attr_reader :config
   
   def run!
-    # Remove legacy instance* style folders
-    Dir.entries(".").find_all { |name| name.include?('instance') }.each { |folder|
+    # Remove legacy instance* and *_rsync|git style folders
+    Dir.entries(".").find_all { |name| name.include?('instance') || name.include?('_rsync') ||
+                                       name.include?('_git') }.each { |folder|
       system "rm -rf #{folder}"
     }
     
@@ -157,11 +158,11 @@ class Runner
   end
   
   def fetch_code(job)
-    system "rsync -az --delete -e ssh #{job.root}/ #{job.project}_rsync"
+    system "rsync -az --delete -e ssh #{job.root}/ #{job.project}"
   end
   
   def before_run(job)
-    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}_rsync; rake testbot:before_run"
+    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}; rake testbot:before_run"
   end
   
   def first_job_from_requester?

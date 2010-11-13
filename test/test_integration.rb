@@ -29,8 +29,8 @@ class IntegrationTest < Test::Unit::TestCase
     # Should not include ignored files
     assert !File.exists?("tmp/server/log/test.log")
     assert !File.exists?("tmp/server/tmp/restart.txt")
-    assert !File.exists?("tmp/runner/local_rsync/log/test.log")
-    assert !File.exists?("tmp/runner/local_rsync/tmp/restart.txt")
+    assert !File.exists?("tmp/runner/local/log/test.log")
+    assert !File.exists?("tmp/runner/local/tmp/restart.txt")
   end
   
   def teardown
