@@ -1,0 +1,35 @@
+namespace :testbot do
+  task :before_request do
+    # This is run after you start a request (ex: rake testbot:spec)
+  end
+  
+  task :before_run do
+    # This is run by the runner after files are synced but before tests are run
+
+    # Example: Setting up a test database
+    database_yml = <<-DB_CONFIG
+test:
+  adapter: mysql
+  encoding: utf8
+  database: <%= options.project %>_testbot_test<%%= ENV['TEST_ENV_NUMBER'] %>
+  username: root
+  password:
+  host: localhost
+DB_CONFIG
+
+    # database_file_path = "config/database.yml"
+    # File.open(database_file_path, 'w') { |f| f.write(database_yml) }
+    # 
+    # # Setup databases for all instances
+    # 0.upto(ENV['TEST_INSTANCES'].to_i - 1) do |instance|
+    #   test_env_number = (instance == 0) ? '' : instance + 1
+    #   system "mysqladmin -u root -f drop <%= options.project %>_testbot_test#{test_env_number}  > /dev/null 2>&1"
+    #   system "mysqladmin -u root -f create <%= options.project %>_testbot_test#{test_env_number} > /dev/null 2>&1"
+    #   system "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; rake db:test:load"
+    # end
+
+    # Example: Building gems
+    # system "rm vendor/gems/*/ext/**/*.o > /dev/null 2>&1"
+    # system "rake gems:build:force > /dev/null 2>&1"
+  end
+end
