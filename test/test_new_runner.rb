@@ -40,9 +40,9 @@ class ServerTest < Test::Unit::TestCase
   
   should 'configure the server uri' do
     flexmock(YAML).should_receive(:load_file).once.with("#{ENV['HOME']}/.testbot_runner.yml").
-                   and_return({ :server_uri => 'http://somewhere:#{Testbot::SERVER_PORT}' })
+                   and_return({ :server_host => 'somewhere' })
     NewRunner.load_config
-    assert_equal 'http://somewhere:#{Testbot::SERVER_PORT}', Server.base_uri
+    assert_equal "http://somewhere:2288", Server.base_uri
   end
   
 end

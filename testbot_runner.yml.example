@@ -1,10 +1,8 @@
-server_uri: http://localhost:2288
+server_host: localhost
 max_instances: 1
 automatic_updates: false
 
-# To tunnel traffic through SSH
-# ssh_tunnel: user@server
-# server_uri: http://localhost:2288
+# ssh_tunnel: true
 
 # To use less instances when running JRuby (as it requires more memory)
 # max_jruby_instances: 1

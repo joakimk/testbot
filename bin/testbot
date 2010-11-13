@@ -26,24 +26,24 @@ def show_help
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
   puts "  --working_dir <path>\t\t# Where to store temporary files (default: #{Testbot::DEFAULT_WORKING_DIR})"
   puts "  --cpus <number>\t\t# The number of CPU cores to use (default: use all)"
-  puts "  --ssh_tunnel <user@server>\t# Use a ssh tunnel"
+  puts "  --ssh_tunnel\t# Use a ssh tunnel"
   puts
   puts "Test options:"
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
   puts "  --rsync_ignores <ignores>\t\t# Files to ignore when syncing (default: include all)"
   puts "  --rsync_path <path>\t\t# Sync path on the server (default: #{Testbot::DEFAULT_SERVER_PATH})"
-  puts "  --ssh_tunnel\t# Use a ssh tunnel (uses the same user and server as rsync)"
+  puts "  --ssh_tunnel\t# Use a ssh tunnel"
   puts
   puts "Other:"
   puts "  --help\t\t\t# Show help (this page)"
   puts "  --version\t\t\t# Show the testbot version"
 
+  # puts "  --user <username>                        # Use a custom rsync / ssh tunnel user (default: testbot)"
   # puts "  --auto_update                            # Keep testbot updated to the same version as the server."
   # puts "                                           # (when the server gem version is changed,"
   # puts "                                           #  this runs gem install with the same version"
   # puts "                                           #  and restarts the test runner)"
-  # puts "  --rsync_user <username>                  # Use a custom rsync user (default: testbot)"
-  # puts "  --rsync_server <server>                  # Use a custom rsync server (defaults to the same as --connect)"
+
 
   # TODO:
   # puts " --use_git_ignore                          # Don't rsync files that are ignored by git"

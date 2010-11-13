@@ -65,7 +65,7 @@ module Testbot
         working_dir = opts[:working_dir] || Testbot::DEFAULT_WORKING_DIR
         FileUtils.mkdir_p(working_dir)
         Dir.chdir(working_dir)
-        runner = Runner.new(:server_uri => "http://#{opts[:connect]}:#{Testbot::SERVER_PORT}",
+        runner = Runner.new(:server_host => opts[:connect],
                             :automatic_updates => false, :max_instances => opts[:cpus],
                             :ssh_tunnel => opts[:ssh_tunnel])
         runner.run!

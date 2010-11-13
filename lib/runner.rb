@@ -78,7 +78,14 @@ class Runner
     @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1
     @config = OpenStruct.new(config)
     @config.max_instances = CPU.count unless @config.max_instances
-    Server.base_uri(@config.server_uri)
+    
+    if @config.ssh_tunnel
+      server_uri = "http://127.0.0.1:#{Testbot::SERVER_PORT}"
+    else
+      server_uri = "http://#{@config.server_host}:#{Testbot::SERVER_PORT}"
+    end
+    
+    Server.base_uri(server_uri)
   end
   
   attr_reader :config
@@ -89,7 +96,7 @@ class Runner
       system "rm -rf #{folder}"
     }
     
-    SSHTunnel.new(*@config.ssh_tunnel.split('@').reverse).open if @config.ssh_tunnel
+    SSHTunnel.new(@config.server_host, Testbot::DEFAULT_USER).open if @config.ssh_tunnel
     while true
       # Make sure the jobs for this runner is taken by another runner if it crashes or
       # is restarted

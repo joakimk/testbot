@@ -16,7 +16,8 @@ class NewRunner
   end
   
   def self.load_config
-    Server.base_uri YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml")[:server_uri]
+    host = YAML.load_file("#{ENV['HOME']}/.testbot_runner.yml")[:server_host]
+    Server.base_uri "http://#{host}:2288"
   end
 
   private
