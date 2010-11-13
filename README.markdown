@@ -73,7 +73,7 @@ Using testbot with Rails 2:
 
     ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/0.2.4'
 
-    # There isn't any Rails 2 generator yet. The simplest thing is probably to
+    # There isn't any rails 2 generator yet. The simplest thing is probably to
     # create a rails 3 app and then copy the generated files.
     # script/generate ...
     
