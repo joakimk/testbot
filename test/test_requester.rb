@@ -41,8 +41,8 @@ class RequesterTest < Test::Unit::TestCase
 
     should 'create a requester from config' do
       flexmock(YAML).should_receive(:load_file).once.with("testbot.yml").
-                     and_return({ :server_host => 'hostname', :rsync_path => 'user@somewhere:/path', :rsync_ignores => ".git tmp", :available_runner_usage => '50%', :ssh_tunnel => false })
-      flexmock(Requester).should_receive(:new).once.with({ :server_host => 'hostname', :rsync_path => 'user@somewhere:/path', :rsync_ignores => '.git tmp', :available_runner_usage => '50%', :ssh_tunnel => false })
+                     and_return({ :server_host => 'hostname', :rsync_path => '/path', :rsync_ignores => ".git tmp", :available_runner_usage => '50%', :ssh_tunnel => false })
+      flexmock(Requester).should_receive(:new).once.with({ :server_host => 'hostname', :rsync_path => '/path', :rsync_ignores => '.git tmp', :available_runner_usage => '50%', :ssh_tunnel => false })
       Requester.create_by_config("testbot.yml")
     end
     
@@ -52,7 +52,7 @@ class RequesterTest < Test::Unit::TestCase
 
     should "should be able to create a build" do
       flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
-      requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => 'user@somewhere:/path', :available_runner_usage => '60%', :project => 'things')
+      requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => '/path', :available_runner_usage => '60%', :project => 'things')
       flexmock(requester).should_receive(:find_tests).with(RSpecAdapter, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec/models/car_spec.rb' ])
       
       flexmock(File).should_receive(:stat).once.with("spec/models/house_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(10)
@@ -60,7 +60,7 @@ class RequesterTest < Test::Unit::TestCase
       
       flexmock(HTTParty).should_receive(:post).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds",
                                         :body => { :type => "spec",
-                                                   :root => "user@somewhere:/path",
+                                                   :root => "testbot@192.168.1.100:/path",
                                                    :project => "things",
                                                    :available_runner_usage => "60%",
                                                    :requester_mac => 'aa:aa:aa:aa:aa:aa',
@@ -260,9 +260,9 @@ class RequesterTest < Test::Unit::TestCase
       ENV['USE_JRUBY'] = "true"
       requester = Requester.new
 
-      other_args = { :available_runner_usage=>nil, :type=>"test", :requester_mac=>"00:25:00:a8:c3:00",
-        :sizes=>"0", :files=>"test/some_test.rb", :project=>nil,
-        :root=>nil }
+      other_args = { :available_runner_usage=>nil, :type=>"test", :requester_mac => Mac.addr,
+        :sizes=>"0", :files=>"test/some_test.rb", :project=>nil, :root => "testbot@:" }
+        
       flexmock(requester).should_receive(:find_tests).and_return([ 'test/some_test.rb' ])
       flexmock(HTTParty).should_receive(:post).with(any, :body => other_args.merge({ :jruby => true })).and_return('5')
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })

@@ -63,7 +63,7 @@ Running tests:
 
 Using testbot with Rails 3:
 
-    rails g testbot --connect 192.168.0.100
+    rails g testbot --connect 192.168.0.100 --project project_name
     rake testbot:spec (or :test, :features)
 
     # Gemfile:

@@ -135,8 +135,6 @@ class Runner
       next_job = Server.get("/jobs/next", :query => next_params) rescue nil
       next if next_job == nil
       
-      puts ([ self, next_job.split(',') ].flatten).inspect
-      
       job = Job.new(*([ self, next_job.split(',') ].flatten))
       if first_job_from_requester?
         fetch_code(job)

@@ -17,7 +17,7 @@ def show_help
   puts 
   puts "Types:"
   puts "  --server <start|stop|run>"
-  puts "  --runner <start|stop>"
+  puts "  --runner <start|stop|run>"
   Adapter.all.each do |adapter|
     puts "  --#{adapter.type}\t\t\t# Run #{adapter.name} tests"
   end

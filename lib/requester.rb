@@ -26,14 +26,13 @@ class Requester
 
     if config.rsync_path
       rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      rsync_uri = ENV['INTEGRATION_TEST'] ? config.rsync_path : "#{server_user}@#{config.server_host}:#{config.rsync_path}"
       system "rsync -az --delete -e ssh #{rsync_ignores} . #{rsync_uri}"
     end
         
     files = find_tests(adapter, dir)
     sizes = find_sizes(files)
 
-    build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => root(config),
+    build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => root,
                                                      :type => adapter.type.to_s,
                                                      :project => config.project,
                                                      :requester_mac => Mac.addr,
@@ -96,9 +95,20 @@ class Requester
     config.server_user || Testbot::DEFAULT_USER
   end
   
-  def root(config)
-    config.rsync_path
-    #TODO: "#{Testbot::DEFAULT_USER}@#{config.server_host}:#{config.rsync_path}"
+  def root
+    if localhost?
+      config.rsync_path
+    else
+      "#{Testbot::DEFAULT_USER}@#{config.server_host}:#{config.rsync_path}"
+    end
+  end
+  
+  def rsync_uri
+    localhost? ? config.rsync_path : "#{server_user}@#{config.server_host}:#{config.rsync_path}"
+  end
+  
+  def localhost?
+    [ '0.0.0.0', 'localhost', '127.0.0.1' ].include?(config.server_host)
   end
   
   def failed_build?(build)
