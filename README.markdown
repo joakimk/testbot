@@ -61,10 +61,6 @@ Running tests:
     testbot --test --connect 192.168.0.100
     # --test could also be --spec or --features
 
-Using testbot with Rails 2:
-
-    # ...
-
 Using testbot with Rails 3:
 
     rails g testbot --connect 192.168.0.100
@@ -72,6 +68,16 @@ Using testbot with Rails 3:
 
     # Gemfile:
     gem 'testbot'
+
+Using testbot with Rails 2:
+
+    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/0.2.4'
+
+    # There isn't any Rails 2 generator yet. The simplest thing is probably to
+    # create a rails 3 app and then copy the generated files.
+    # script/generate ...
+    
+    rake testbot:spec (or :test, :features)
 
 Updating testbot
 ----

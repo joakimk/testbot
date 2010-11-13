@@ -6,7 +6,7 @@ namespace :testbot do
     Rake::Task["testbot:before_request"].invoke
         
     require File.join(File.dirname(__FILE__), '..', "requester.rb")
-    requester = Requester.create_by_config("#{RAILS_ROOT}/config/testbot.yml")
+    requester = Requester.create_by_config("#{Rails.root}/config/testbot.yml")
 
     puts "Running #{adapter.pluralized}..."
     start_time = Time.now

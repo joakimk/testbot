@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.bindir      = "bin"
   s.executables = [ "testbot" ]
   s.files       = Dir.glob("lib/**/*") + %w(Gemfile testbot.gemspec CHANGELOG README.markdown bin/testbot)
-  s.add_dependency('sinatra', '>= 1.1.0')
+  s.add_dependency('sinatra', '=1.0.0') # To be able to use rack 1.0.1 which is compatible with rails 2.
   s.add_dependency('httparty', '>= 0.6.1')
   s.add_dependency('macaddr', '>= 1.0.0')
   s.add_dependency('net-ssh', '>= 2.0.23')
