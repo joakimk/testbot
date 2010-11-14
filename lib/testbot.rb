@@ -6,11 +6,11 @@ module Testbot
   require 'railtie' if defined?(Rails)
 
   VERSION = "0.2.4"
-  SERVER_PID="/tmp/testbot_server.pid"
-  RUNNER_PID="/tmp/testbot_runner.pid"
-  DEFAULT_WORKING_DIR="/tmp/testbot"
-  DEFAULT_SERVER_PATH="/tmp/testbot/#{ENV['USER']}"
-  DEFAULT_USER="testbot"
+  SERVER_PID = "/tmp/testbot_server.pid"
+  RUNNER_PID = "/tmp/testbot_runner.pid"
+  DEFAULT_WORKING_DIR = "/tmp/testbot"
+  DEFAULT_SERVER_PATH = "/tmp/testbot/#{ENV['USER']}"
+  DEFAULT_USER = "testbot"
   SERVER_PORT = ENV['INTEGRATION_TEST'] ? 22880 : 2288
   
   class CLI
