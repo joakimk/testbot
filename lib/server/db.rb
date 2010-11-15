@@ -34,7 +34,7 @@ DB.create_table :runners do
   primary_key :id
   String :ip
   String :hostname
-  String :mac
+  String :uid
   String :username
   String :version
   Integer :idle_instances

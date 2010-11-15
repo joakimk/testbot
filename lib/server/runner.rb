@@ -7,7 +7,7 @@ class Runner < Sequel::Model
   end
   
   def self.create_or_update_by_mac!(hash)
-    if (runner = find(:mac => hash[:mac]))
+    if (runner = find(:uid => hash[:uid]))
       runner.update hash
     else
       Runner.create hash

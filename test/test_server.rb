@@ -130,12 +130,12 @@ class ServerTest < Test::Unit::TestCase
     end
   
     should "save information about the runners" do
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini.local', :mac => "00:01:...", :idle_instances => 2, :max_instances => 4
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini.local', :uid => "00:01:...", :idle_instances => 2, :max_instances => 4
       runner = DB[:runners].first
       assert_equal Testbot::VERSION, runner[:version]
       assert_equal '127.0.0.1', runner[:ip]
       assert_equal 'macmini.local', runner[:hostname]
-      assert_equal '00:01:...', runner[:mac]
+      assert_equal '00:01:...', runner[:uid]
       assert_equal 2, runner[:idle_instances]
       assert_equal 4, runner[:max_instances]
       assert (Time.now - 5) < runner[:last_seen_at]
@@ -143,25 +143,25 @@ class ServerTest < Test::Unit::TestCase
     end
   
     should "only create one record for the same mac" do
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:01:..."
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:01:..."
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:01:..."
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:01:..."
       assert_equal 1, Runner.count
     end
   
     should "not return anything to outdated clients" do
       Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project'
-      get '/jobs/next', :version => "1", :mac => "00:..."
+      get '/jobs/next', :version => "1", :uid => "00:..."
       assert last_response.ok?
       assert_equal '', last_response.body
     end
     
     should "only give jobs from the same source to a runner" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb"
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:..."
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:..."
       
       # Creating the second job here because of the random lookup.
       job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa"
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
       
       assert last_response.ok?
       assert_equal '', last_response.body
@@ -169,11 +169,11 @@ class ServerTest < Test::Unit::TestCase
     
     should "not give more jruby jobs to an instance that can't take more" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :jruby => 1
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:..."
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:..."
       
       # Creating the second job here because of the random lookup.
       job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :jruby => 1
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:...", :no_jruby => "true"
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:...", :no_jruby => "true"
       
       assert last_response.ok?
       assert_equal '', last_response.body
@@ -181,11 +181,11 @@ class ServerTest < Test::Unit::TestCase
     
     should "still return other jobs when the runner cant take more jruby jobs" do
       job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :jruby => 1
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:..."
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:..."
       
       # Creating the second job here because of the random lookup.
       job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :jruby => 0
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:...", :no_jruby => "true"
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:...", :no_jruby => "true"
       
       assert last_response.ok?
       assert_equal job2.id.to_s, last_response.body.split(',')[0]
@@ -197,7 +197,7 @@ class ServerTest < Test::Unit::TestCase
       20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa" }
       
       macs = (0...10).map {
-        get '/jobs/next', :version => Testbot::VERSION, :mac => "00:..."
+        get '/jobs/next', :version => Testbot::VERSION, :uid => "00:..."
         last_response.body.split(',')[1]
       }
       
@@ -211,7 +211,7 @@ class ServerTest < Test::Unit::TestCase
       20.times { Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb" }
       
       files = (0...10).map {
-        get '/jobs/next', :version => Testbot::VERSION, :mac => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
+        get '/jobs/next', :version => Testbot::VERSION, :uid => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
         last_response.body.split(',').last
       }
       
@@ -223,8 +223,8 @@ class ServerTest < Test::Unit::TestCase
       missing_runner = Runner.create(:last_seen_at => Time.now - 15)
       old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa", :taken_by_id => missing_runner.id, :taken_at => Time.now - 30, :project => 'things'
       
-      new_runner = Runner.create(:mac => "00:01")
-      get '/jobs/next', :version => Testbot::VERSION, :mac => "00:01"
+      new_runner = Runner.create(:uid => "00:01")
+      get '/jobs/next', :version => Testbot::VERSION, :uid => "00:01"
       assert_equal new_runner.id, old_taken_job.reload.taken_by_id
       
       assert last_response.ok?
@@ -236,10 +236,10 @@ class ServerTest < Test::Unit::TestCase
   context "/runners/outdated" do
     
     should "return a list of outdated runners" do
-      get '/jobs/next', :version => "1", :hostname => 'macmini1.local', :mac => "00:01"
-      get '/jobs/next', :version => "1", :hostname => 'macmini2.local', :mac => "00:02"
+      get '/jobs/next', :version => "1", :hostname => 'macmini1.local', :uid => "00:01"
+      get '/jobs/next', :version => "1", :hostname => 'macmini2.local', :uid => "00:02"
       get '/jobs/next'    
-      get '/jobs/next', :version => Testbot::VERSION.to_s, :hostname => 'macmini3.local', :mac => "00:03"
+      get '/jobs/next', :version => Testbot::VERSION.to_s, :hostname => 'macmini3.local', :uid => "00:03"
       assert_equal 4, Runner.count
       get '/runners/outdated'
       assert last_response.ok?
@@ -251,17 +251,17 @@ class ServerTest < Test::Unit::TestCase
   context "GET /runners/available_runners" do
 
     should "return a list of available runners" do
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2, :username => 'user1'
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4, :username => 'user2'
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2, :username => 'user1'
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4, :username => 'user2'
       get '/runners/available'
       assert last_response.ok?
       assert_equal "127.0.0.1 macmini1.local 00:01 user1 2\n127.0.0.1 macmini2.local 00:02 user2 4", last_response.body
     end
     
     should "not return runners as available when not seen the last 10 seconds" do
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2, :username => "user1"
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
-      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 10)      
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2, :username => "user1"
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
+      Runner.find(:uid => "00:02").update(:last_seen_at => Time.now - 10)      
       get '/runners/available'
       assert_equal "127.0.0.1 macmini1.local 00:01 user1 2", last_response.body
     end
@@ -271,17 +271,17 @@ class ServerTest < Test::Unit::TestCase
   context "GET /runners/available_instances" do
     
     should "return the number of available runner instances" do
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
       get '/runners/available_instances'
       assert last_response.ok?
       assert_equal "6", last_response.body
     end    
         
     should "not return instances as available when not seen the last 10 seconds" do
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :mac => "00:01", :idle_instances => 2
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :mac => "00:02", :idle_instances => 4
-      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 10)
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
+      Runner.find(:uid => "00:02").update(:last_seen_at => Time.now - 10)
       get '/runners/available_instances'
       assert last_response.ok?
       assert_equal "2", last_response.body
@@ -292,17 +292,17 @@ class ServerTest < Test::Unit::TestCase
   context "GET /runners/total_instances" do
     
     should "return the number of available runner instances" do
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :mac => "00:01", :max_instances => 2
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :mac => "00:02", :max_instances => 4
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4
       get '/runners/total_instances'
       assert last_response.ok?
       assert_equal "6", last_response.body
     end    
         
     should "not return instances as available when not seen the last 10 seconds" do
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :mac => "00:01", :max_instances => 2
-      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :mac => "00:02", :max_instances => 4
-      Runner.find(:mac => "00:02").update(:last_seen_at => Time.now - 10)
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2
+      get '/jobs/next', :version => Testbot::VERSION, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4
+      Runner.find(:uid => "00:02").update(:last_seen_at => Time.now - 10)
       get '/runners/total_instances'
       assert last_response.ok?
       assert_equal "2", last_response.body
@@ -313,8 +313,8 @@ class ServerTest < Test::Unit::TestCase
   context "GET /runners/ping" do
     
     should "update last_seen_at for the runner" do
-      runner = Runner.create(:mac => 'aa:aa:aa:aa:aa:aa')
-      get "/runners/ping", :mac => 'aa:aa:aa:aa:aa:aa', :version => Testbot::VERSION
+      runner = Runner.create(:uid => 'aa:aa:aa:aa:aa:aa')
+      get "/runners/ping", :uid => 'aa:aa:aa:aa:aa:aa', :version => Testbot::VERSION
       runner.reload
       assert last_response.ok?
       assert (Time.now - 5) < runner[:last_seen_at]
@@ -322,11 +322,11 @@ class ServerTest < Test::Unit::TestCase
     end
     
     should "update data on the runner" do
-      runner = Runner.create(:mac => 'aa:aa:..')
-      get "/runners/ping", :mac => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot::VERSION, :username => 'jocke'
+      runner = Runner.create(:uid => 'aa:aa:..')
+      get "/runners/ping", :uid => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot::VERSION, :username => 'jocke'
       runner.reload
       assert last_response.ok?
-      assert_equal 'aa:aa:..', runner.mac
+      assert_equal 'aa:aa:..', runner.uid
       assert_equal 4, runner.max_instances
       assert_equal 2, runner.idle_instances
       assert_equal 'hostname1', runner.hostname
@@ -335,14 +335,14 @@ class ServerTest < Test::Unit::TestCase
     end
     
     should "do nothing if the version does not match" do
-      runner = Runner.create(:mac => 'aa:aa:..', :version => Testbot::VERSION)
-      get "/runners/ping", :mac => 'aa:aa:..', :version => "OLD"
+      runner = Runner.create(:uid => 'aa:aa:..', :version => Testbot::VERSION)
+      get "/runners/ping", :uid => 'aa:aa:..', :version => "OLD"
       assert last_response.ok?
       assert_equal Testbot::VERSION, runner.reload.version
     end
     
     should "do nothing if the runners isnt known yet found" do
-      get "/runners/ping", :mac => 'aa:aa:aa:aa:aa:aa', :version => Testbot::VERSION
+      get "/runners/ping", :uid => 'aa:aa:aa:aa:aa:aa', :version => Testbot::VERSION
       assert last_response.ok?
     end
     

@@ -98,11 +98,8 @@ class Runner
     
     SSHTunnel.new(@config.server_host, @config.server_user || Testbot::DEFAULT_USER).open if @config.ssh_tunnel
     while true
-      # Make sure the jobs for this runner is taken by another runner if it crashes or
-      # is restarted
-      sleep 15 unless ENV['INTEGRATION_TEST']
-
       begin
+        update_uid!
         start_ping
         wait_for_jobs
       rescue Exception => ex
@@ -113,6 +110,13 @@ class Runner
   end
 
   private
+  
+  def update_uid!
+    # When a runner crashes or is restarted it might loose current job info. Because
+    # of this we provide a new unique ID to the server so that it does not wait for
+    # lost jobs to complete.
+    @uid = "#{Time.now.to_i}@#{Mac.addr}"
+  end
   
   def wait_for_jobs
     loop do
@@ -195,7 +199,7 @@ class Runner
   end
   
   def base_params
-    { :version => Testbot::VERSION, :mac => Mac.addr }
+    { :version => Testbot::VERSION, :uid => @uid }
   end
   
   def max_instances_running?

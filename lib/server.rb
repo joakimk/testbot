@@ -46,13 +46,13 @@ end
 
 get '/runners/ping' do
   return unless Server.valid_version?(params[:version])
-  runner = Runner.find(:mac => params[:mac])
+  runner = Runner.find(:uid => params[:uid])
   runner.update(params.merge({ :last_seen_at => Time.now })) if runner
   nil
 end
 
 get '/runners/outdated' do
-  Runner.find_all_outdated.map { |runner| [ runner[:ip], runner[:hostname], runner[:mac] ].join(' ') }.join("\n").strip
+  Runner.find_all_outdated.map { |runner| [ runner[:ip], runner[:hostname], runner[:uid] ].join(' ') }.join("\n").strip
 end
 
 get '/runners/available_instances' do
@@ -64,7 +64,7 @@ get '/runners/total_instances' do
 end
 
 get '/runners/available' do
-  Runner.find_all_available.map { |runner| [ runner[:ip], runner[:hostname], runner[:mac], runner[:username], runner[:idle_instances] ].join(' ') }.join("\n").strip
+  Runner.find_all_available.map { |runner| [ runner[:ip], runner[:hostname], runner[:uid], runner[:username], runner[:idle_instances] ].join(' ') }.join("\n").strip
 end
 
 get '/version' do
