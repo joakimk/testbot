@@ -17,20 +17,9 @@ end
 disable :logging if ENV['DISABLE_LOGGING']
 
 class Server
-  def self.version
-    33
-  end
-  
   def self.valid_version?(runner_version)
-    version == runner_version.to_i
+    Testbot::VERSION == runner_version
   end
-end
-
-class Sinatra::Application
-  def config
-    @@config ||= ENV['INTEGRATION_TEST'] ? { :update_uri => '' } : YAML.load_file("#{ENV['HOME']}/.testbot_server.yml")
-    OpenStruct.new(@@config)
-  end  
 end
 
 post '/builds' do
@@ -79,10 +68,5 @@ get '/runners/available' do
 end
 
 get '/version' do
-  Server.version.to_s
+  Testbot::VERSION
 end
-
-get '/update_uri' do
-  config.update_uri
-end
-

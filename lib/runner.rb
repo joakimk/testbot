@@ -182,15 +182,12 @@ class Runner
   def check_for_update
     return unless @config.automatic_updates
     version = Server.get('/version') rescue TESTBOT_VERSION
-    return unless version.to_i != TESTBOT_VERSION
-    
-    update_uri = Server.get("/update_uri") rescue nil
-    if update_uri
-      successful_download = system "rm -rf ~/runner_update && mkdir ~/runner_update && curl -L #{update_uri} | tar xz --strip 1 -C ~/runner_update"
+    return unless version != TESTBOT_VERSION
 
-      # This closes the process and runs the updater.
-      exec "~/runner_update/bin/update_runner" if successful_download
-    end
+    successful_install = system "gem install testbot -v #{version}"
+
+    # This closes the process and attempts to re-run the same command.
+    exec "testbot #{ARGV.join(' ')}" if successful_install
   end
   
   def ping_params

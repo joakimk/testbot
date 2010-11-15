@@ -36,7 +36,7 @@ DB.create_table :runners do
   String :hostname
   String :mac
   String :username
-  Integer :version
+  String :version
   Integer :idle_instances
   Integer :max_instances
   Datetime :last_seen_at
