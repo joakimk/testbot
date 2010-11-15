@@ -68,7 +68,9 @@ module Testbot
         Dir.chdir(working_dir)
         runner = Runner.new(:server_host => opts[:connect],
                             :auto_update => opts[:auto_update], :max_instances => opts[:cpus],
-                            :ssh_tunnel => opts[:ssh_tunnel], :user => opts[:user])
+                            :ssh_tunnel => opts[:ssh_tunnel], :user => opts[:user],
+                            :max_jruby_instances => opts[:max_jruby_instances],
+                            :jruby_opts => opts[:jruby_opts])
         runner.run!
       }
     

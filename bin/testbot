@@ -29,6 +29,8 @@ def show_help
   puts "  --ssh_tunnel\t\t\t# Use a ssh tunnel"
   puts "  --user <username>\t\t# Use a custom ssh tunnel user (default: testbot)"
   puts "  --auto_update\t\t\t# Keep testbot updated to the same version as the server."
+  puts "  --max_jruby_instances <num>\t# To use less instances when running JRuby (as it requires more memory)"
+  puts "  --jruby_opts <-J-X...>\t# Options to JRuby."
   puts
   puts "Test options:"
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
