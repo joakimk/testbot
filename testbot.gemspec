@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency('macaddr', '>= 1.0.0')
   s.add_dependency('net-ssh', '>= 2.0.23')
   s.add_dependency('sequel', '>= 3.16.0')
-  s.add_dependency('sqlite3-ruby', '>= 1.3.2')
+  s.add_dependency('sqlite3-ruby', '>= 1.2.5')
   s.add_dependency('json', '>= 1.4.6')
   
   # Because sinatra's "disable :logging" does not work with WEBrick.
