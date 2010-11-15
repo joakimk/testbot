@@ -8,7 +8,11 @@ server_user: <%= options.user %>
 
 # Project prefix. Used for prefixing project files
 # so that you can run multiple projects in the same testbot network.
+<%- if options.project %>
 project: <%= options.project %>
+<%- else -%>
+# project: <%= Testbot::DEFAULT_PROJECT %>
+<%- end -%>
 
 # RSync settings. The folder where your files are synced to
 # and then fetched from before running the tests.

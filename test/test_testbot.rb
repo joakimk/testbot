@@ -152,6 +152,14 @@ module Testbot
             flexmock(mock).should_receive(:run_tests)
             CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--user', 'cruise' ])
           end
+          
+          should "accept a custom project name" do
+            flexmock(Requester).should_receive(:new).once.
+                                with(requester_attributes.merge({ :project => "rspec" })).
+                                and_return(mock = Object.new)
+            flexmock(mock).should_receive(:run_tests)
+            CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--project', 'rspec' ])
+          end
         end
       end
     end
