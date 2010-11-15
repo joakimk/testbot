@@ -5,7 +5,6 @@ require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 require File.dirname(__FILE__) + '/adapters/adapter'
 
-TESTBOT_VERSION = 33
 TIME_BETWEEN_POLLS = 1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
@@ -180,9 +179,9 @@ class Runner
   end
   
   def check_for_update
-    return unless @config.automatic_updates
-    version = Server.get('/version') rescue TESTBOT_VERSION
-    return unless version != TESTBOT_VERSION
+    return unless @config.auto_update
+    version = Server.get('/version') rescue Testbot::VERSION
+    return unless version != Testbot::VERSION
 
     successful_install = system "gem install testbot -v #{version}"
 
@@ -196,7 +195,7 @@ class Runner
   end
   
   def base_params
-    { :version => TESTBOT_VERSION, :mac => Mac.addr }
+    { :version => Testbot::VERSION, :mac => Mac.addr }
   end
   
   def max_instances_running?

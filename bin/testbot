@@ -28,6 +28,7 @@ def show_help
   puts "  --cpus <number>\t\t# The number of CPU cores to use (default: use all)"
   puts "  --ssh_tunnel\t\t\t# Use a ssh tunnel"
   puts "  --user <username>\t\t# Use a custom ssh tunnel user (default: testbot)"
+  puts "  --auto_update\t\t\t# Keep testbot updated to the same version as the server."
   puts
   puts "Test options:"
   puts "  --connect <host_or_ip>\t# Which server to use (required)"
@@ -35,13 +36,12 @@ def show_help
   puts "  --rsync_path <path>\t\t# Sync path on the server (default: #{Testbot::DEFAULT_SERVER_PATH})"
   puts "  --ssh_tunnel\t\t\t# Use a ssh tunnel"
   puts "  --user <username>\t\t# Use a custom rsync / ssh tunnel user (default: #{Testbot::DEFAULT_USER})"
-  puts "  --project <project_name>\t\t# Use a custom project name (default: #{Testbot::DEFAULT_PROJECT})"
+  puts "  --project <project_name>\t# Use a custom project name (default: #{Testbot::DEFAULT_PROJECT})"
   puts
   puts "Other:"
   puts "  --help\t\t\t# Show help (this page)"
   puts "  --version\t\t\t# Show the testbot version"
 
-  # puts "  --auto_update                            # Keep testbot updated to the same version as the server."
   # puts "                                           # (when the server gem version is changed,"
   # puts "                                           #  this runs gem install with the same version"
   # puts "                                           #  and restarts the test runner)"

@@ -67,7 +67,7 @@ module Testbot
         FileUtils.mkdir_p(working_dir)
         Dir.chdir(working_dir)
         runner = Runner.new(:server_host => opts[:connect],
-                            :automatic_updates => false, :max_instances => opts[:cpus],
+                            :auto_update => opts[:auto_update], :max_instances => opts[:cpus],
                             :ssh_tunnel => opts[:ssh_tunnel], :user => opts[:user])
         runner.run!
       }
