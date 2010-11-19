@@ -5,3 +5,4 @@ todo.txt
 instance*
 **/*.rbc
 *.sh
+**/*.swp

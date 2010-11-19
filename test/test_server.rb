@@ -14,7 +14,7 @@ class ServerTest < Test::Unit::TestCase
     DB[:runners].delete
     DB[:builds].delete
   end
-
+  
   def app
     Sinatra::Application
   end
