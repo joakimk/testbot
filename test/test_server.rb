@@ -22,31 +22,31 @@ class ServerTest < Test::Unit::TestCase
   context "POST /builds" do
     
     should "create a build and return its id" do
-       flexmock(Runner).should_receive(:total_instances).and_return(2)
-       post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "10 20", :jruby => false
+      flexmock(Runner).should_receive(:total_instances).and_return(2)
+      post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "10 20", :jruby => false
        
-       first_build = Build.first
-       assert last_response.ok?
-       assert_equal first_build[:id].to_s, last_response.body
-       assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_build[:files]
-       assert_equal '10 20', first_build[:sizes]
-       assert_equal 'server:/path/to/project', first_build[:root]
-       assert_equal 'spec', first_build[:type]
-       assert_equal 'bb:bb:bb:bb:bb:bb', first_build[:requester_mac]
-       assert_equal 'things', first_build[:project]
-       assert_equal 0, first_build[:jruby]
-       assert_equal '', first_build[:results]
+      first_build = Build.first
+      assert last_response.ok?
+      assert_equal first_build[:id].to_s, last_response.body
+      assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_build[:files]
+      assert_equal '10 20', first_build[:sizes]
+      assert_equal 'server:/path/to/project', first_build[:root]
+      assert_equal 'spec', first_build[:type]
+      assert_equal 'bb:bb:bb:bb:bb:bb', first_build[:requester_mac]
+      assert_equal 'things', first_build[:project]
+      assert_equal 0, first_build[:jruby]
+      assert_equal '', first_build[:results]
     end
-        
+
     should "create jobs from the build based on the number of total instances" do
       flexmock(Runner).should_receive(:total_instances).and_return(2)      
       flexmock(Group).should_receive(:build).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], [ 1, 1, 1, 1 ], 2, 'spec').once.and_return([
         ["spec/models/car_spec.rb", "spec/models/car2_spec.rb"],
         ["spec/models/house_spec.rb", "spec/models/house2_spec.rb"]
       ])
-      
+
       post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "1 1 1 1", :jruby => true
-      
+     
       assert_equal 2, Job.count
       first_job, last_job = Job.all
       assert_equal 'spec/models/car_spec.rb spec/models/car2_spec.rb', first_job[:files]
