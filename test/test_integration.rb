@@ -24,7 +24,8 @@ class IntegrationTest < Test::Unit::TestCase
   
     # Should include the result from script/spec
     #puts result.inspect
-    assert result.include?('script/spec got called with ["-O", "spec/spec.opts", "spec/models/house_spec.rb", "spec/models/car_spec.rb"]')
+    assert result.include?('script/spec got called with ["-O", "spec/spec.opts", "spec/models/house_spec.rb", "spec/models/car_spec.rb"]') ||
+           result.include?('script/spec got called with ["-O", "spec/spec.opts", "spec/models/car_spec.rb", "spec/models/house_spec.rb"]')           
   
     # Should not include ignored files
     assert !File.exists?("tmp/server/log/test.log")

@@ -16,6 +16,10 @@ def with_test_gemset
   end
 end
 
+def find_latest_gem
+  [ "pkg", Dir.entries("pkg").reject { |file| file[0,1] == '.' }.sort_by { |file| File.mtime("pkg/#{file}") }.last ].join('/')
+end
+
 Given /^I have a rails (\d+) application$/ do |version|
   has_rvm = system "which rvm &> /dev/null"
   raise "You need rvm to run these tests as the tests use it to setup isolated environments." unless has_rvm
@@ -26,8 +30,8 @@ Given /^I have a rails (\d+) application$/ do |version|
   @test_gemset_name = "testbot_rails#{version}"
   @current_gemset = `rvm gemset name`.chomp
   @app_path = "tmp/cucumber/rails#{version}"
-  @testbot_gem_path = [ "pkg", Dir.entries("pkg").sort_by { |file| File.ctime("pkg/#{file}") }.last ].join('/')
-  
+  @testbot_gem_path = find_latest_gem
+
   has_gemset = `rvm gemset list|grep '#{@test_gemset_name}'` != ""
   if has_gemset
     with_test_gemset do
@@ -41,7 +45,7 @@ Given /^I have a rails (\d+) application$/ do |version|
     system "rvm gemset create #{@test_gemset_name}"
     
     with_test_gemset do
-      system("gem install rails -v 3.0.3 1> /dev/null") || raise("Failed to install rails#{version}")
+      system("gem install rails -v 3.0.3 --no-ri --no-rdoc 1> /dev/null") || raise("Failed to install rails#{version}")
       create_app(version)
     end
   end
