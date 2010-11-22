@@ -6,3 +6,5 @@ instance*
 **/*.rbc
 *.sh
 **/*.swp
+**/.*.swp
+tmp
