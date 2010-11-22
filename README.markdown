@@ -109,7 +109,7 @@ Contributing to testbot
 ----
 
 First, get the tests to run:
-    gem install rack-test shoulda flexmock
+    bundle
     rake
 
 For development I recommend: [grosser/autotest](http://github.com/grosser/autotest)

@@ -1,0 +1,57 @@
+PATH
+  remote: .
+  specs:
+    testbot (0.2.5)
+      httparty (>= 0.6.1)
+      json (>= 1.4.6)
+      macaddr (>= 1.0.0)
+      mongrel (>= 1.1.5)
+      net-ssh (>= 2.0.23)
+      sequel (>= 3.16.0)
+      sinatra (= 1.0.0)
+      sqlite3-ruby (>= 1.2.5)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    cgi_multipart_eof_fix (2.5.0)
+    crack (0.1.8)
+    daemons (1.1.0)
+    fastthread (1.0.7)
+    flexmock (0.8.11)
+    gem_plugin (0.2.3)
+    httparty (0.6.1)
+      crack (= 0.1.8)
+    json (1.4.6)
+    macaddr (1.0.0)
+    mongrel (1.1.5)
+      cgi_multipart_eof_fix (>= 2.4)
+      daemons (>= 1.0.3)
+      fastthread (>= 1.0.1)
+      gem_plugin (>= 0.2.3)
+    net-ssh (2.0.23)
+    rack (1.2.1)
+    rack-test (0.5.6)
+      rack (>= 1.0)
+    sequel (3.17.0)
+    shoulda (2.11.3)
+    sinatra (1.0)
+      rack (>= 1.0)
+    sqlite3-ruby (1.3.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  flexmock
+  httparty (>= 0.6.1)
+  json (>= 1.4.6)
+  macaddr (>= 1.0.0)
+  mongrel (>= 1.1.5)
+  net-ssh (>= 2.0.23)
+  rack-test
+  sequel (>= 3.16.0)
+  shoulda
+  sinatra (= 1.0.0)
+  sqlite3-ruby (>= 1.2.5)
+  testbot!
