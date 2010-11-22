@@ -22,5 +22,6 @@ Gem::Specification.new do |s|
   s.add_dependency('json', '>= 1.4.6')
   
   # Because sinatra's "disable :logging" does not work with WEBrick.
-  s.add_dependency('mongrel', '>= 1.1.5')  
+  # Also, using a version that builds on ruby 1.9.2.
+  s.add_dependency('mongrel', '1.2.0.pre2')  
 end
