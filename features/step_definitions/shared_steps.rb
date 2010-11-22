@@ -1,6 +1,7 @@
 def create_app(version)
+  system("gem install #{@testbot_gem_path} 1> /dev/null") || raise("Testbot install failed")
   if version.to_i == 3
-    system "rails new #{@app_path} &> /dev/null" || raise('Failed to create rails3 fixture')
+    system("rails new #{@app_path} 1> /dev/null") || raise('Failed to create rails3 fixture')
   else
     raise "Implement"
   end
@@ -20,10 +21,13 @@ Given /^I have a rails (\d+) application$/ do |version|
   raise "You need rvm to run these tests as the tests use it to setup isolated environments." unless has_rvm
   
   system "rm -rf tmp/cucumber; mkdir -p tmp/cucumber"
+  system "rake build 1> /dev/null"
+  
   @test_gemset_name = "testbot_rails#{version}"
   @current_gemset = `rvm gemset name`.chomp
   @app_path = "tmp/cucumber/rails#{version}"
-
+  @testbot_gem_path = [ "pkg", Dir.entries("pkg").sort_by { |file| File.ctime("pkg/#{file}") }.last ].join('/')
+  
   has_gemset = `rvm gemset list|grep '#{@test_gemset_name}'` != ""
   if has_gemset
     with_test_gemset do
@@ -37,7 +41,7 @@ Given /^I have a rails (\d+) application$/ do |version|
     system "rvm gemset create #{@test_gemset_name}"
     
     with_test_gemset do
-      system "gem install rails -v 3.0.3 &> /dev/null" || raise("Failed to install rails#{version}")
+      system("gem install rails -v 3.0.3 1> /dev/null") || raise("Failed to install rails#{version}")
       create_app(version)
     end
   end
@@ -49,7 +53,7 @@ end
 
 Given /^I run "([^"]*)"$/ do |command|
   with_test_gemset do
-    system "cd #{@app_path}; #{command} &> /dev/null"
+    system("cd #{@app_path}; #{command} 1>/dev/null") || raise("Command failed.")
   end
 end
 

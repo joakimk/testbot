@@ -5,6 +5,8 @@ todo.txt
 instance*
 **/*.rbc
 *.sh
-**/*.swp
-**/.*.swp
+*/*.swp
+*/**/.*.swp
+*/**/*.swp
+*/*/*/*.swp
 tmp
