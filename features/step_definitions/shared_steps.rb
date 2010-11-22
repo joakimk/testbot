@@ -57,3 +57,11 @@ Given /^I run "([^"]*)"$/ do |command|
   end
 end
 
+Then /^there is a "([^"]*)" file$/ do |path|
+  File.exists?([ @app_path, path ].join('/')) || raise("File missing")
+end
+
+Then /^the "([^"]*)" file contains "([^"]*)"$/ do |path, content|
+  File.read([ @app_path, path ].join('/')).include?(content) || raise("#{path} did not contain #{content}")
+end
+
