@@ -30,7 +30,8 @@ class GroupTest < Test::Unit::TestCase
                                       'spec/models/house_spec.rb', 'spec/models/house2_spec.rb' ], [ 40, 10, 10, 20 ], 2, 'spec')
     
       assert_equal [ 'spec/models/car_spec.rb' ], groups[0]
-      assert_equal [ 'spec/models/house2_spec.rb', 'spec/models/car2_spec.rb', 'spec/models/house_spec.rb' ], groups[1]      
+      assert ![ 'spec/models/house2_spec.rb', 'spec/models/car2_spec.rb', 'spec/models/house_spec.rb' ].
+              find { |file| !groups[1].include?(file) }      
     end
     
   end
