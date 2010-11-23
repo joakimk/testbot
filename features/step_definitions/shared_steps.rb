@@ -22,7 +22,7 @@ def use_test_gemset!
 end
 
 Given /^I have a rails (.+) application$/ do |version|
-  has_rvm = system "which rvm &> /dev/null"
+  has_rvm = system "which rvm > /dev/null"
   raise "You need rvm to run these tests as the tests use it to setup isolated environments." unless has_rvm
   
   system "rm -rf tmp/cucumber; mkdir -p tmp/cucumber"
