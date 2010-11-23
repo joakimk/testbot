@@ -1,3 +1,5 @@
+require 'rvm'
+
 def rails3?
   @version[0, 1].to_i == 3
 end
@@ -9,16 +11,6 @@ def create_app
     system("rails new #{@app_path} 1> /dev/null") || raise('Failed to create rails3 app')
   else
     system("rails #{@app_path} 1> /dev/null") || raise("Failed to create rails2 app")
-  end
-end
-
-def with_test_gemset
-  begin
-    require 'rvm'
-    RVM.gemset_use! @test_gemset_name
-    yield
-  ensure
-    RVM.gemset_use! @current_gemset
   end
 end
 
@@ -34,23 +26,19 @@ Given /^I have a rails (.+) application$/ do |version|
   
   @version = version
   @test_gemset_name = "testbot_rails_#{@version}"
-  @current_gemset = `rvm gemset name`.chomp
   @testbot_path = Dir.pwd
   @app_path = "tmp/cucumber/rails_#{@version}"
 
   has_gemset = `rvm gemset list|grep '#{@test_gemset_name}'` != ""
   if has_gemset
-    with_test_gemset do
-      create_app
-    end
+    RVM.gemset_use! @test_gemset_name
   else
     system "rvm gemset create #{@test_gemset_name} 1> /dev/null"
     
-    with_test_gemset do
-      system("gem install rails -v #{@version} --no-ri --no-rdoc 1> /dev/null") || raise("Failed to install rails#{@version}")
-      create_app
-    end
+    RVM.gemset_use! @test_gemset_name
+    system("gem install rails -v #{@version} --no-ri --no-rdoc 1> /dev/null") || raise("Failed to install rails#{@version}")
   end
+  create_app
 end
 
 Given /^I add testbot$/ do
