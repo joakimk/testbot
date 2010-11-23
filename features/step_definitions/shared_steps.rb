@@ -6,7 +6,6 @@ end
 
 def create_app
   if rails3? 
-    system "rake build 1> /dev/null" if rails3?
     system("gem install #{find_latest_gem} 1> /dev/null") || raise("Testbot install failed")
     system("rails new #{@app_path} 1> /dev/null") || raise('Failed to create rails3 app')
   else
@@ -35,6 +34,8 @@ Given /^I have a rails (.+) application$/ do |version|
   @testbot_path = Dir.pwd
   @app_path = "tmp/cucumber/rails_#{@version}"
 
+  system "rake build 1> /dev/null" if rails3?
+  
   has_gemset = `rvm gemset list|grep '#{@test_gemset_name}'` != ""
   if has_gemset
     use_test_gemset!
