@@ -18,6 +18,12 @@ def find_latest_gem
   [ "pkg", Dir.entries("pkg").reject { |file| file[0,1] == '.' }.sort_by { |file| File.mtime("pkg/#{file}") }.last ].join('/')
 end
 
+def use_test_gemset!
+  # Using this because "RVM.gemset_use! @test_gemset_name" gets YAML
+  # errors loading the environment in CI.
+  RVM::Environment.new(ENV['RUBY_VERSION']).gemset_use!(@test_gemset_name)
+end
+
 Given /^I have a rails (.+) application$/ do |version|
   has_rvm = system "which rvm &> /dev/null"
   raise "You need rvm to run these tests as the tests use it to setup isolated environments." unless has_rvm
@@ -31,11 +37,11 @@ Given /^I have a rails (.+) application$/ do |version|
 
   has_gemset = `rvm gemset list|grep '#{@test_gemset_name}'` != ""
   if has_gemset
-    RVM.gemset_use! @test_gemset_name
+    use_test_gemset!
   else
     system "rvm gemset create #{@test_gemset_name} 1> /dev/null"
     
-    RVM.gemset_use! @test_gemset_name
+    use_test_gemset!
     system("gem install rails -v #{@version} --no-ri --no-rdoc 1> /dev/null") || raise("Failed to install rails#{@version}")
   end
   create_app
