@@ -6,5 +6,6 @@ group :development do
   gem "rack-test"
   gem "flexmock"
   gem "cucumber"
+  gem "rvm"
 end
 
