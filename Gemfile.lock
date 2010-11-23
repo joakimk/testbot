@@ -40,6 +40,8 @@ GEM
     rack (1.2.1)
     rack-test (0.5.6)
       rack (>= 1.0)
+    rake (0.8.7)
+    rvm (1.1.0)
     sequel (3.17.0)
     shoulda (2.11.3)
     sinatra (1.0)
@@ -59,6 +61,8 @@ DEPENDENCIES
   mongrel (= 1.2.0.pre2)
   net-ssh (>= 2.0.23)
   rack-test
+  rake
+  rvm
   sequel (>= 3.16.0)
   shoulda
   sinatra (= 1.0.0)

@@ -112,7 +112,6 @@ Contributing to testbot
 First, get the tests to run:
     bundle
     rake
-    cucumber
 
 For development I recommend: [grosser/autotest](http://github.com/grosser/autotest)
     autotest -f -c

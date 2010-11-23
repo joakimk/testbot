@@ -1,24 +1,27 @@
 require 'bundler'
+require 'cucumber'
+require 'cucumber/rake/task'
+
 Bundler::GemHelper.install_tasks
 
-task :default do
+task :default => [ :test, :features ] do
+end
+
+desc "Run Test::Unit tests"
+task :test do
   Dir["test/**/test_*.rb"].each { |test| require(File.expand_path(test)) }
 end
 
-namespace :test do
+Cucumber::Rake::Task.new(:features) do |t|
+  t.cucumber_opts = "features --format progress"
+end
 
-  task :create_test_app do
-    system "cd /tmp; rm -rf testapp; rails testapp &> /dev/null"
-  
-    print "Creating testgroups (100): "
-    0.upto(100) do |number|
-      print "#{number} "; STDOUT.flush
-      system "cd /tmp/testapp; script/generate scaffold model#{number} field:string &> /dev/null"
+# HACK: As we use RVM to install gems while running cucumber we don't want bundler
+# to raise an error like "rails is not part of the bundle. Add it to Gemfile.".
+module Cucumber::Rake
+  class Task::ForkedCucumberRunner
+    def runner
+      [ RUBY ]
     end
-    puts
-  
-    system "cd /tmp/testapp; rake db:migrate &> /dev/null"
-    puts "Testapp ready in /tmp/testapp"
   end
-  
 end
