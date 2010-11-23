@@ -6,8 +6,8 @@ require 'shoulda'
 class IntegrationTest < Test::Unit::TestCase
 
   def stop!
-    system "bin/testbot --server stop &>/dev/null"
-    system "bin/testbot --runner stop &>/dev/null"
+    system "bin/testbot --server stop > /dev/null"
+    system "bin/testbot --runner stop > /dev/null"
   end
 
   # This is slow, and Test:Unit does not have "before/after :all" method, so I'm using a single testcase for multiple tests
@@ -20,8 +20,8 @@ class IntegrationTest < Test::Unit::TestCase
     }
 
     system "mkdir -p tmp; cp -rf test/fixtures/local tmp/local"
-    system "export INTEGRATION_TEST=true; bin/testbot --runner --connect 127.0.0.1 --working_dir tmp/runner &> /dev/null"
-    system "export INTEGRATION_TEST=true; bin/testbot --server &> /dev/null"
+    system "export INTEGRATION_TEST=true; bin/testbot --runner --connect 127.0.0.1 --working_dir tmp/runner > /dev/null"
+    system "export INTEGRATION_TEST=true; bin/testbot --server > /dev/null"
      
     # For debug
     # Thread.new do
