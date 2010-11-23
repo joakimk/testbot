@@ -18,9 +18,7 @@ def find_latest_gem
 end
 
 def use_test_gemset!
-  # Using this because "RVM.gemset_use! @test_gemset_name" gets YAML
-  # errors loading the environment in CI.
-  RVM::Environment.new(ENV['RUBY_VERSION']).gemset_use!(@test_gemset_name)
+  RVM.gemset_use! @test_gemset_name
 end
 
 Given /^I have a rails (.+) application$/ do |version|
