@@ -293,8 +293,9 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:system)
       flexmock(Mac).should_receive(:addr).and_return("00:01:..") 
 
+      # This is quite ugly. I want something like hash_including instead...
       other_args = { :type=>"test", :available_runner_usage=>"100%",
-        :root=>"testbot@:/tmp/testbot/jocke", :files=>"test/some_test.rb",
+        :root=>"testbot@:/tmp/testbot/#{ENV['USER']}", :files=>"test/some_test.rb",
         :requester_mac=>"00:01:..", :sizes=>"0", :project=>"project" }
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'test/some_test.rb' ])
