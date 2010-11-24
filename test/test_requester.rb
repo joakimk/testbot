@@ -41,9 +41,31 @@ class RequesterTest < Test::Unit::TestCase
 
     should 'create a requester from config' do
       flexmock(YAML).should_receive(:load_file).once.with("testbot.yml").
-                     and_return({ :server_host => 'hostname', :rsync_path => '/path', :rsync_ignores => ".git tmp", :available_runner_usage => '50%', :ssh_tunnel => false })
-      flexmock(Requester).should_receive(:new).once.with({ :server_host => 'hostname', :rsync_path => '/path', :rsync_ignores => '.git tmp', :available_runner_usage => '50%', :ssh_tunnel => false })
+                     and_return({ :server_host => 'hostname', :rsync_path => '/path',
+                                  :rsync_ignores => ".git tmp", :available_runner_usage => '50%',
+                                  :ssh_tunnel => false, :project => "appname", :server_user => "user" })
+      flexmock(Requester).should_receive(:new).once.with({ :server_host => 'hostname',
+                         :rsync_path => '/path', :rsync_ignores => '.git tmp',
+                         :available_runner_usage => '50%', :ssh_tunnel => false, :project => "appname",
+                         :server_user => "user" })
       Requester.create_by_config("testbot.yml")
+    end
+
+
+  end
+
+  context "initialize" do
+    
+    should "use defaults when values are missing" do
+      expected = { :server_host            => 'hostname',
+                   :rsync_path             => Testbot::DEFAULT_SERVER_PATH,
+                   :project                => Testbot::DEFAULT_PROJECT,
+                   :server_user            => Testbot::DEFAULT_USER,
+                   :available_runner_usage => Testbot::DEFAULT_RUNNER_USAGE }
+      
+      actual = Requester.new({ :server_host => 'hostname' }).config 
+
+      assert_equal OpenStruct.new(expected), actual
     end
 
   end
@@ -81,6 +103,7 @@ class RequesterTest < Test::Unit::TestCase
       requester = Requester.new(:server_host => "192.168.1.100")
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      flexmock(requester).should_receive(:system)
 
       flexmock(HTTParty).should_receive(:post).and_return('5')
 
@@ -100,6 +123,7 @@ class RequesterTest < Test::Unit::TestCase
       requester = Requester.new(:server_host => "192.168.1.100")
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      flexmock(requester).should_receive(:system)
 
       flexmock(HTTParty).should_receive(:post).and_return('5')
 
@@ -118,6 +142,7 @@ class RequesterTest < Test::Unit::TestCase
       requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => '/path', :rsync_ignores => '.git tmp')
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      flexmock(requester).should_receive(:system)
 
       flexmock(HTTParty).should_receive(:post).and_return('5')
       flexmock(requester).should_receive(:sleep).once
@@ -134,6 +159,7 @@ class RequesterTest < Test::Unit::TestCase
       requester = Requester.new(:server_host => "192.168.1.100")
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      flexmock(requester).should_receive(:system)
 
       flexmock(HTTParty).should_receive(:post).and_return('5')
 
@@ -154,6 +180,7 @@ class RequesterTest < Test::Unit::TestCase
       requester = Requester.new(:server_host => "192.168.1.100")
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      flexmock(requester).should_receive(:system)
 
       flexmock(HTTParty).should_receive(:post).and_return('5')
 
@@ -172,6 +199,7 @@ class RequesterTest < Test::Unit::TestCase
       requester = Requester.new(:server_host => "192.168.1.100", :simple_output => true)
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      flexmock(requester).should_receive(:system)
 
       flexmock(HTTParty).should_receive(:post).and_return('5')
 
@@ -191,6 +219,7 @@ class RequesterTest < Test::Unit::TestCase
 
     should "use SSHTunnel when specified (with a port that does not collide with the runner)" do
       requester = Requester.new(:ssh_tunnel => true, :server_host => "somewhere")
+      flexmock(requester).should_receive(:system)
 
       flexmock(SSHTunnel).should_receive(:new).once.with("somewhere", "testbot", 2299).and_return(ssh_tunnel = Object.new)
       flexmock(ssh_tunnel).should_receive(:open).once
@@ -226,6 +255,7 @@ class RequesterTest < Test::Unit::TestCase
 
     should "use another port for cucumber to be able to run at the same time as rspec" do
       requester = Requester.new(:ssh_tunnel => true, :server_host => "somewhere")
+      flexmock(requester).should_receive(:system)
 
       flexmock(SSHTunnel).should_receive(:new).once.with("somewhere", "testbot", 2230).and_return(ssh_tunnel = Object.new)
       flexmock(ssh_tunnel).should_receive(:open).once
@@ -242,6 +272,7 @@ class RequesterTest < Test::Unit::TestCase
 
     should "use another port for Test::Unit" do
       requester = Requester.new(:ssh_tunnel => true, :server_host => "somewhere")
+      flexmock(requester).should_receive(:system)
 
       flexmock(SSHTunnel).should_receive(:new).once.with("somewhere", "testbot", 2231).and_return(ssh_tunnel = Object.new)
       flexmock(ssh_tunnel).should_receive(:open).once
@@ -259,9 +290,11 @@ class RequesterTest < Test::Unit::TestCase
     should "request a run with jruby if USE_JRUBY is set" do
       ENV['USE_JRUBY'] = "true"
       requester = Requester.new
+      flexmock(requester).should_receive(:system)
 
-      other_args = { :available_runner_usage=>nil, :type=>"test", :requester_mac => Mac.addr,
-        :sizes=>"0", :files=>"test/some_test.rb", :project=>nil, :root => "testbot@:" }
+      other_args = { :type=>"test", :available_runner_usage=>"100%",
+        :root=>"testbot@:/tmp/testbot/jocke", :files=>"test/some_test.rb",
+        :requester_mac=>"00:25:00:a8:c3:00", :sizes=>"0", :project=>"project" }
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'test/some_test.rb' ])
       flexmock(HTTParty).should_receive(:post).with(any, :body => other_args.merge({ :jruby => true })).and_return('5')

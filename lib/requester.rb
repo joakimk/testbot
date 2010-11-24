@@ -11,6 +11,10 @@ class Requester
   attr_reader :config
 
   def initialize(config = {})
+    config[:rsync_path]             ||= Testbot::DEFAULT_SERVER_PATH
+    config[:project]                ||= Testbot::DEFAULT_PROJECT
+    config[:server_user]            ||= Testbot::DEFAULT_USER
+    config[:available_runner_usage] ||= Testbot::DEFAULT_RUNNER_USAGE
     @config = OpenStruct.new(config)
   end
 
@@ -18,17 +22,15 @@ class Requester
     puts if config.simple_output
 
     if config.ssh_tunnel
-      SSHTunnel.new(config.server_host, server_user, adapter.requester_port).open
+      SSHTunnel.new(config.server_host, config.server_user, adapter.requester_port).open
       server_uri = "http://127.0.0.1:#{adapter.requester_port}"
     else
       server_uri = "http://#{config.server_host}:#{Testbot::SERVER_PORT}"
     end
 
-    if config.rsync_path
-      rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      system "rsync -az --delete -e ssh #{rsync_ignores} . #{rsync_uri}"
-    end
-
+    rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
+    system "rsync -az --delete -e ssh #{rsync_ignores} . #{rsync_uri}"
+   
     files = find_tests(adapter, dir)
     sizes = find_sizes(files)
 
@@ -82,7 +84,8 @@ class Requester
   end
 
   def self.create_by_config(path)
-    Requester.new(YAML.load_file(path))
+    config = YAML.load_file(path)
+    Requester.new(config)
   end
 
   def result_lines
@@ -91,20 +94,16 @@ class Requester
 
   private
 
-  def server_user
-    config.server_user || Testbot::DEFAULT_USER
-  end
-
   def root
     if localhost?
       config.rsync_path
     else
-      "#{server_user}@#{config.server_host}:#{config.rsync_path}"
+      "#{config.server_user}@#{config.server_host}:#{config.rsync_path}"
     end
   end
 
   def rsync_uri
-    localhost? ? config.rsync_path : "#{server_user}@#{config.server_host}:#{config.rsync_path}"
+    localhost? ? config.rsync_path : "#{config.server_user}@#{config.server_host}:#{config.rsync_path}"
   end
 
   def localhost?

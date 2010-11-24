@@ -12,6 +12,7 @@ module Testbot
   DEFAULT_SERVER_PATH = "/tmp/testbot/#{ENV['USER']}"
   DEFAULT_USER = "testbot"
   DEFAULT_PROJECT = "project"
+  DEFAULT_RUNNER_USAGE = "100%"
   SERVER_PORT = ENV['INTEGRATION_TEST'] ? 22880 : 2288
   
   class CLI
@@ -104,10 +105,11 @@ module Testbot
   
     def self.start_requester(opts, adapter)
       requester = Requester.new(:server_host => opts[:connect],
-                                :rsync_path => (opts[:rsync_path] || Testbot::DEFAULT_SERVER_PATH),
-                                :rsync_ignores => opts[:rsync_ignores].to_s, :available_runner_usage => "100%",
-                                :project => (opts[:project] || Testbot::DEFAULT_PROJECT),
-                                :ssh_tunnel => opts[:ssh_tunnel], :user => opts[:user])
+                                :rsync_path => opts[:rsync_path],
+                                :rsync_ignores => opts[:rsync_ignores].to_s,
+                                :available_runner_usage => nil,
+                                :project => opts[:project],
+                                :ssh_tunnel => opts[:ssh_tunnel], :server_user => opts[:user])
       requester.run_tests(adapter, adapter.base_path)
     end
   

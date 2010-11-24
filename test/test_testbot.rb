@@ -11,8 +11,9 @@ module Testbot
 
     def requester_attributes
       { :server_host => "192.168.0.100",
-        :rsync_path => "/tmp/testbot/#{ENV['USER']}",
-        :rsync_ignores => '', :available_runner_usage => "100%", :project => "project", :ssh_tunnel => nil, :user => nil }
+        :rsync_path => nil,
+        :rsync_ignores => '', :server_user => nil, :available_runner_usage => nil,
+        :project => nil, :ssh_tunnel => nil }
     end  
   
   end
@@ -147,7 +148,7 @@ module Testbot
           
           should "accept a custom user" do
             flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :user => "cruise" })).
+                                with(requester_attributes.merge({ :server_user => "cruise" })).
                                 and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
             CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--user', 'cruise' ])
