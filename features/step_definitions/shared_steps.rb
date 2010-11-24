@@ -50,7 +50,7 @@ Given /^I add testbot$/ do
   if rails3?
     system %{echo 'gem "testbot"' >> #{@app_path}/Gemfile}
   else
-    system %{cd #{@app_path}; script/plugin install #{@testbot_path}}
+    system %{cd #{@app_path}; ln -s #{@testbot_path} vendor/plugins/testbot}
   end
 end
 
