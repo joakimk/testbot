@@ -294,7 +294,7 @@ class RequesterTest < Test::Unit::TestCase
 
       other_args = { :type=>"test", :available_runner_usage=>"100%",
         :root=>"testbot@:/tmp/testbot/jocke", :files=>"test/some_test.rb",
-        :requester_mac=>"00:25:00:a8:c3:00", :sizes=>"0", :project=>"project" }
+        :requester_mac=>Mac.addr, :sizes=>"0", :project=>"project" }
 
       flexmock(requester).should_receive(:find_tests).and_return([ 'test/some_test.rb' ])
       flexmock(HTTParty).should_receive(:post).with(any, :body => other_args.merge({ :jruby => true })).and_return('5')
