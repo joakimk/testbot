@@ -55,9 +55,7 @@ Given /^I add testbot$/ do
 end
 
 Given /^I run "([^"]*)"$/ do |command|
-  with_test_gemset do
-    system("cd #{@app_path}; #{command} 1>/dev/null") || raise("Command failed.")
-  end
+  system("cd #{@app_path}; #{command} 1>/dev/null") || raise("Command failed.")
 end
 
 Then /^there is a "([^"]*)" file$/ do |path|
@@ -69,7 +67,7 @@ Then /^the "([^"]*)" file contains "([^"]*)"$/ do |path, content|
 end
 
 Then /^the testbot rake tasks are present$/ do
-  pending
-  # p `cd #{@app_path}; rake -T testbot` 
+  rake_tasks = `cd #{@app_path}; rake -T testbot`
+  raise unless rake_tasks.include?('rake testbot:test')
 end
 
