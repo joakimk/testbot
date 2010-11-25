@@ -6,11 +6,21 @@ require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 require File.dirname(__FILE__) + '/adapters/adapter'
 require File.expand_path(File.dirname(__FILE__) + '/testbot')
 
+class Hash
+  def symbolize_keys_without_active_support
+    inject({}) do |options, (key, value)|
+      options[(key.to_sym rescue key) || key] = value
+      options
+    end
+  end
+end
+
 class Requester
 
   attr_reader :config
 
   def initialize(config = {})
+    config = config.symbolize_keys_without_active_support
     config[:rsync_path]             ||= Testbot::DEFAULT_SERVER_PATH
     config[:project]                ||= Testbot::DEFAULT_PROJECT
     config[:server_user]            ||= Testbot::DEFAULT_USER
