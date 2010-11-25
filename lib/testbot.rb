@@ -5,7 +5,9 @@ require 'fileutils'
 module Testbot
   require 'railtie' if defined?(Rails)
 
-  VERSION = "0.2.6"
+  # Don't forget to update readme
+  VERSION = "0.2.7"
+
   SERVER_PID = "/tmp/testbot_server.pid"
   RUNNER_PID = "/tmp/testbot_runner.pid"
   DEFAULT_WORKING_DIR = "/tmp/testbot"
