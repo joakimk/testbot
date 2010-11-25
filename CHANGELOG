@@ -1,4 +1,4 @@
-0.2.9
+0.3.0
 
 Made testbot into a gem. Simplified the design. Added a CLI. Removed git support.
 
