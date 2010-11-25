@@ -6,7 +6,7 @@ module Testbot
   require 'railtie' if defined?(Rails)
 
   # Don't forget to update readme and changelog
-  VERSION = "0.3.1"
+  VERSION = "0.3.2"
 
   SERVER_PID = "/tmp/testbot_server.pid"
   RUNNER_PID = "/tmp/testbot_runner.pid"

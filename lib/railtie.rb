@@ -1,5 +1,5 @@
 require 'testbot'
-if require('rails') rescue nil
+if (require('rails') rescue(nil))
   module Testbot
     class Railtie < Rails::Railtie
       rake_tasks do

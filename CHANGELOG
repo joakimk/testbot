@@ -1,4 +1,4 @@
-0.3.1
+0.3.2
 
 Fixed loading issue in rails 2, testbot depended on having rails installed as a gem.
 
