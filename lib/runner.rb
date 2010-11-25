@@ -76,7 +76,7 @@ class Runner
     @last_requester_mac = nil
     @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1
     @config = OpenStruct.new(config)
-    @config.max_instances = CPU.count unless @config.max_instances
+    @config.max_instances = @config.max_instances ? @config.max_instances.to_i || CPU.count 
     
     if @config.ssh_tunnel
       server_uri = "http://127.0.0.1:#{Testbot::SERVER_PORT}"
@@ -142,7 +142,7 @@ class Runner
       job = Job.new(*([ self, next_job.split(',') ].flatten))
       if first_job_from_requester?
         fetch_code(job)
-        before_run(job) if File.exists?("lib/tasks/testbot.rake")
+        before_run(job) if File.exists?("#{job.project}/lib/tasks/testbot.rake")
       end
       
       @instances << [ Thread.new { job.run(free_instance_number) },
