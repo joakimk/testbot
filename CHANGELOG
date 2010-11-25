@@ -1,3 +1,7 @@
+0.3.1
+
+Fixed loading issue in rails 2, testbot depended on having rails installed as a gem.
+
 0.3.0
 
 Made testbot into a gem. Simplified the design. Added a CLI. Removed git support.
