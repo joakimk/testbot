@@ -189,10 +189,14 @@ class Runner
 
     successful_install = system "gem install testbot -v #{version}"
 
-    # This closes the process and attempts to re-run the same command.
-    exec "testbot #{ARGV.join(' ')}" if successful_install
+    if successful_install
+      File.open("/tmp/update_testbot.sh", "w") { |file| file.write("#!/bin/sh\nsleep 5\ntestbot #{ARGV.join(' ')}") }
+      system "chmod +x /tmp/update_testbot.sh"
+      system "nohup /tmp/update_testbot.sh &"
+      exit 0
+    end
   end
-  
+
   def ping_params
     { :hostname => (@hostname ||= `hostname`.chomp), :max_instances => @config.max_instances,
       :idle_instances => (@config.max_instances - @instances.size), :username => ENV['USER'] }.merge(base_params)
