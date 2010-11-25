@@ -1,5 +1,13 @@
 require 'testbot'
-if (require('rails') rescue(nil))
+
+begin
+  require 'rails'
+  @rails_loaded = true
+rescue LoadError => ex
+  @rails_loaded = false
+end
+
+if @rails_loaded
   module Testbot
     class Railtie < Rails::Railtie
       rake_tasks do
