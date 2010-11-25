@@ -76,7 +76,7 @@ class Runner
     @last_requester_mac = nil
     @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1
     @config = OpenStruct.new(config)
-    @config.max_instances = @config.max_instances ? @config.max_instances.to_i || CPU.count 
+    @config.max_instances = @config.max_instances ? @config.max_instances.to_i : CPU.count 
     
     if @config.ssh_tunnel
       server_uri = "http://127.0.0.1:#{Testbot::SERVER_PORT}"
