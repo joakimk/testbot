@@ -1,6 +1,3 @@
-**IMPORTANT**: This is work in progress. This documentation describes how I imagine it will work when this branch is complete. The stable version can be found at: [http://github.com/joakimk/testbot](http://github.com/joakimk/testbot)
-
-
 Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber. The basic idea is that you let testbot spread the load of running your tests across multiple machines to make the tests run faster.
 
 Using testbot on 11 machines (25 cores) we got our test suite down to **2 minutes from 30**. [More examples of how testbot is used](http://github.com/joakimk/testbot/wiki/How-testbot-is-being-used).
@@ -71,12 +68,12 @@ Using testbot with Rails 3:
 
 Using testbot with Rails 2:
 
-    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/0.2.4'
+    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.2.6'
 
-    # There isn't any rails 2 generator yet. The simplest thing is probably to
-    # create a rails 3 app and then copy the generated files.
-    # script/generate ...
-    
+    # The rails 2 generator isn't done yet. You can look at the following examples:
+    # [lib/tasks/testbot.rake](https://gist.github.com/715836)
+    # [config/testbot.yml](https://gist.github.com/715839)
+
     rake testbot:spec (or :test, :features)
 
 Updating testbot
