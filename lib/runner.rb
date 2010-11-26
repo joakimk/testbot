@@ -165,7 +165,9 @@ class Runner
   end
   
   def before_run(job)
-    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}; rake testbot:before_run"
+    use_bundler = File.exists?("#{job.project}/Gemfile") && system("which bundle > /dev/null")
+    bundler_cmd = use_bundler ? "bundle; " : ""
+    system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}; #{bundler_cmd} rake testbot:before_run"
   end
   
   def first_job_from_requester?
