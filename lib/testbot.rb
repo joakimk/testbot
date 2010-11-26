@@ -6,7 +6,7 @@ module Testbot
   require 'railtie' if defined?(Rails)
 
   # Don't forget to update readme and changelog
-  VERSION = "0.3.4"
+  VERSION = "0.3.5"
 
   SERVER_PID = "/tmp/testbot_server.pid"
   RUNNER_PID = "/tmp/testbot_runner.pid"
@@ -71,7 +71,7 @@ module Testbot
         Dir.chdir(working_dir)
         runner = Runner.new(:server_host => opts[:connect],
                             :auto_update => opts[:auto_update], :max_instances => opts[:cpus],
-                            :ssh_tunnel => opts[:ssh_tunnel], :user => opts[:user],
+                            :ssh_tunnel => opts[:ssh_tunnel], :server_user => opts[:user],
                             :max_jruby_instances => opts[:max_jruby_instances],
                             :jruby_opts => opts[:jruby_opts])
         runner.run!
