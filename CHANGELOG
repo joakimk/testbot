@@ -1,3 +1,9 @@
+0.3.4
+
+Bundler support. Testbot now runs "bundle" before "testbot:before_run" if you
+have "bundle" in path and have a "Gemfile" in the project so that the
+rails environment can load.
+
 0.3.3
 
 Fixed loading issue in rails 2, testbot depended on having rails installed as a gem.
