@@ -75,7 +75,7 @@ class RequesterTest < Test::Unit::TestCase
     should "should be able to create a build" do
       flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
       requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => '/path', :available_runner_usage => '60%', :project => 'things', :server_user => "cruise")
-      flexmock(requester).should_receive(:find_tests).with(RSpecAdapter, 'spec').once.and_return([ 'spec/models/house_spec.rb', 'spec/models/car_spec.rb' ])
+      flexmock(RSpecAdapter).should_receive(:test_files).with('spec').once.and_return([ 'spec/models/house_spec.rb', 'spec/models/car_spec.rb' ])
 
       flexmock(File).should_receive(:stat).once.with("spec/models/house_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(10)
       flexmock(File).should_receive(:stat).once.with("spec/models/car_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(20)
@@ -298,7 +298,7 @@ class RequesterTest < Test::Unit::TestCase
         :root=>"testbot@:/tmp/testbot/#{ENV['USER']}", :files=>"test/some_test.rb",
         :requester_mac=>"00:01:..", :sizes=>"0", :project=>"project" }
 
-      flexmock(requester).should_receive(:find_tests).and_return([ 'test/some_test.rb' ])
+      flexmock(TestUnitAdapter).should_receive(:test_files).and_return([ 'test/some_test.rb' ])
       flexmock(HTTParty).should_receive(:post).with(any, :body => other_args.merge({ :jruby => true })).and_return('5')
       flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
       flexmock(requester).should_receive(:sleep)

@@ -41,8 +41,8 @@ class Requester
     rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
     system "rsync -az --delete -e ssh #{rsync_ignores} . #{rsync_uri}"
    
-    files = find_tests(adapter, dir)
-    sizes = find_sizes(adapter, files)
+    files = adapter.test_files(dir) 
+    sizes = adapter.get_sizes(files)
 
     build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => root,
                                                      :type => adapter.type.to_s,
@@ -130,14 +130,6 @@ class Requester
 
   def line_is_failure?(line)
     line =~ /(\d{2,}|[1-9]) (fail|error)/
-  end
-
-  def find_tests(adapter, dir)
-    adapter.test_files(dir)
-  end
-
-  def find_sizes(adapter, files)
-    adapter.find_sizes(files)
   end
 
   def jruby?

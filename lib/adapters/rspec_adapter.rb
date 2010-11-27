@@ -8,7 +8,7 @@ class RSpecAdapter
     Dir["#{dir}/#{file_pattern}"]
   end
 
-  def self.find_sizes(files)
+  def self.get_sizes(files)
     files.map { |file| File.stat(file).size }
   end
   
