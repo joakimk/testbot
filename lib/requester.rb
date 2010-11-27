@@ -42,7 +42,7 @@ class Requester
     system "rsync -az --delete -e ssh #{rsync_ignores} . #{rsync_uri}"
    
     files = find_tests(adapter, dir)
-    sizes = find_sizes(files)
+    sizes = find_sizes(adapter, files)
 
     build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => root,
                                                      :type => adapter.type.to_s,
@@ -133,11 +133,11 @@ class Requester
   end
 
   def find_tests(adapter, dir)
-    Dir["#{dir}/#{adapter.file_pattern}"]
+    adapter.test_files(dir)
   end
 
-  def find_sizes(files)
-    files.map { |file| File.stat(file).size }
+  def find_sizes(adapter, files)
+    adapter.find_sizes(files)
   end
 
   def jruby?
