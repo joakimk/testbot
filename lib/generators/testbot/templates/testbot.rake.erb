@@ -11,7 +11,7 @@ namespace :testbot do
 test:
   adapter: mysql
   encoding: utf8
-  database: <%= options.project %>_testbot_test<%%= ENV['TEST_ENV_NUMBER'] %>
+  database: <%= options[:project] %>_testbot_test<%%= ENV['TEST_ENV_NUMBER'] %>
   username: root
   password:
   host: localhost
@@ -23,8 +23,8 @@ DB_CONFIG
     # # Setup databases for all instances
     # 0.upto(ENV['TEST_INSTANCES'].to_i - 1) do |instance|
     #   test_env_number = (instance == 0) ? '' : instance + 1
-    #   system "mysqladmin -u root -f drop <%= options.project %>_testbot_test#{test_env_number}  > /dev/null 2>&1"
-    #   system "mysqladmin -u root -f create <%= options.project %>_testbot_test#{test_env_number} > /dev/null 2>&1"
+    #   system "mysqladmin -u root -f drop <%= options[:project] %>_testbot_test#{test_env_number}  > /dev/null 2>&1"
+    #   system "mysqladmin -u root -f create <%= options[:project] %>_testbot_test#{test_env_number} > /dev/null 2>&1"
     #   system "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; rake db:test:load"
     # end
 
