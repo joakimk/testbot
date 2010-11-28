@@ -5,8 +5,8 @@ def rails3?
 end
 
 def create_app
+  system("gem install #{find_latest_gem} 1> /dev/null") || raise("Testbot install failed")
   if rails3? 
-    system("gem install #{find_latest_gem} 1> /dev/null") || raise("Testbot install failed")
     system("rails new #{@app_path} 1> /dev/null") || raise('Failed to create rails3 app')
   else
     system("rails #{@app_path} 1> /dev/null") || raise("Failed to create rails2 app")
@@ -21,7 +21,13 @@ def use_test_gemset!
   RVM.gemset_use! @test_gemset_name
 end
 
+def use_normal_gemset!
+  RVM.gemset_use! 'testbot'
+end
+
 Given /^I have a rails (.+) application$/ do |version|
+  use_normal_gemset!
+
   has_rvm = system "which rvm > /dev/null"
   raise "You need rvm to run these tests as the tests use it to setup isolated environments." unless has_rvm
   
@@ -32,7 +38,7 @@ Given /^I have a rails (.+) application$/ do |version|
   @testbot_path = Dir.pwd
   @app_path = "tmp/cucumber/rails_#{@version}"
 
-  system "rake build 1> /dev/null" if rails3?
+  system "rake build 1> /dev/null" 
   
   has_gemset = `rvm gemset list|grep '#{@test_gemset_name}'` != ""
   if has_gemset

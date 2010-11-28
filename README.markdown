@@ -69,10 +69,7 @@ Using testbot with Rails 3:
 Using testbot with Rails 2:
 
     ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.3.5'
-
-The rails 2 config generator isn't done yet so you can look at the following examples instead:
-  [lib/tasks/testbot.rake](https://gist.github.com/715836) and
-  [config/testbot.yml](https://gist.github.com/715839).
+    script/generate testbot --connect 192.168.0.100
 
     rake testbot:spec (or :test, :features)
 
