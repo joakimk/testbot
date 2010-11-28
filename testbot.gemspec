@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency('net-ssh', '>= 2.0.23')
   s.add_dependency('sequel', '>= 3.16.0')
   s.add_dependency('json', '>= 1.4.6')
+  s.add_dependency('acts_as_rails3_generator')
 
   # Could work with older versions, but not newer (when deploying on debian)
   s.add_dependency('sqlite3-ruby', '= 1.2.5')
