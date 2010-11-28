@@ -1,3 +1,7 @@
+0.3.6
+
+Added Rails 2 generator support.
+
 0.3.5
 
 Fixed ssh_tunnel bug when using a custom user.
