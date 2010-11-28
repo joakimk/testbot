@@ -5,11 +5,57 @@ class CucumberAdapter
   end
  
   def self.test_files(dir)
-    Dir["#{dir}/#{file_pattern}"]
+    features = Dir["#{dir}/#{file_pattern}"]
+
+    scenario_pointers = []
+    features.each do |feature|
+      File.readlines(feature).each_with_index { |line, i|
+        scenario_pointers << "#{feature}:#{i+1}" if line.include?("Scenario:")
+      }
+    end
+
+   scenario_pointers
   end
   
-  def self.get_sizes(files)
-    files.map { |file| File.stat(file).size }
+  def self.get_sizes(scenario_pointers)
+ #   return scenario_pointers.map { 1 }
+ #   return scenario_pointers.map { |file| File.stat(file).size }
+ 
+    file_contents = {}
+    
+    files = scenario_pointers.map { |file| file.split(':').first }.uniq
+    files.each do |file|
+      file_contents[file] = File.readlines(file)
+    end
+
+    sizes = []
+    scenario_pointers.each do |sp|
+      lines = file_contents[sp.split(":").first]
+      lines_before_first_scenario = 0
+      lines.each_with_index do |line, i|
+        if line.include?('Scenario:')
+          lines_before_first_scenario = i
+          break
+        end
+      end
+
+      scenario_line = sp.split(":").last.to_i - 1
+      size = nil
+      lines.each_with_index do |line, i|
+        if i > scenario_line && lines[i].include?("Scenario:")
+          size = i - scenario_line
+        end
+      end
+
+      # Last scenario
+      unless size
+        size = lines.size - scenario_line - 1
+      end
+
+      sizes << lines_before_first_scenario + size
+    end
+    
+    sizes
   end
 
   def self.requester_port
