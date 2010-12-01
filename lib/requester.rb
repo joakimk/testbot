@@ -84,13 +84,12 @@ class Requester
 
       last_results_size = @build['results'].size
 
-      success = false if failed_build?(@build)
       break if @build['done']
     end
 
     puts if config.simple_output
 
-    success
+    @build["success"]
   end
 
   def self.create_by_config(path)
@@ -120,16 +119,8 @@ class Requester
     [ '0.0.0.0', 'localhost', '127.0.0.1' ].include?(config.server_host)
   end
 
-  def failed_build?(build)
-    result_lines.any? { |line| line_is_failure?(line) }
-  end
-
   def line_is_result?(line)
     line =~ /\d+ fail/
-  end
-
-  def line_is_failure?(line)
-    line =~ /(\d{2,}|[1-9]) (fail|error)/
   end
 
   def jruby?

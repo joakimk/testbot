@@ -91,7 +91,7 @@ class RequesterTest < Test::Unit::TestCase
                                                    :sizes => "10 20",
                                                    :jruby => false })
 
-      flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, 'results' => '' })
+      flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, 'results' => '', "success" => true })
       flexmock(requester).should_receive(:sleep)
       flexmock(requester).should_receive(:puts)
       flexmock(requester).should_receive(:system)
@@ -117,6 +117,24 @@ class RequesterTest < Test::Unit::TestCase
       flexmock(requester).should_receive(:puts).once.with("job 1 done: ....")
 
       requester.run_tests(RSpecAdapter, 'spec')
+    end
+
+    should "return false if not successful" do
+      requester = Requester.new(:server_host => "192.168.1.100")
+
+      flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+      flexmock(requester).should_receive(:system)
+
+      flexmock(HTTParty).should_receive(:post).and_return('5')
+
+      flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
+                  :format => :json).and_return({ "success" => false, "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
+
+      flexmock(requester).should_receive(:sleep).once.with(1)
+      flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+      mock_file_sizes
+
+      assert_equal false, requester.run_tests(RSpecAdapter, 'spec')
     end
 
     should "not print empty lines when there is no result" do
@@ -317,43 +335,6 @@ class RequesterTest < Test::Unit::TestCase
       requester = requester_with_result(results)
       requester.run_tests(RSpecAdapter, 'spec')
       assert_equal [ '... 0 failures' ], requester.result_lines
-    end
-
-  end
-
-  context "failure detection" do
-
-    should "not fail if the word error or failure is in the text" do
-      assert_equal true, build_with_result('... failure ...')
-      assert_equal true, build_with_result('... error ...')
-    end
-
-    should "fail with single failed" do
-      assert_equal false, build_with_result("10 tests, 20 assertions, 0 failures, 0 errors\n10 tests, 20 assertions, 1 failure, 0 errors")
-    end
-
-    should "fail with single error" do
-      assert_equal false, build_with_result("10 tests, 20 assertions, 0 failures, 1 errors\n10 tests, 20 assertions, 0 failures, 0 errors")
-    end
-
-    should "fail with failed and error" do
-      assert_equal false, build_with_result("10 tests, 20 assertions, 0 failures, 1 errors\n10 tests, 20 assertions, 1 failures, 1 errors")
-    end
-
-    should "fail with multiple failed tests" do
-      assert_equal false, build_with_result("10 tests, 20 assertions, 2 failures, 0 errors\n10 tests, 1 assertion, 1 failures, 0 errors")
-    end
-
-    should "not fail with successful tests" do
-     assert_equal true, build_with_result("10 tests, 20 assertions, 0 failures, 0 errors\n10 tests, 20 assertions, 0 failures, 0 errors")
-    end
-
-    should "fail with 10 failures" do
-      assert_equal false, build_with_result("10 tests, 20 assertions, 10 failures, 0 errors\n10 tests, 20 assertions, 0 failures, 0 errors")
-    end
-
-    should "fail with cucumber failure messages" do
-      assert_equal false, build_with_result("721 steps (4 failed, 4 skipped, 713 passed)")
     end
 
   end

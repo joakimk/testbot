@@ -7,6 +7,9 @@ class Job < Sequel::Model
       done = Job.filter([ "result IS NULL AND build_id = ?", self[:build_id] ]).count == 0
       build.update(:results => build[:results].to_s + hash[:result].to_s,
                    :done => done)
+
+      build_broken_by_job = (hash[:success] == "false" && build[:success])
+      build.update(:success => false) if build_broken_by_job
     end
   end
   

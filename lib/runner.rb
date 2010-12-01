@@ -51,7 +51,7 @@ class Job
     adapter = Adapter.find(@type)
     result += `#{base_environment} #{adapter.command(ruby_cmd, @files)} 2>&1`
 
-    Server.put("/jobs/#{@id}", :body => { :result => result })
+    Server.put("/jobs/#{@id}", :body => { :result => result, :success => ($?.exitstatus == 0) })
     puts "Job #{@id} finished."
   end
   

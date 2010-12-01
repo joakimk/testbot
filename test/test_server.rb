@@ -36,6 +36,7 @@ class ServerTest < Test::Unit::TestCase
       assert_equal 'things', first_build[:project]
       assert_equal 0, first_build[:jruby]
       assert_equal '', first_build[:results]
+      assert_equal true, first_build[:success]
     end
 
     should "create jobs from the build based on the number of total instances" do
@@ -71,10 +72,10 @@ class ServerTest < Test::Unit::TestCase
   context "GET /builds/:id" do
     
     should 'return the build status' do
-      build = Build.create(:done => false, :results => "testbot5\n..........\ncompleted")
+      build = Build.create(:done => false, :results => "testbot5\n..........\ncompleted", :success => false)
       get "/builds/#{build[:id]}"
       assert_equal true, last_response.ok?
-      assert_equal ({ "done" => false, "results" => "testbot5\n..........\ncompleted" }),
+      assert_equal ({ "done" => false, "results" => "testbot5\n..........\ncompleted", "success" => false }),
                    JSON.parse(last_response.body)
     end
     
@@ -352,28 +353,39 @@ class ServerTest < Test::Unit::TestCase
 
     should "receive the results of a job" do
       job = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30
-      put "/jobs/#{job[:id]}", :result => 'test run result'
+      put "/jobs/#{job[:id]}", :result => 'test run result', :success => true
       assert last_response.ok?
       assert_equal 'test run result', job.reload.result
+      assert_equal true, job.success
     end
 
     should "update the related build" do
       build = Build.create
       job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
       job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]      
-      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
-      put "/jobs/#{job2[:id]}", :result => 'test run result 2\n'
+      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => true
+      put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
       assert_equal 'test run result 1\ntest run result 2\n', build.reload[:results]
+      assert_equal true, build[:success]
     end
     
     should "make the related build done if there are no more jobs for the build" do
       build = Build.create
       job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
       job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
-      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n'
-      put "/jobs/#{job2[:id]}", :result => 'test run result 2\n'
+      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => true
+      put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
       assert_equal true, build.reload[:done]
     end
+
+    should "make the build fail if one of the jobs fail" do
+      build = Build.create
+      job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
+      job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]      
+      put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => false
+      put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
+      assert_equal false, build.reload[:success]
+    end 
 
   end
   
