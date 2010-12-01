@@ -5,7 +5,8 @@ require 'ostruct'
 require File.dirname(__FILE__) + '/shared/ssh_tunnel'
 require File.dirname(__FILE__) + '/adapters/adapter'
 
-TIME_BETWEEN_POLLS = 1
+TIME_BETWEEN_NORMAL_POLLS = 1
+TIME_BETWEEN_QUICK_POLLS = 0.1
 TIME_BETWEEN_PINGS = 5
 TIME_BETWEEN_VERSION_CHECKS = 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
@@ -119,9 +120,11 @@ class Runner
   end
   
   def wait_for_jobs
+    last_check_found_a_job = false
     loop do
-      sleep TIME_BETWEEN_POLLS
-      check_for_update if time_for_update?
+      sleep (last_check_found_a_job ? TIME_BETWEEN_QUICK_POLLS : TIME_BETWEEN_NORMAL_POLLS)
+
+      check_for_update if !last_check_found_a_job && time_for_update?
 
       # Only get jobs from one requester at a time
       next_params = base_params
@@ -138,7 +141,8 @@ class Runner
       
       next_job = Server.get("/jobs/next", :query => next_params) rescue nil
       next if next_job == nil
-      
+      last_check_found_a_job = true
+
       job = Job.new(*([ self, next_job.split(',') ].flatten))
       if first_job_from_requester?
         fetch_code(job)
