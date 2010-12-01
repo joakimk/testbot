@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    testbot (0.2.5)
+    testbot (0.3.8)
+      acts_as_rails3_generator
       httparty (>= 0.6.1)
       json (>= 1.4.6)
       macaddr (>= 1.0.0)
@@ -9,11 +10,12 @@ PATH
       net-ssh (>= 2.0.23)
       sequel (>= 3.16.0)
       sinatra (= 1.0.0)
-      sqlite3-ruby (>= 1.2.5)
+      sqlite3-ruby (= 1.2.5)
 
 GEM
   remote: http://rubygems.org/
   specs:
+    acts_as_rails3_generator (0.0.1)
     builder (2.1.2)
     crack (0.1.8)
     cucumber (0.9.4)
@@ -46,13 +48,14 @@ GEM
     shoulda (2.11.3)
     sinatra (1.0)
       rack (>= 1.0)
-    sqlite3-ruby (1.3.2)
+    sqlite3-ruby (1.2.5)
     term-ansicolor (1.0.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  acts_as_rails3_generator
   cucumber
   flexmock
   httparty (>= 0.6.1)
@@ -66,5 +69,5 @@ DEPENDENCIES
   sequel (>= 3.16.0)
   shoulda
   sinatra (= 1.0.0)
-  sqlite3-ruby (>= 1.2.5)
+  sqlite3-ruby (= 1.2.5)
   testbot!

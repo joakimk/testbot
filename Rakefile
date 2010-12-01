@@ -1,4 +1,6 @@
 require 'bundler'
+# TODO: Add when possible. Currently "rake test" fails.
+#require 'bundler/setup'
 require 'cucumber'
 require 'cucumber/rake/task'
 
