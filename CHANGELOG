@@ -1,3 +1,7 @@
+0.3.7
+
+The runner now checks right away for another job if it got one last time around.
+
 0.3.6
 
 Added Rails 2 generator support.
