@@ -1,3 +1,7 @@
+0.3.8
+
+Testbot now uses exit code to determine if the test run has failed.
+
 0.3.7
 
 The runner now checks right away for another job if it got one last time around.
