@@ -66,6 +66,11 @@ class RubyEnvTest < Test::Unit::TestCase
                                                                             :bin => "rspec", :ruby_interpeter => "jruby")
     end
 
+    should "use the interpeter when there is no binary specified" do
+      flexmock(RubyEnv).should_receive(:bundler?).and_return(true)
+      flexmock(File).should_receive(:exists?).and_return(false)
+      assert_equal 'ruby -S bundle exec ruby', RubyEnv.ruby_command("path/to/project")
+    end
   end
 
 end

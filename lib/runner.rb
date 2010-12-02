@@ -49,7 +49,7 @@ class Job
     base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project};"
     
     adapter = Adapter.find(@type)
-    result += `#{base_environment} #{adapter.command(ruby_cmd, @files)} 2>&1`
+    result += `#{base_environment} #{adapter.command(@project, ruby_cmd, @files)} 2>&1`
 
     Server.put("/jobs/#{@id}", :body => { :result => result, :success => ($?.exitstatus == 0) })
     puts "Job #{@id} finished."
