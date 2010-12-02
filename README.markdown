@@ -68,7 +68,7 @@ Using testbot with Rails 3:
 
 Using testbot with Rails 2:
 
-    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.3.8'
+    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.3.9'
     script/generate testbot --connect 192.168.0.100
 
     rake testbot:spec (or :test, :features)

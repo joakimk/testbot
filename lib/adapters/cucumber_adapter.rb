@@ -5,7 +5,7 @@ class CucumberAdapter
   def self.command(project_path, ruby_interpreter, files)
     cucumber_command = RubyEnv.ruby_command(project_path, :script => "script/cucumber", :bin => "cucumber",
                                                           :ruby_interpreter => ruby_interpreter)
-    "export AUTOTEST=1; #{ruby_interpreter} #{cucumber_command} -f progress --backtrace -r features/support -r features/step_definitions #{files} -t ~@disabled"
+    "export AUTOTEST=1; #{cucumber_command} -f progress --backtrace -r features/support -r features/step_definitions #{files} -t ~@disabled"
   end
  
   def self.test_files(dir)

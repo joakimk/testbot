@@ -1,3 +1,7 @@
+0.3.9
+
+Added support for running tests with bundler exec.
+
 0.3.8
 
 Testbot now uses exit code to determine if the test run has failed.
