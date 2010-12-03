@@ -8,7 +8,7 @@ unless defined?(Testbot)
     require 'railtie' if defined?(Rails)
 
     # Don't forget to update readme and changelog
-    VERSION = "0.3.9"
+    VERSION = "0.4.0"
 
     if ENV['INTEGRATION_TEST']
       SERVER_PID = "/tmp/integration_test_testbot_server.pid"
@@ -17,6 +17,7 @@ unless defined?(Testbot)
       SERVER_PID = "/tmp/testbot_server.pid"
       RUNNER_PID = "/tmp/testbot_runner.pid"
     end
+
     DEFAULT_WORKING_DIR = "/tmp/testbot"
     DEFAULT_SERVER_PATH = "/tmp/testbot/#{ENV['USER']}"
     DEFAULT_USER = "testbot"
