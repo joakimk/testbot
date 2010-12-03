@@ -10,8 +10,13 @@ unless defined?(Testbot)
     # Don't forget to update readme and changelog
     VERSION = "0.3.9"
 
-    SERVER_PID = "/tmp/testbot_server.pid"
-    RUNNER_PID = "/tmp/testbot_runner.pid"
+    if ENV['INTEGRATION_TEST']
+      SERVER_PID = "/tmp/integration_test_testbot_server.pid"
+      RUNNER_PID = "/tmp/integration_test_testbot_runner.pid"
+    else
+      SERVER_PID = "/tmp/testbot_server.pid"
+      RUNNER_PID = "/tmp/testbot_runner.pid"
+    end
     DEFAULT_WORKING_DIR = "/tmp/testbot"
     DEFAULT_SERVER_PATH = "/tmp/testbot/#{ENV['USER']}"
     DEFAULT_USER = "testbot"
