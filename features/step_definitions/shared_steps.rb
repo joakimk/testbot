@@ -91,11 +91,8 @@ Given /^I can successfully run "([^"]*)"$/ do |cmd|
   success = system("cd #{@app_path}; export INTEGRATION_TEST=true; #{cmd} 1> /dev/null")
   system "export INTEGRATION_TEST=true; testbot --server stop 1> /dev/null"
   system "export INTEGRATION_TEST=true; testbot --runner stop 1> /dev/null"
+  system "rm -rf #{@testbot_path}/tmp"
   raise "Command failed!" unless success
-end
-
-Given /^I add "([^"]*)" to the Gemfile$/ do |statement|
-  system %{echo "#{statement}" >> #{@app_path}/Gemfile}
 end
 
 Given /^I run "([^"]*)"$/ do |command|
