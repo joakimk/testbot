@@ -8,7 +8,7 @@ require File.dirname(__FILE__) + '/adapters/adapter'
 TIME_BETWEEN_NORMAL_POLLS = 1
 TIME_BETWEEN_QUICK_POLLS = 0.1
 TIME_BETWEEN_PINGS = 5
-TIME_BETWEEN_VERSION_CHECKS = Testbot.version.include?('.DEV.') ? 5 : 60
+TIME_BETWEEN_VERSION_CHECKS = Testbot.version.include?('.DEV.') ? 20 : 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
 
 class CPU
