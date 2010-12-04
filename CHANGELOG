@@ -1,4 +1,4 @@
-0.4.3
+0.4.4
 
 Changed to using the deamons gem. Seems to fix some problems with old processes
 not closing down when using auto_update.
