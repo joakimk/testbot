@@ -16,8 +16,6 @@ end
 
 desc "Used for quickly deploying and testing updates without pusing to rubygems.org"
 task :deploy do
-  ENV['TESTBOT_DEV_DEPLOY'] = '1'
-
   File.open("DEV_VERSION", "w") { |f| f.write(".DEV.#{Time.now.to_i}") }
   
   gem_file = "testbot-#{Testbot.version}.gem"
