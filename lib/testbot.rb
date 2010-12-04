@@ -9,7 +9,7 @@ unless defined?(Testbot)
 
     # Don't forget to update readme and changelog
     def self.version
-      version = "0.4.2"
+      version = "0.4.3"
       dev_version_file = File.join(File.dirname(__FILE__), '..', 'DEV_VERSION')
       if File.exists?(dev_version_file)
         version += File.read(dev_version_file)
@@ -89,6 +89,7 @@ unless defined?(Testbot)
                               :ssh_tunnel => opts[:ssh_tunnel], :server_user => opts[:user],
                               :max_jruby_instances => opts[:max_jruby_instances],
                               :dev_gem_root => opts[:dev_gem_root],
+                              :wait_for_updated_gem => opts[:wait_for_updated_gem],
                               :jruby_opts => opts[:jruby_opts])
           runner.run!
         }

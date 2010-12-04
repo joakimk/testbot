@@ -8,7 +8,7 @@ require File.dirname(__FILE__) + '/adapters/adapter'
 TIME_BETWEEN_NORMAL_POLLS = 1
 TIME_BETWEEN_QUICK_POLLS = 0.1
 TIME_BETWEEN_PINGS = 5
-TIME_BETWEEN_VERSION_CHECKS = 60
+TIME_BETWEEN_VERSION_CHECKS = Testbot.version.include?('.DEV.') ? 5 : 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
 
 class CPU
@@ -192,10 +192,17 @@ class Runner
     version = Server.get('/version') rescue Testbot.version
     return unless version != Testbot.version
 
-    if version.include?(".DEV.")
-      successful_install = system "wget #{@config.dev_gem_root}/testbot-#{version}.gem && gem install testbot-#{version}.gem && rm testbot-#{version}.gem"
+    # In a PXE cluster with a shared gem folder we only want one of them to do the update
+    if @config.wait_for_updated_gem
+      # Gem.available? is cached so it won't detect new gems.
+      gem = Gem::Dependency.new("testbot", version)
+      successful_install = !Gem::SourceIndex.from_installed_gems.search(gem).empty?
     else
-      successful_install = system "gem install testbot -v #{version}"
+      if version.include?(".DEV.")
+        successful_install = system("wget #{@config.dev_gem_root}/testbot-#{version}.gem && gem install testbot-#{version}.gem --no-ri --no-rdoc && rm testbot-#{version}.gem")
+      else
+        successful_install = system "gem install testbot -v #{version} --no-ri --no-rdoc"
+      end
     end
 
     if successful_install
