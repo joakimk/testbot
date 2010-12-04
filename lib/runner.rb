@@ -193,7 +193,7 @@ class Runner
     return unless version != Testbot.version
 
     if version.include?(".DEV.")
-      successful_install = system "gem install #{@config.dev_gem_root}/testbot-#{version}.gem"
+      successful_install = system "wget #{@config.dev_gem_root}/testbot-#{version}.gem && gem install testbot-#{version}.gem && rm testbot-#{version}.gem"
     else
       successful_install = system "gem install testbot -v #{version}"
     end
