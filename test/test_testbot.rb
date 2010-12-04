@@ -46,8 +46,8 @@ module Testbot
       context "with --server" do
         should "start a server" do
           flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::SERVER_PID)
-          flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::SERVER_PID).and_return(1234)
-          flexmock(CLI).should_receive(:puts).once.with("Testbot server started (pid: 1234)")
+          flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::SERVER_PID, "testbot (server)")
+          flexmock(CLI).should_receive(:puts).once.with("Testbot server started (pid: #{Process.pid})")
           assert_equal true, CLI.run([ "--server" ])
         end
       
@@ -81,8 +81,8 @@ module Testbot
       context "with --runner" do
         should "start a runner" do
           flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::RUNNER_PID)
-          flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::RUNNER_PID).and_return(1234)
-          flexmock(CLI).should_receive(:puts).once.with("Testbot runner started (pid: 1234)")
+          flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::RUNNER_PID, "testbot (runner)")
+          flexmock(CLI).should_receive(:puts).once.with("Testbot runner started (pid: #{Process.pid})")
           assert_equal true, CLI.run([ "--runner", "--connect", "192.168.0.100", "--working_dir", "/tmp/testbot" ])
         end
       

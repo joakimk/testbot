@@ -97,8 +97,8 @@ unless defined?(Testbot)
         if opts[:runner] == 'run'
           proc.call
         else
-          pid = SimpleDaemonize.start(proc, Testbot::RUNNER_PID)
-          puts "Testbot runner started (pid: #{pid})"
+          puts "Testbot runner started (pid: #{Process.pid})"
+          SimpleDaemonize.start(proc, Testbot::RUNNER_PID, "testbot (runner)")
         end
       end
 
@@ -109,12 +109,12 @@ unless defined?(Testbot)
           require File.join(File.dirname(__FILE__), '/server')
           Sinatra::Application.run! :environment => "production"
         else
-          pid = SimpleDaemonize.start(lambda {
+          puts "Testbot server started (pid: #{Process.pid})"
+          SimpleDaemonize.start(lambda {
             ENV['DISABLE_LOGGING'] = "true"
             require File.join(File.dirname(__FILE__), '/server')
             Sinatra::Application.run! :environment => "production"
-          }, Testbot::SERVER_PID)
-          puts "Testbot server started (pid: #{pid})"
+          }, Testbot::SERVER_PID, "testbot (server)")
         end
       end
 
