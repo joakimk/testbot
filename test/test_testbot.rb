@@ -38,7 +38,7 @@ module Testbot
     
       context "with --version" do
         should "print version and return true" do
-          flexmock(CLI).should_receive(:puts).once.with("Testbot #{Testbot::VERSION}")
+          flexmock(CLI).should_receive(:puts).once.with("Testbot #{Testbot.version}")
           assert_equal true, CLI.run([ '--version' ])
         end
       end

@@ -19,11 +19,11 @@ class Runner < Sequel::Model
   end
   
   def self.find_all_outdated
-    DB[:runners].filter("version != ? OR version IS NULL", Testbot::VERSION)
+    DB[:runners].filter("version != ? OR version IS NULL", Testbot.version)
   end
   
   def self.find_all_available
-    DB[:runners].filter("version = ? AND last_seen_at > ?", Testbot::VERSION, Time.now - Runner.timeout)
+    DB[:runners].filter("version = ? AND last_seen_at > ?", Testbot.version, Time.now - Runner.timeout)
   end  
   
   def self.available_instances

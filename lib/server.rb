@@ -18,7 +18,7 @@ disable :logging if ENV['DISABLE_LOGGING']
 
 class Server
   def self.valid_version?(runner_version)
-    Testbot::VERSION == runner_version
+    Testbot.version == runner_version
   end
 end
 
@@ -68,5 +68,5 @@ get '/runners/available' do
 end
 
 get '/version' do
-  Testbot::VERSION
+  Testbot.version
 end

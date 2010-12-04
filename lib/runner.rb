@@ -189,10 +189,14 @@ class Runner
   
   def check_for_update
     return unless @config.auto_update
-    version = Server.get('/version') rescue Testbot::VERSION
-    return unless version != Testbot::VERSION
+    version = Server.get('/version') rescue Testbot.version
+    return unless version != Testbot.version
 
-    successful_install = system "gem install testbot -v #{version}"
+    if version.include?(".DEV.")
+      successful_install = system "gem install #{@config.dev_gem_root}/testbot-#{version}.gem"
+    else
+      successful_install = system "gem install testbot -v #{version}"
+    end
 
     if successful_install
       File.open("/tmp/update_testbot.sh", "w") { |file| file.write("#!/bin/sh\nsleep 5\ntestbot #{ARGV.join(' ')}") }
@@ -208,7 +212,7 @@ class Runner
   end
   
   def base_params
-    { :version => Testbot::VERSION, :uid => @uid }
+    { :version => Testbot.version, :uid => @uid }
   end
   
   def max_instances_running?

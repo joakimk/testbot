@@ -4,7 +4,7 @@ require File.expand_path("lib/testbot")
 
 Gem::Specification.new do |s|
   s.name        = "testbot"
-  s.version     = Testbot::VERSION
+  s.version     = Testbot.version
   s.authors     = ["Joakim Kolsjö"]
   s.email       = ["joakim.kolsjo@gmail.com"]
   s.homepage    = "http://github.com/joakimk/testbot"

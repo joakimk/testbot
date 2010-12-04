@@ -8,7 +8,11 @@ unless defined?(Testbot)
     require 'railtie' if defined?(Rails)
 
     # Don't forget to update readme and changelog
-    VERSION = "0.4.0"
+    def self.version
+      version = "0.4.1"
+      version += ".DEV.#{Time.now.to_i}" if ENV['TESTBOT_DEV_DEPLOY']
+      version
+    end
 
     if ENV['INTEGRATION_TEST']
       SERVER_PID = "/tmp/integration_test_testbot_server.pid"
@@ -34,7 +38,7 @@ unless defined?(Testbot)
         if opts[:help]
           return false
         elsif opts[:version]
-          puts "Testbot #{Testbot::VERSION}"
+          puts "Testbot #{Testbot.version}"
         elsif [ true, 'run', 'start' ].include?(opts[:server])
           start_server(opts[:server])
         elsif opts[:server] == 'stop'
@@ -81,6 +85,7 @@ unless defined?(Testbot)
                               :auto_update => opts[:auto_update], :max_instances => opts[:cpus],
                               :ssh_tunnel => opts[:ssh_tunnel], :server_user => opts[:user],
                               :max_jruby_instances => opts[:max_jruby_instances],
+                              :dev_gem_root => opts[:dev_gem_root],
                               :jruby_opts => opts[:jruby_opts])
           runner.run!
         }

@@ -14,6 +14,18 @@ task :test do
   Dir["test/**/test_*.rb"].each { |test| require(File.expand_path(test)) }
 end
 
+desc "Used for quickly deploying and testing updates without pusing to rubygems.org"
+task :deploy do
+  ENV['TESTBOT_DEV_DEPLOY'] = '1'
+  
+  gem_file = "testbot-#{Testbot.version}.gem"
+  config = YAML.load_file(".deploy_config.yml")
+  Rake::Task["build"].invoke
+
+  system(config["upload_gem"].gsub(/GEM_FILE/, gem_file)) || fail
+  system(config["update_and_restart_server"].gsub(/GEM_FILE/, gem_file)) || fail
+end
+
 Cucumber::Rake::Task.new(:features) do |t|
   t.cucumber_opts = "features --format progress"
 end
