@@ -1,3 +1,7 @@
+0.4.5
+
+Made auto_update a bit more reliable.
+
 0.4.4
 
 Changed to using the deamons gem. Seems to fix some problems with old processes
