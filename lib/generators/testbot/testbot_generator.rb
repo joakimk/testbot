@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + "/../../testbot") 
+require File.expand_path(File.dirname(__FILE__) + "/../../shared/testbot") 
 require "acts_as_rails3_generator"
 
 class TestbotGenerator < Rails::Generators::Base

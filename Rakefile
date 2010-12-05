@@ -1,6 +1,6 @@
 require 'bundler'
-# TODO: Add when possible. Currently "rake test" fails.
-#require 'bundler/setup'
+# TODO: Add when possible. Currently "rake features" fails.
+# require 'bundler/setup'
 require 'cucumber'
 require 'cucumber/rake/task'
 
@@ -21,7 +21,7 @@ task :deploy do
   gem_file = "testbot-#{Testbot.version}.gem"
   config = YAML.load_file(".deploy_config.yml")
   Rake::Task["build"].invoke
-
+  
   begin
     system(config["upload_gem"].gsub(/GEM_FILE/, gem_file)) || fail
     system(config["update_and_restart_server"].gsub(/GEM_FILE/, gem_file)) || fail

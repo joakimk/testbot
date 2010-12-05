@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    testbot (0.4.3)
+    testbot (0.4.6)
       acts_as_rails3_generator
-      daemons
+      daemons (= 1.0.10)
       httparty (>= 0.6.1)
       json (>= 1.4.6)
       macaddr (>= 1.0.0)
@@ -58,7 +58,7 @@ PLATFORMS
 DEPENDENCIES
   acts_as_rails3_generator
   cucumber
-  daemons
+  daemons (= 1.0.10)
   flexmock
   httparty (>= 0.6.1)
   json (>= 1.4.6)

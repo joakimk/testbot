@@ -1,3 +1,7 @@
+0.4.7
+
+Refactored the code into modules with one directory for each.
+
 0.4.6
 
 Fixed a bug that caused auto_update not to check for an update after a job had been run.

@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '../../lib/adapters/adapter.rb')
+require File.expand_path(File.join(File.dirname(__FILE__), '../../../lib/shared/adapters/adapter.rb'))
 require 'test/unit'
 require 'shoulda'
 

@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '../../../lib/adapters/helpers/ruby_env.rb')
+require File.expand_path(File.join(File.dirname(__FILE__), '../../../../lib/shared/adapters/helpers/ruby_env.rb'))
 require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'

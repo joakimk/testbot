@@ -1,12 +1,12 @@
-require File.dirname(__FILE__) + '/../adapters/adapter'
+require File.dirname(__FILE__) + '/../shared/adapters/adapter'
 
 namespace :testbot do
   
   def run_and_show_results(adapter, custom_path)
     Rake::Task["testbot:before_request"].invoke
         
-    require File.join(File.dirname(__FILE__), '..', "requester.rb")
-    requester = Requester.create_by_config("#{Rails.root}/config/testbot.yml")
+    require File.expand_path(File.join(File.dirname(__FILE__), '..', 'requester', 'requester.rb'))
+    requester = Testbot::Requester::Requester.create_by_config("#{Rails.root}/config/testbot.yml")
 
     puts "Running #{adapter.pluralized}..."
     start_time = Time.now
