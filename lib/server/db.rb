@@ -30,9 +30,7 @@ module Testbot::Server
     Integer :jruby
     Integer :build_id
     Integer :taken_by_id
-    Inreger :time
     Boolean :success
-    Boolean :profile, :default => false
     Datetime :taken_at, :default => nil
   end
 
@@ -45,7 +43,6 @@ module Testbot::Server
     String :version
     Integer :idle_instances
     Integer :max_instances
-    Integer :cpu_test_time
     Datetime :last_seen_at
   end
 

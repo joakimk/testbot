@@ -10,7 +10,7 @@ module Testbot::Runner
   TIME_BETWEEN_NORMAL_POLLS = 1
   TIME_BETWEEN_QUICK_POLLS = 0.1
   TIME_BETWEEN_PINGS = 5
-  TIME_BETWEEN_VERSION_CHECKS = Testbot.version.include?('.DEV.') ? 3 : 60
+  TIME_BETWEEN_VERSION_CHECKS = Testbot.version.include?('.DEV.') ? 10 : 60
   MAX_CPU_USAGE_WHEN_IDLE = 50
 
   class CPU
@@ -63,10 +63,6 @@ module Testbot::Runner
         system "rm -rf #{folder}"
       }
 
-      t = Time.now
-      1.upto(9_999_999) {|i| i%3==0 || i%5==0 || i%7==0 }
-      @cpu_test_time = ((Time.now - t) * 100).to_i
-
       SSHTunnel.new(@config.server_host, @config.server_user || Testbot::DEFAULT_USER).open if @config.ssh_tunnel
       while true
         begin
@@ -104,8 +100,6 @@ module Testbot::Runner
         else
           @last_requester_mac = nil
         end
-
-        next_params.merge!({ :cpu_test_time => @cpu_test_time })
 
         # Makes sure all instances are listed as available after a run
         clear_completed_instances 
