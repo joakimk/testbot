@@ -33,7 +33,7 @@ module Testbot::Runner
     def measure_run_time
       start_time = Time.now
       yield
-      Time.now - start_time
+      (Time.now - start_time) * 100
     end
 
     def run_and_return_result(command)

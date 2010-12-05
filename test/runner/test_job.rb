@@ -8,7 +8,7 @@ module Testbot::Runner
 
   class JobTest < Test::Unit::TestCase
 
-    def expect_put_with(id, result_text, success, time = 0.0)
+    def expect_put_with(id, result_text, success, time = 0)
       expected_result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
       expected_result += result_text
       flexmock(Server).should_receive(:put).once.with("/jobs/#{id}", :body =>
@@ -55,12 +55,12 @@ module Testbot::Runner
       job.run(1)
     end
 
-    should "return test runtime" do
+    should "return test runtime in milliseconds" do
       job = Job.new(Runner.new({}), 10, "00:00", "project", "/tmp/testbot/user", "spec", "ruby", "spec/foo_spec.rb spec/bar_spec.rb")
       flexmock(job).should_receive(:puts)
 
       stub_duration(10.55) 
-      expect_put_with(10, "result text", true, 10.55)
+      expect_put_with(10, "result text", true, 1055)
       flexmock(job).should_receive(:run_and_return_result).and_return('result text')
       job.run(0)
     end
