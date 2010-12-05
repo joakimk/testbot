@@ -41,7 +41,11 @@ module Testbot::Server
   end
 
   put '/jobs/:id' do
-    Job.find(:id => params[:id].to_i).update(:result => params[:result], :success => params[:success]); nil
+    job = Job.find(:id => params[:id].to_i)
+    result = "\n\nExpected:#{Build.expected_time(job.files)/100.0}:Act#{params[:time].to_i/100.0}"
+    result += params[:result]
+    result += Build.result!(job, Runner.find(:id => job.taken_by_id), job.files, params[:time])
+    Job.find(:id => params[:id].to_i).update(:result => result, :success => params[:success], :time => params[:time]); nil
   end
 
   get '/runners/ping' do
@@ -57,6 +61,10 @@ module Testbot::Server
 
   get '/runners/available_instances' do
     Runner.available_instances.to_s
+  end
+
+  get '/runners/cpu_test_times' do
+    Runner.find_all_available.map { |runner| [ runner[:hostname], runner[:cpu_test_time] ].join(',') }.join("\n")
   end
 
   get '/runners/total_instances' do

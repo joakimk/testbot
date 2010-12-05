@@ -24,10 +24,17 @@ task :deploy do
   
   begin
     system(config["upload_gem"].gsub(/GEM_FILE/, gem_file)) || fail
-    system(config["update_and_restart_server"].gsub(/GEM_FILE/, gem_file)) || fail
+    system(config["update_server"].gsub(/GEM_FILE/, gem_file)) || fail
+    system(config["restart_server"]) || fail
   ensure
     system("rm DEV_VERSION")
   end
+end
+
+desc "Used to restart the server when developing testbot"
+task :restart do
+  config = YAML.load_file(".deploy_config.yml")
+  system(config["restart_server"]) || fail
 end
 
 Cucumber::Rake::Task.new(:features) do |t|
