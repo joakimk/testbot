@@ -14,7 +14,7 @@ module Testbot::Server
     def setup
       DB[:jobs].delete
       DB[:runners].delete
-      DB[:builds].delete
+      Build.delete_all
     end
 
     def app
@@ -27,8 +27,9 @@ module Testbot::Server
         flexmock(Runner).should_receive(:total_instances).and_return(2)
         post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "10 20", :jruby => false
 
-        first_build = Build.first
+        first_build = Build.all.first
         assert last_response.ok?
+
         assert_equal first_build[:id].to_s, last_response.body
         assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_build[:files]
         assert_equal '10 20', first_build[:sizes]
@@ -60,7 +61,7 @@ module Testbot::Server
         assert_equal 'bb:bb:bb:bb:bb:bb', first_job[:requester_mac]
         assert_equal 'things', first_job[:project]
         assert_equal 1, first_job[:jruby]
-        assert_equal Build.first[:id], first_job[:build_id]
+        assert_equal Build.all.first[:id], first_job[:build_id]
       end
 
       should "only use resources according to available_runner_usage" do

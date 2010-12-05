@@ -3,6 +3,7 @@ require 'sinatra'
 require 'yaml'
 require 'json'
 require File.expand_path(File.join(File.dirname(__FILE__), '/../shared/testbot'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'memory_model.rb'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'job.rb'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'group.rb')) #unless defined?(Group)
 require File.expand_path(File.join(File.dirname(__FILE__), 'runner.rb'))
@@ -27,9 +28,9 @@ module Testbot::Server
   end
 
   get '/builds/:id' do
-    build = Build.find(:id => params[:id].to_i)
-    build.destroy if build[:done]
-    { "done" => build[:done], "results" => build[:results], "success" => build[:success] }.to_json
+    build = Build.find(params[:id].to_i)
+    build.destroy if build.done
+    { "done" => build.done, "results" => build.results, "success" => build.success }.to_json
   end
 
   get '/jobs/next' do

@@ -1,6 +1,10 @@
 module Testbot::Server
 
-  class Build < Sequel::Model
+  class Build < MemoryModel
+
+    def initialize(hash)
+      super({ :success => true, :done => false, :results => '' }.merge(hash))
+    end
 
     def self.create_and_build_jobs(hash)
       hash["jruby"] = (hash["jruby"] == "true") ? 1 : 0

@@ -5,7 +5,7 @@ module Testbot::Server
   class Job < Sequel::Model
     def update(hash)
       super(hash)
-      if build = Build.find([ "id = ?", self[:build_id] ])
+      if build = Build.all.find { |b| b.id == self[:build_id] }
         done = Job.filter([ "result IS NULL AND build_id = ?", self[:build_id] ]).count == 0
         build.update(:results => build[:results].to_s + hash[:result].to_s,
                      :done => done)
