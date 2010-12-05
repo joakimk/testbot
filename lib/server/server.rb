@@ -47,7 +47,7 @@ module Testbot::Server
 
   get '/runners/ping' do
     return unless Server.valid_version?(params[:version])
-    runner = Runner.find(:uid => params[:uid])
+    runner = Runner.find_by_uid(params[:uid])
     runner.update(params.merge({ :last_seen_at => Time.now })) if runner
     nil
   end

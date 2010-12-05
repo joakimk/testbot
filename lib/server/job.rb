@@ -38,7 +38,7 @@ module Testbot::Server
     end
 
     def self.release_jobs_taken_by_missing_runners!
-      missing_runners = Runner.filter([ "last_seen_at < ?", (Time.now - Runner.timeout) ])
+      missing_runners = Runner.all.find_all { |r| r.last_seen_at < (Time.now - Runner.timeout) }
       missing_runners.each { |r|
         Job.filter(:taken_by_id => r[:id]).update(:taken_at => nil)
       }    

@@ -19,16 +19,4 @@ module Testbot::Server
     Datetime :taken_at, :default => nil
   end
 
-  DB.create_table :runners do
-    primary_key :id
-    String :ip
-    String :hostname
-    String :uid
-    String :username
-    String :version
-    Integer :idle_instances
-    Integer :max_instances
-    Datetime :last_seen_at
-  end
-
 end

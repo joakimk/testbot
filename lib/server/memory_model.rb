@@ -4,12 +4,12 @@ class MemoryModel < OpenStruct
   attr_reader :id, :type
 
   def initialize(hash)
-    h = {}
-    hash.each { |k, v| h[k.to_sym] = v }
-    @id = h[:id]
-    @type = h[:type]
-    super(h)
+    hash = symbolize_keys(hash)
+    @id = hash[:id]
+    @type = hash[:type]
+    super(hash)
   end
+
 
   def delete
     self.class.all.delete_if { |b| b.id == id }
@@ -20,7 +20,8 @@ class MemoryModel < OpenStruct
   end
 
   def update(hash)
-    @table.merge!(hash)
+    @table.merge!(symbolize_keys(hash))
+    self
   end
 
   def reload
@@ -40,6 +41,10 @@ class MemoryModel < OpenStruct
     @@db[self] ||= []
     @@db[self]
   end
+  
+  def self.first
+    all.first
+  end
 
   def self.delete_all
     all.clear
@@ -51,6 +56,14 @@ class MemoryModel < OpenStruct
 
   def self.count
     all.size
+  end
+
+private
+
+  def symbolize_keys(hash)
+    h = {}
+    hash.each { |k, v| h[k.to_sym] = v }
+    h
   end
 
 end

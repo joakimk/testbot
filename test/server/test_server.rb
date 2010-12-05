@@ -13,7 +13,7 @@ module Testbot::Server
 
     def setup
       DB[:jobs].delete
-      DB[:runners].delete
+      Runner.delete_all
       Build.delete_all
     end
 
@@ -135,13 +135,13 @@ module Testbot::Server
 
       should "save information about the runners" do
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini.local', :uid => "00:01:...", :idle_instances => 2, :max_instances => 4
-        runner = DB[:runners].first
+        runner = Runner.first
         assert_equal Testbot.version, runner[:version]
         assert_equal '127.0.0.1', runner[:ip]
         assert_equal 'macmini.local', runner[:hostname]
         assert_equal '00:01:...', runner[:uid]
-        assert_equal 2, runner[:idle_instances]
-        assert_equal 4, runner[:max_instances]
+        assert_equal 2, runner[:idle_instances].to_i
+        assert_equal 4, runner[:max_instances].to_i
         assert (Time.now - 5) < runner[:last_seen_at]
         assert (Time.now + 5) > runner[:last_seen_at]
       end
@@ -265,7 +265,7 @@ module Testbot::Server
       should "not return runners as available when not seen the last 10 seconds" do
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2, :username => "user1"
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
-        Runner.find(:uid => "00:02").update(:last_seen_at => Time.now - 10)      
+        Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)      
         get '/runners/available'
         assert_equal "127.0.0.1 macmini1.local 00:01 user1 2", last_response.body
       end
@@ -285,7 +285,7 @@ module Testbot::Server
       should "not return instances as available when not seen the last 10 seconds" do
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
-        Runner.find(:uid => "00:02").update(:last_seen_at => Time.now - 10)
+        Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)
         get '/runners/available_instances'
         assert last_response.ok?
         assert_equal "2", last_response.body
@@ -306,7 +306,7 @@ module Testbot::Server
       should "not return instances as available when not seen the last 10 seconds" do
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4
-        Runner.find(:uid => "00:02").update(:last_seen_at => Time.now - 10)
+        Runner.all.find { |r| r.uid == "00:02" }.update(:last_seen_at => Time.now - 10)
         get '/runners/total_instances'
         assert last_response.ok?
         assert_equal "2", last_response.body
@@ -319,7 +319,6 @@ module Testbot::Server
       should "update last_seen_at for the runner" do
         runner = Runner.create(:uid => 'aa:aa:aa:aa:aa:aa')
         get "/runners/ping", :uid => 'aa:aa:aa:aa:aa:aa', :version => Testbot.version
-        runner.reload
         assert last_response.ok?
         assert (Time.now - 5) < runner[:last_seen_at]
         assert (Time.now + 5) > runner[:last_seen_at]
@@ -328,11 +327,10 @@ module Testbot::Server
       should "update data on the runner" do
         runner = Runner.create(:uid => 'aa:aa:..')
         get "/runners/ping", :uid => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'jocke'
-        runner.reload
         assert last_response.ok?
         assert_equal 'aa:aa:..', runner.uid
-        assert_equal 4, runner.max_instances
-        assert_equal 2, runner.idle_instances
+        assert_equal 4, runner.max_instances.to_i
+        assert_equal 2, runner.idle_instances.to_i
         assert_equal 'hostname1', runner.hostname
         assert_equal Testbot.version, runner.version
         assert_equal 'jocke', runner.username
@@ -342,7 +340,7 @@ module Testbot::Server
         runner = Runner.create(:uid => 'aa:aa:..', :version => Testbot.version)
         get "/runners/ping", :uid => 'aa:aa:..', :version => "OLD"
         assert last_response.ok?
-        assert_equal Testbot.version, runner.reload.version
+        assert_equal Testbot.version, runner.version
       end
 
       should "do nothing if the runners isnt known yet found" do
