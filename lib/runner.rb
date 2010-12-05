@@ -105,8 +105,8 @@ class Runner
       next unless cpu_available?
       
       next_job = Server.get("/jobs/next", :query => next_params) rescue nil
-      next if next_job == nil
-      last_check_found_a_job = true
+      last_check_found_a_job = (next_job != nil)
+      next unless last_check_found_a_job
 
       job = Job.new(*([ self, next_job.split(',') ].flatten))
       if first_job_from_requester?

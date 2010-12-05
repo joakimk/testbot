@@ -1,3 +1,7 @@
+0.4.6
+
+Fixed a bug that caused auto_update not to check for an update after a job had been run.
+
 0.4.5
 
 Made auto_update a bit more reliable.
