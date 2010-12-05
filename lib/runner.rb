@@ -8,7 +8,7 @@ require File.dirname(__FILE__) + '/adapters/adapter'
 TIME_BETWEEN_NORMAL_POLLS = 1
 TIME_BETWEEN_QUICK_POLLS = 0.1
 TIME_BETWEEN_PINGS = 5
-TIME_BETWEEN_VERSION_CHECKS = Testbot.version.include?('.DEV.') ? 20 : 60
+TIME_BETWEEN_VERSION_CHECKS = Testbot.version.include?('.DEV.') ? 10 : 60
 MAX_CPU_USAGE_WHEN_IDLE = 50
 
 class CPU
@@ -205,12 +205,7 @@ class Runner
       end
     end
 
-    if successful_install
-      File.open("/tmp/update_testbot.sh", "w") { |file| file.write("#!/bin/sh\nsleep 5\ntestbot #{ARGV.join(' ')}") }
-      system "chmod +x /tmp/update_testbot.sh"
-      system "nohup /tmp/update_testbot.sh &"
-      exit 0
-    end
+    system "testbot #{ARGV.join(' ')}" if successful_install
   end
 
   def ping_params
