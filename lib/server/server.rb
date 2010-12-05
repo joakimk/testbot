@@ -16,8 +16,6 @@ module Testbot::Server
     set :port, Testbot::SERVER_PORT
   end
 
-  disable :logging if ENV['DISABLE_LOGGING']
-
   class Server
     def self.valid_version?(runner_version)
       Testbot.version == runner_version

@@ -102,15 +102,13 @@ module Testbot
 
     def self.start_server(type)
       stop('server', Testbot::SERVER_PID)
+      require File.expand_path(File.join(File.dirname(__FILE__), '/../server/server'))
 
       if type == 'run'
-        require File.expand_path(File.join(File.dirname(__FILE__), '/../server/server'))
         Sinatra::Application.run! :environment => "production"
       else
         puts "Testbot server started (pid: #{Process.pid})"
         SimpleDaemonize.start(lambda {
-          ENV['DISABLE_LOGGING'] = "true"
-          require File.expand_path(File.join(File.dirname(__FILE__), '/../server/server'))
           Sinatra::Application.run! :environment => "production"
         }, Testbot::SERVER_PID, "testbot (server)")
       end
