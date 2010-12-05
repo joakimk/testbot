@@ -1,9 +1,10 @@
-require File.expand_path(File.join(File.dirname(__FILE__), '../lib/testbot')) unless defined?(Testbot)
+require File.expand_path(File.join(File.dirname(__FILE__), '../../lib/shared/testbot')) unless defined?(Testbot)
 require 'test/unit'
 require 'shoulda'
 require 'flexmock/test_unit'
-require File.join(File.dirname(__FILE__), '../lib/requester')
-require File.join(File.dirname(__FILE__), '../lib/server')
+require 'sinatra'
+require File.expand_path(File.join(File.dirname(__FILE__), '../../lib/requester/requester'))
+require File.expand_path(File.join(File.dirname(__FILE__), '../../lib/server/server'))
 
 module Testbot
 
@@ -38,7 +39,7 @@ module Testbot
     
       context "with --version" do
         should "print version and return true" do
-          flexmock(CLI).should_receive(:puts).once.with("Testbot #{Testbot::VERSION}")
+          flexmock(CLI).should_receive(:puts).once.with("Testbot #{Testbot.version}")
           assert_equal true, CLI.run([ '--version' ])
         end
       end
@@ -46,8 +47,8 @@ module Testbot
       context "with --server" do
         should "start a server" do
           flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::SERVER_PID)
-          flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::SERVER_PID).and_return(1234)
-          flexmock(CLI).should_receive(:puts).once.with("Testbot server started (pid: 1234)")
+          flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::SERVER_PID, "testbot (server)")
+          flexmock(CLI).should_receive(:puts).once.with("Testbot server started (pid: #{Process.pid})")
           assert_equal true, CLI.run([ "--server" ])
         end
       
@@ -81,8 +82,8 @@ module Testbot
       context "with --runner" do
         should "start a runner" do
           flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::RUNNER_PID)
-          flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::RUNNER_PID).and_return(1234)
-          flexmock(CLI).should_receive(:puts).once.with("Testbot runner started (pid: 1234)")
+          flexmock(SimpleDaemonize).should_receive(:start).once.with(any, Testbot::RUNNER_PID, "testbot (runner)")
+          flexmock(CLI).should_receive(:puts).once.with("Testbot runner started (pid: #{Process.pid})")
           assert_equal true, CLI.run([ "--runner", "--connect", "192.168.0.100", "--working_dir", "/tmp/testbot" ])
         end
       
@@ -107,7 +108,7 @@ module Testbot
         should "start it in the foreground with run" do
           flexmock(SimpleDaemonize).should_receive(:stop).once.with(Testbot::RUNNER_PID)
           flexmock(SimpleDaemonize).should_receive(:start).never
-          flexmock(Runner).should_receive(:new).once.and_return(mock = Object.new)
+          flexmock(Runner::Runner).should_receive(:new).once.and_return(mock = Object.new)
           flexmock(mock).should_receive(:run!).once
           assert_equal true, CLI.run([ "--runner", 'run', '--connect', '192.168.0.100' ])
         end
@@ -116,48 +117,48 @@ module Testbot
       Adapter.all.each do |adapter|
         context "with --#{adapter.type}" do
           should "start a #{adapter.name} requester and return true" do
-            flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes).and_return(mock = Object.new)
+            flexmock(Requester::Requester).should_receive(:new).once.
+                                           with(requester_attributes).and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests).once.with(adapter, adapter.base_path)
             assert_equal true, CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100" ])
           end
         
           should "accept a custom rsync_path" do
-            flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :rsync_path => "/somewhere/else" })).
-                                and_return(mock = Object.new)
+            flexmock(Requester::Requester).should_receive(:new).once.
+                                           with(requester_attributes.merge({ :rsync_path => "/somewhere/else" })).
+                                           and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
             CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--rsync_path', '/somewhere/else' ])
           end
         
           should "accept rsync_ignores" do
-            flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :rsync_ignores => "tmp log" })).
-                                and_return(mock = Object.new)
+            flexmock(Requester::Requester).should_receive(:new).once.
+                                           with(requester_attributes.merge({ :rsync_ignores => "tmp log" })).
+                                           and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
             CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--rsync_ignores', 'tmp', 'log' ])
           end
         
           should "accept ssh tunnel" do
-            flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :ssh_tunnel => true })).
-                                and_return(mock = Object.new)
+            flexmock(Requester::Requester).should_receive(:new).once.
+                                           with(requester_attributes.merge({ :ssh_tunnel => true })).
+                                           and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
             CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--ssh_tunnel' ])
           end
           
           should "accept a custom user" do
-            flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :server_user => "cruise" })).
-                                and_return(mock = Object.new)
+            flexmock(Requester::Requester).should_receive(:new).once.
+                                           with(requester_attributes.merge({ :server_user => "cruise" })).
+                                           and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
             CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--user', 'cruise' ])
           end
           
           should "accept a custom project name" do
-            flexmock(Requester).should_receive(:new).once.
-                                with(requester_attributes.merge({ :project => "rspec" })).
-                                and_return(mock = Object.new)
+            flexmock(Requester::Requester).should_receive(:new).once.
+                                           with(requester_attributes.merge({ :project => "rspec" })).
+                                           and_return(mock = Object.new)
             flexmock(mock).should_receive(:run_tests)
             CLI.run([ "--#{adapter.type}", "--connect", "192.168.0.100", '--project', 'rspec' ])
           end

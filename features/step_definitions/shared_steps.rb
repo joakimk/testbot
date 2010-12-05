@@ -5,8 +5,8 @@ def rails3?
 end
 
 def create_app
+  system("gem install #{find_latest_gem} 1> /dev/null") || raise("Testbot install failed")
   if rails3? 
-    system("gem install #{find_latest_gem} 1> /dev/null") || raise("Testbot install failed")
     system("rails new #{@app_path} 1> /dev/null") || raise('Failed to create rails3 app')
   else
     system("rails #{@app_path} 1> /dev/null") || raise("Failed to create rails2 app")
@@ -21,7 +21,13 @@ def use_test_gemset!
   RVM.gemset_use! @test_gemset_name
 end
 
+def use_normal_gemset!
+  RVM.gemset_use! 'testbot'
+end
+
 Given /^I have a rails (.+) application$/ do |version|
+  use_normal_gemset!
+
   has_rvm = system "which rvm > /dev/null"
   raise "You need rvm to run these tests as the tests use it to setup isolated environments." unless has_rvm
   
@@ -32,7 +38,7 @@ Given /^I have a rails (.+) application$/ do |version|
   @testbot_path = Dir.pwd
   @app_path = "tmp/cucumber/rails_#{@version}"
 
-  system "rake build 1> /dev/null" if rails3?
+  system "rake build 1> /dev/null" 
   
   has_gemset = `rvm gemset list|grep '#{@test_gemset_name}'` != ""
   if has_gemset
@@ -52,6 +58,41 @@ Given /^I add testbot$/ do
   else
     system %{cd #{@app_path}; ln -s #{@testbot_path} vendor/plugins/testbot}
   end
+end
+
+And /^I add rspec 2 and some specs$/ do
+  system %{echo "gem 'rspec-rails', '~> 2.0.1'" >> #{@app_path}/Gemfile}
+  And 'I run "gem install rspec-rails -v 2.0.1 --no-ri --no-rdoc"'
+  And 'I run "script/rails generate rspec:install"'
+  And 'I run "script/rails generate scaffold user name:string"'
+end
+
+Given /^I have a testbot network setup$/ do
+  system "export INTEGRATION_TEST=true; testbot --server 1> /dev/null"
+  system "export INTEGRATION_TEST=true; testbot --runner --connect 127.0.0.1 --working_dir #{@testbot_path}/tmp/runner 1> /dev/null"
+  system "cd #{@app_path}; rails g testbot --connect 127.0.0.1 --rsync_path #{@testbot_path}/tmp/server 1> /dev/null"
+
+  # Add db setup to testbot.rake
+  lines = File.readlines("#{@app_path}/lib/tasks/testbot.rake")
+  file = File.open("#{@app_path}/lib/tasks/testbot.rake", "w")
+  lines.each do |line|
+    file.write(line)
+    if line.include?("task :before_run")
+      file.write("system 'rake db:migrate'\n")
+    end
+  end
+  file.close
+
+  # Wait for the runner to register with the server
+  sleep 2
+end
+
+Given /^I can successfully run "([^"]*)"$/ do |cmd|
+  success = system("cd #{@app_path}; export INTEGRATION_TEST=true; #{cmd} 1> /dev/null")
+  system "export INTEGRATION_TEST=true; testbot --server stop 1> /dev/null"
+  system "export INTEGRATION_TEST=true; testbot --runner stop 1> /dev/null"
+  system "rm -rf #{@testbot_path}/tmp"
+  raise "Command failed!" unless success
 end
 
 Given /^I run "([^"]*)"$/ do |command|

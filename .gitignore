@@ -1,3 +1,4 @@
+.deploy_config.yml
 *.db
 pkg
 todo.txt

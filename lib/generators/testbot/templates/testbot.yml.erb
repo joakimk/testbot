@@ -1,34 +1,34 @@
 # Which server to use.
-server_host: <%= options.connect %>
-<%- if options.user -%>
-server_user: <%= options.user %>
+server_host: <%= options[:connect] %>
+<%- if options[:user] -%>
+server_user: <%= options[:user] %>
 <%- else -%>
 # server_user: <%= Testbot::DEFAULT_USER %>
 <%- end -%>
 
 # Project prefix. Used for prefixing project files
 # so that you can run multiple projects in the same testbot network.
-<%- if options.project %>
-project: <%= options.project %>
+<%- if options[:project] %>
+project: <%= options[:project] %>
 <%- else -%>
 # project: <%= Testbot::DEFAULT_PROJECT %>
 <%- end -%>
 
 # RSync settings. The folder where your files are synced to
 # and then fetched from before running the tests.
-<%- if options.rsync_path -%>
-rsync_path: <%= options.rsync_path %>
+<%- if options[:rsync_path] -%>
+rsync_path: <%= options[:rsync_path] %>
 <%- else -%>
 # rsync_path: <%= Testbot::DEFAULT_SERVER_PATH %>
 <%- end -%>
-<%- if options.rsync_ignores -%>
-rsync_ignores: <%= options.rsync_ignores %>
+<%- if options[:rsync_ignores] -%>
+rsync_ignores: <%= options[:rsync_ignores] %>
 <%- else -%>
 # rsync_ignores:
 <%- end -%>
 
 # To tunnel traffic through SSH
-<%- if options.ssh_tunnel -%>
+<%- if options[:ssh_tunnel] -%>
 ssh_tunnel: true
 <%- else -%>
 # ssh_tunnel: true

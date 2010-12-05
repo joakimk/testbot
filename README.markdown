@@ -2,6 +2,7 @@ Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and
 
 Using testbot on 11 machines (25 cores) we got our test suite down to **2 minutes from 30**. [More examples of how testbot is used](http://github.com/joakimk/testbot/wiki/How-testbot-is-being-used).
 
+
 Installing
 ----
 
@@ -68,11 +69,8 @@ Using testbot with Rails 3:
 
 Using testbot with Rails 2:
 
-    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.3.5'
-
-The rails 2 config generator isn't done yet so you can look at the following examples instead:
-  [lib/tasks/testbot.rake](https://gist.github.com/715836) and
-  [config/testbot.yml](https://gist.github.com/715839).
+    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.4.7'
+    script/generate testbot --connect 192.168.0.100
 
     rake testbot:spec (or :test, :features)
 
@@ -101,6 +99,7 @@ Features
 * You can add and remove computers at any time. Testbot simply gives abandoned jobs to other computers.
 * Testbot will try to balance the testload so that every computer finishes running the tests at the same time to reduce the time it takes to run the entire test suite. It does a good job, but has potential for further improvement.
 * You can access your testbot network through SSH by using the built in SSH tunneling code.
+* You can use the same testbot network with multiple projects.
 * Testbot is continuously tested for compability with Ruby 1.8.7 and 1.9.2.
 
 Contributing to testbot
@@ -125,4 +124,5 @@ Add a **lib/adapters/framework_name_adapter.rb** file, update **lib/adapters/ada
 More
 ----
 
+* IRC channel: #testbot (freenode)
 * Check the [wiki](http://github.com/joakimk/testbot/wiki) for more info.

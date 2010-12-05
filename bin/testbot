@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require File.expand_path(File.join(File.dirname(__FILE__), '../lib/testbot.rb'))
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/shared/testbot.rb'))
 
 def show_help
-  puts "Testbot #{Testbot::VERSION}"
+  puts "Testbot #{Testbot.version}"
   puts
   puts "Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber."
   puts

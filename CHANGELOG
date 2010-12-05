@@ -1,3 +1,46 @@
+0.4.7
+
+- Refactored the code into modules with one directory for each.
+- Added a notice about our IRC channel, #testbot on freenode.
+- No longer dependent on mongel, now using webrat.
+
+0.4.6
+
+Fixed a bug that caused auto_update not to check for an update after a job had been run.
+
+0.4.5
+
+Made auto_update a bit more reliable.
+
+0.4.4
+
+Changed to using the deamons gem. Seems to fix some problems with old processes
+not closing down when using auto_update.
+
+0.4.2
+
+Added support for quick deploys when developing testbot.
+
+0.4.0
+
+Fixed RSpec 2 compability issue.
+
+0.3.9
+
+Added support for running tests with bundler exec.
+
+0.3.8
+
+Testbot now uses exit code to determine if the test run has failed.
+
+0.3.7
+
+The runner now checks right away for another job if it got one last time around.
+
+0.3.6
+
+Added Rails 2 generator support.
+
 0.3.5
 
 Fixed ssh_tunnel bug when using a custom user.
