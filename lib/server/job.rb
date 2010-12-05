@@ -1,12 +1,10 @@
-require File.expand_path(File.join(File.dirname(__FILE__), 'db.rb'))
-
 module Testbot::Server
 
-  class Job < Sequel::Model
+  class Job < MemoryModel
     def update(hash)
       super(hash)
       if build = Build.all.find { |b| b.id == self[:build_id] }
-        done = Job.filter([ "result IS NULL AND build_id = ?", self[:build_id] ]).count == 0
+        done = !Job.all.find { |j| !j.result && j.build_id == self[:build_id] }
         build.update(:results => build[:results].to_s + hash[:result].to_s,
                      :done => done)
 
@@ -19,29 +17,27 @@ module Testbot::Server
       clean_params = params.reject { |k, v| [ "requester_mac", "no_jruby" ].include?(k) }
       runner = Runner.record! clean_params.merge({ :ip => remove_addr, :last_seen_at => Time.now })
       return unless Server.valid_version?(params[:version])
-      [ next_job_query(params["requester_mac"], params["no_jruby"]).first, runner ]
+      [ next_job(params["requester_mac"], params["no_jruby"]), runner ]
     end
 
     private
 
-    def self.next_job_query(requester_mac, no_jruby)
+    def self.next_job(requester_mac, no_jruby)
       release_jobs_taken_by_missing_runners!
-      query = Job.filter("taken_at IS NULL").order("Random()".lit)
-      filters = []
-      filters << "requester_mac = '#{requester_mac}'" if requester_mac
-      filters << "jruby != 1" if no_jruby
-      if filters.empty?
-        query
-      else
-        query.filter(filters.join(' AND ')) 
-      end
+      jobs = Job.all.find_all { |j|
+        !j.taken_at &&
+          (requester_mac ? j.requester_mac == requester_mac : true) &&
+          (no_jruby ? j.jruby != 1 : true)
+      }
+
+      jobs[rand(jobs.size)]
     end
 
     def self.release_jobs_taken_by_missing_runners!
       missing_runners = Runner.all.find_all { |r| r.last_seen_at < (Time.now - Runner.timeout) }
       missing_runners.each { |r|
-        Job.filter(:taken_by_id => r[:id]).update(:taken_at => nil)
-      }    
+        Job.all.find { |j| j.taken_by_id == r.id }.update(:taken_at => nil)
+      }
     end
   end
 

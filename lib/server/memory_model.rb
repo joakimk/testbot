@@ -1,6 +1,7 @@
 class MemoryModel < OpenStruct
 
   @@db = {}
+  @@next_id = 1
   attr_reader :id, :type
 
   def initialize(hash)
@@ -33,7 +34,8 @@ class MemoryModel < OpenStruct
   end
 
   def self.create(hash = {})
-    all << new(hash.merge({ :id => all.size }))
+    all << new(hash.merge({ :id => @@next_id }))
+    @@next_id += 1
     all[-1]
   end
 

@@ -12,7 +12,7 @@ module Testbot::Server
     include Rack::Test::Methods
 
     def setup
-      DB[:jobs].delete
+      Job.delete_all
       Runner.delete_all
       Build.delete_all
     end
@@ -94,8 +94,8 @@ module Testbot::Server
         related_job = Job.create(:build_id => build.id)
         other_job = Job.create(:build_id => nil)
         get "/builds/#{build[:id]}"
-        assert !Job.find([ 'id = ?', related_job.id ])
-        assert Job.find([ 'id = ?', other_job.id ])
+        assert !Job.find(related_job.id)
+        assert Job.find(other_job.id)
       end
 
     end
@@ -109,7 +109,7 @@ module Testbot::Server
         assert last_response.ok?      
 
         assert_equal [ job1[:id], "bb:bb:bb:bb:bb:bb", "things", "server:/project", "spec", "jruby", "spec/models/car_spec.rb" ].join(','), last_response.body
-        assert job1.reload[:taken_at] != nil
+        assert job1[:taken_at] != nil
       end
 
       should "not return a job that has already been taken" do
@@ -357,7 +357,7 @@ module Testbot::Server
         put "/jobs/#{job[:id]}", :result => 'test run result', :success => true
         assert last_response.ok?
         assert_equal 'test run result', job.reload.result
-        assert_equal true, job.success
+        assert_equal 'true', job.success
       end
 
       should "update the related build" do
@@ -376,7 +376,7 @@ module Testbot::Server
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
         put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => true
         put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
-        assert_equal true, build.reload[:done]
+        assert_equal true, build[:done]
       end
 
       should "make the build fail if one of the jobs fail" do
@@ -385,7 +385,7 @@ module Testbot::Server
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]      
         put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => false
         put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
-        assert_equal false, build.reload[:success]
+        assert_equal false, build[:success]
       end 
 
     end

@@ -42,7 +42,7 @@ module Testbot::Server
   end
 
   put '/jobs/:id' do
-    Job.find(:id => params[:id].to_i).update(:result => params[:result], :success => params[:success]); nil
+    Job.find(params[:id].to_i).update(:result => params[:result], :success => params[:success]); nil
   end
 
   get '/runners/ping' do

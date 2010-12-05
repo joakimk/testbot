@@ -28,7 +28,7 @@ module Testbot::Server
     end
 
     def destroy
-      Job.filter([ 'build_id = ?', self[:id] ]).each { |job| job.destroy }
+      Job.all.find_all { |j| j.build_id == self.id }.each { |job| job.destroy }
       super
     end
 
