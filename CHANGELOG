@@ -1,6 +1,7 @@
 0.4.7
 
-Refactored the code into modules with one directory for each.
+- Refactored the code into modules with one directory for each.
+- Added a notice about our IRC channel, #testbot on freenode.
 
 0.4.6
 

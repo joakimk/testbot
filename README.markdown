@@ -2,6 +2,7 @@ Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and
 
 Using testbot on 11 machines (25 cores) we got our test suite down to **2 minutes from 30**. [More examples of how testbot is used](http://github.com/joakimk/testbot/wiki/How-testbot-is-being-used).
 
+
 Installing
 ----
 
@@ -123,4 +124,5 @@ Add a **lib/adapters/framework_name_adapter.rb** file, update **lib/adapters/ada
 More
 ----
 
+* IRC channel: #testbot (freenode)
 * Check the [wiki](http://github.com/joakimk/testbot/wiki) for more info.
