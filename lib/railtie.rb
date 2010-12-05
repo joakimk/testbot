@@ -1,5 +1,3 @@
-require 'testbot'
-
 begin
   require 'rails'
   @rails_loaded = true
