@@ -1,15 +1,13 @@
 PATH
   remote: .
   specs:
-    testbot (0.4.6)
+    testbot (0.4.8)
       acts_as_rails3_generator
-      daemons (= 1.0.10)
+      daemons (>= 1.0.10)
       httparty (>= 0.6.1)
       json (>= 1.4.6)
       macaddr (>= 1.0.0)
-      mongrel (= 1.2.0.pre2)
       net-ssh (>= 2.0.23)
-      sequel (>= 3.16.0)
       sinatra (= 1.0.0)
       sqlite3-ruby (= 1.2.5)
 
@@ -28,7 +26,6 @@ GEM
     daemons (1.0.10)
     diff-lcs (1.1.2)
     flexmock (0.8.11)
-    gem_plugin (0.2.3)
     gherkin (2.2.9)
       json (~> 1.4.6)
       term-ansicolor (~> 1.0.5)
@@ -36,16 +33,12 @@ GEM
       crack (= 0.1.8)
     json (1.4.6)
     macaddr (1.0.0)
-    mongrel (1.2.0.pre2)
-      daemons (~> 1.0.10)
-      gem_plugin (~> 0.2.3)
     net-ssh (2.0.23)
     rack (1.2.1)
     rack-test (0.5.6)
       rack (>= 1.0)
     rake (0.8.7)
     rvm (1.1.0)
-    sequel (3.17.0)
     shoulda (2.11.3)
     sinatra (1.0)
       rack (>= 1.0)
@@ -58,17 +51,15 @@ PLATFORMS
 DEPENDENCIES
   acts_as_rails3_generator
   cucumber
-  daemons (= 1.0.10)
+  daemons (>= 1.0.10)
   flexmock
   httparty (>= 0.6.1)
   json (>= 1.4.6)
   macaddr (>= 1.0.0)
-  mongrel (= 1.2.0.pre2)
   net-ssh (>= 2.0.23)
   rack-test
   rake
   rvm
-  sequel (>= 3.16.0)
   shoulda
   sinatra (= 1.0.0)
   sqlite3-ruby (= 1.2.5)
