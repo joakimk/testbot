@@ -400,6 +400,25 @@ module Testbot::Server
 
     end
 
+    context "GET /status" do
+    
+      should "return the contents of the status page" do
+        get '/status'
+        assert_equal true, last_response.body.include?('Testbot status')
+      end
+
+    end
+
+    context "GET /status/:dir/:file" do
+
+      should "return the file" do
+        get "/status/javascripts/jquery-1.4.4.min.js"
+        assert_equal true, last_response.body.include?('jQuery JavaScript Library v1.4.4')
+      end
+
+    end
+
   end
 
 end
+
