@@ -5,7 +5,7 @@ PATH
       acts_as_rails3_generator
       daemons (>= 1.0.10)
       httparty (>= 0.6.1)
-      json (>= 1.4.6)
+      json_pure (>= 1.4.6)
       macaddr (>= 1.0.0)
       net-ssh (>= 2.0.23)
       sinatra (= 1.0.0)
@@ -31,6 +31,7 @@ GEM
     httparty (0.6.1)
       crack (= 0.1.8)
     json (1.4.6)
+    json_pure (1.4.6)
     macaddr (1.0.0)
     net-ssh (2.0.23)
     rack (1.2.1)
@@ -52,7 +53,7 @@ DEPENDENCIES
   daemons (>= 1.0.10)
   flexmock
   httparty (>= 0.6.1)
-  json (>= 1.4.6)
+  json_pure (>= 1.4.6)
   macaddr (>= 1.0.0)
   net-ssh (>= 2.0.23)
   rack-test
