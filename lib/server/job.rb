@@ -1,15 +1,18 @@
 module Testbot::Server
 
   class Job < MemoryModel
+   
+    attribute :success, :boolean
+
     def update(hash)
       super(hash)
       if self.build
         done = !Job.all.find { |j| !j.result && j.build == self.build }
-        build.update(:results => build[:results].to_s + hash[:result].to_s,
-                     :done => done)
+        self.build.update(:results => build.results.to_s + self.result.to_s,
+                          :done => done)
 
-        build_broken_by_job = (hash[:success] == "false" && build[:success])
-        build.update(:success => false) if build_broken_by_job
+        build_broken_by_job = (!self.success && build.success)
+        self.build.update(:success => false) if build_broken_by_job
       end
     end
 

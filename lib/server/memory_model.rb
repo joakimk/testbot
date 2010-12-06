@@ -1,41 +1,37 @@
 class MemoryModel < OpenStruct
 
   @@db = {}
-  @@next_id = 1
-  attr_reader :id, :type
+  @@types = {}
 
   def initialize(hash)
-    hash = symbolize_keys(hash)
-    @id = hash[:id]
-    @type = hash[:type]
+    @@types[self.class] ||= {}
+    hash = resolve_types(symbolize_keys(hash))
     super(hash)
   end
 
-
-  def delete
-    self.class.all.delete_if { |b| b.id == id }
+  def id
+    object_id
   end
 
-  def destroy
-    delete
+  def type
+    @table[:type]
   end
 
   def update(hash)
-    @table.merge!(symbolize_keys(hash))
+    @table.merge!(resolve_types(symbolize_keys(hash)))
     self
   end
 
-  def reload
-    self
+  def destroy
+    self.class.all.delete_if { |b| b.id == id }
   end
 
   def self.find(id)
-    all.find { |r| r.id == id }
+    all.find { |r| r.id == id.to_i }
   end
 
   def self.create(hash = {})
-    all << new(hash.merge({ :id => @@next_id }))
-    @@next_id += 1
+    all << new(hash)
     all[-1]
   end
 
@@ -52,15 +48,34 @@ class MemoryModel < OpenStruct
     all.clear
   end
 
-  def [](attr)
-    send(attr)
-  end
-
   def self.count
     all.size
   end
 
+  def self.attribute(attribute, type)
+    @@types[self] ||= {}
+    @@types[self][attribute] = type
+  end
+
 private
+ 
+  def resolve_types(hash)
+    hash.each { |attribute, value|
+      case @@types[self.class][attribute]
+      when :integer
+        hash[attribute] = value.to_i
+      when :boolean
+        if value == "true"
+          hash[attribute] = true
+        elsif value == "false"
+          hash[attribute] = false
+        elsif value != true && value != false
+          hash[attribute] = nil
+        end
+      end
+    }
+    hash
+  end
 
   def symbolize_keys(hash)
     h = {}

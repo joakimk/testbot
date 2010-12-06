@@ -24,11 +24,11 @@ module Testbot::Server
   end
 
   post '/builds' do
-    build = Build.create_and_build_jobs(params)[:id].to_s
+    build = Build.create_and_build_jobs(params).id.to_s
   end
 
   get '/builds/:id' do
-    build = Build.find(params[:id].to_i)
+    build = Build.find(params[:id])
     build.destroy if build.done
     { "done" => build.done, "results" => build.results, "success" => build.success }.to_json
   end
@@ -37,12 +37,12 @@ module Testbot::Server
     next_job, runner = Job.next(params, @env['REMOTE_ADDR'])
     if next_job
       next_job.update(:taken_at => Time.now, :taken_by => runner)
-      [ next_job[:id], next_job[:requester_mac], next_job[:project], next_job[:root], next_job[:type], (next_job[:jruby] == 1 ? 'jruby' : 'ruby'), next_job[:files] ].join(',')
+      [ next_job.id, next_job.requester_mac, next_job.project, next_job.root, next_job.type, (next_job.jruby == 1 ? 'jruby' : 'ruby'), next_job.files ].join(',')
     end
   end
 
   put '/jobs/:id' do
-    Job.find(params[:id].to_i).update(:result => params[:result], :success => params[:success]); nil
+    Job.find(params[:id]).update(:result => params[:result], :success => params[:success]); nil
   end
 
   get '/runners/ping' do
@@ -53,7 +53,7 @@ module Testbot::Server
   end
 
   get '/runners/outdated' do
-    Runner.find_all_outdated.map { |runner| [ runner[:ip], runner[:hostname], runner[:uid] ].join(' ') }.join("\n").strip
+    Runner.find_all_outdated.map { |runner| [ runner.ip, runner.hostname, runner.uid ].join(' ') }.join("\n").strip
   end
 
   get '/runners/available_instances' do
@@ -65,7 +65,7 @@ module Testbot::Server
   end
 
   get '/runners/available' do
-    Runner.find_all_available.map { |runner| [ runner[:ip], runner[:hostname], runner[:uid], runner[:username], runner[:idle_instances] ].join(' ') }.join("\n").strip
+    Runner.find_all_available.map { |runner| [ runner.ip, runner.hostname, runner.uid, runner.username, runner.idle_instances ].join(' ') }.join("\n").strip
   end
 
   get '/version' do

@@ -30,16 +30,16 @@ module Testbot::Server
         first_build = Build.all.first
         assert last_response.ok?
 
-        assert_equal first_build[:id].to_s, last_response.body
-        assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_build[:files]
-        assert_equal '10 20', first_build[:sizes]
-        assert_equal 'server:/path/to/project', first_build[:root]
-        assert_equal 'spec', first_build[:type]
-        assert_equal 'bb:bb:bb:bb:bb:bb', first_build[:requester_mac]
-        assert_equal 'things', first_build[:project]
-        assert_equal 0, first_build[:jruby]
-        assert_equal '', first_build[:results]
-        assert_equal true, first_build[:success]
+        assert_equal first_build.id.to_s, last_response.body
+        assert_equal 'spec/models/car_spec.rb spec/models/house_spec.rb', first_build.files
+        assert_equal '10 20', first_build.sizes
+        assert_equal 'server:/path/to/project', first_build.root
+        assert_equal 'spec', first_build.type
+        assert_equal 'bb:bb:bb:bb:bb:bb', first_build.requester_mac
+        assert_equal 'things', first_build.project
+        assert_equal 0, first_build.jruby
+        assert_equal '', first_build.results
+        assert_equal true, first_build.success
       end
 
       should "create jobs from the build based on the number of total instances" do
@@ -53,15 +53,15 @@ module Testbot::Server
 
         assert_equal 2, Job.count
         first_job, last_job = Job.all
-        assert_equal 'spec/models/car_spec.rb spec/models/car2_spec.rb', first_job[:files]
-        assert_equal 'spec/models/house_spec.rb spec/models/house2_spec.rb', last_job[:files]
+        assert_equal 'spec/models/car_spec.rb spec/models/car2_spec.rb', first_job.files
+        assert_equal 'spec/models/house_spec.rb spec/models/house2_spec.rb', last_job.files
 
-        assert_equal 'server:/path/to/project', first_job[:root]
-        assert_equal 'spec', first_job[:type]
-        assert_equal 'bb:bb:bb:bb:bb:bb', first_job[:requester_mac]
-        assert_equal 'things', first_job[:project]
-        assert_equal 1, first_job[:jruby]
-        assert_equal Build.all.first, first_job[:build]
+        assert_equal 'server:/path/to/project', first_job.root
+        assert_equal 'spec', first_job.type
+        assert_equal 'bb:bb:bb:bb:bb:bb', first_job.requester_mac
+        assert_equal 'things', first_job.project
+        assert_equal 1, first_job.jruby
+        assert_equal Build.all.first, first_job.build
       end
 
       should "only use resources according to available_runner_usage" do
@@ -76,7 +76,7 @@ module Testbot::Server
 
       should 'return the build status' do
         build = Build.create(:done => false, :results => "testbot5\n..........\ncompleted", :success => false)
-        get "/builds/#{build[:id]}"
+        get "/builds/#{build.id}"
         assert_equal true, last_response.ok?
         assert_equal ({ "done" => false, "results" => "testbot5\n..........\ncompleted", "success" => false }),
           JSON.parse(last_response.body)
@@ -84,7 +84,7 @@ module Testbot::Server
 
       should 'remove a build that is done' do
         build = Build.create(:done => true)
-        get "/builds/#{build[:id]}"
+        get "/builds/#{build.id}"
         assert_equal true, JSON.parse(last_response.body)['done']
         assert_equal 0, Build.count
       end
@@ -93,7 +93,7 @@ module Testbot::Server
         build = Build.create(:done => true)
         related_job = Job.create(:build => build)
         other_job = Job.create(:build => nil)
-        get "/builds/#{build[:id]}"
+        get "/builds/#{build.id}"
         assert !Job.find(related_job.id)
         assert Job.find(other_job.id)
       end
@@ -108,8 +108,8 @@ module Testbot::Server
         get '/jobs/next', :version => Testbot.version
         assert last_response.ok?      
 
-        assert_equal [ job1[:id], "bb:bb:bb:bb:bb:bb", "things", "server:/project", "spec", "jruby", "spec/models/car_spec.rb" ].join(','), last_response.body
-        assert job1[:taken_at] != nil
+        assert_equal [ job1.id, "bb:bb:bb:bb:bb:bb", "things", "server:/project", "spec", "jruby", "spec/models/car_spec.rb" ].join(','), last_response.body
+        assert job1.taken_at != nil
       end
 
       should "not return a job that has already been taken" do
@@ -117,8 +117,8 @@ module Testbot::Server
         job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa", :project => 'things', :jruby => 0
         get '/jobs/next', :version => Testbot.version
         assert last_response.ok?
-        assert_equal [ job2[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
-        assert job2.reload[:taken_at] != nil
+        assert_equal [ job2.id, "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
+        assert job2.taken_at != nil
       end
 
       should "not return a job if there isnt any" do
@@ -130,20 +130,20 @@ module Testbot::Server
       should "save which runner takes a job" do
         job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa"
         get '/jobs/next', :version => Testbot.version
-        assert_equal Runner.first, job.reload.taken_by
+        assert_equal Runner.first, job.taken_by
       end
 
       should "save information about the runners" do
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini.local', :uid => "00:01:...", :idle_instances => 2, :max_instances => 4
         runner = Runner.first
-        assert_equal Testbot.version, runner[:version]
-        assert_equal '127.0.0.1', runner[:ip]
-        assert_equal 'macmini.local', runner[:hostname]
-        assert_equal '00:01:...', runner[:uid]
-        assert_equal 2, runner[:idle_instances].to_i
-        assert_equal 4, runner[:max_instances].to_i
-        assert (Time.now - 5) < runner[:last_seen_at]
-        assert (Time.now + 5) > runner[:last_seen_at]
+        assert_equal Testbot.version, runner.version
+        assert_equal '127.0.0.1', runner.ip
+        assert_equal 'macmini.local', runner.hostname
+        assert_equal '00:01:...', runner.uid
+        assert_equal 2, runner.idle_instances
+        assert_equal 4, runner.max_instances
+        assert (Time.now - 5) < runner.last_seen_at
+        assert (Time.now + 5) > runner.last_seen_at
       end
 
       should "only create one record for the same mac" do
@@ -229,10 +229,10 @@ module Testbot::Server
 
         new_runner = Runner.create(:uid => "00:01")
         get '/jobs/next', :version => Testbot.version, :uid => "00:01"
-        assert_equal new_runner, old_taken_job.reload.taken_by
+        assert_equal new_runner, old_taken_job.taken_by
 
         assert last_response.ok?
-        assert_equal [ old_taken_job[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
+        assert_equal [ old_taken_job.id, "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
       end
 
     end
@@ -320,8 +320,8 @@ module Testbot::Server
         runner = Runner.create(:uid => 'aa:aa:aa:aa:aa:aa')
         get "/runners/ping", :uid => 'aa:aa:aa:aa:aa:aa', :version => Testbot.version
         assert last_response.ok?
-        assert (Time.now - 5) < runner[:last_seen_at]
-        assert (Time.now + 5) > runner[:last_seen_at]
+        assert (Time.now - 5) < runner.last_seen_at
+        assert (Time.now + 5) > runner.last_seen_at
       end
 
       should "update data on the runner" do
@@ -329,8 +329,8 @@ module Testbot::Server
         get "/runners/ping", :uid => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'jocke'
         assert last_response.ok?
         assert_equal 'aa:aa:..', runner.uid
-        assert_equal 4, runner.max_instances.to_i
-        assert_equal 2, runner.idle_instances.to_i
+        assert_equal 4, runner.max_instances
+        assert_equal 2, runner.idle_instances
         assert_equal 'hostname1', runner.hostname
         assert_equal Testbot.version, runner.version
         assert_equal 'jocke', runner.username
@@ -354,38 +354,38 @@ module Testbot::Server
 
       should "receive the results of a job" do
         job = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30
-        put "/jobs/#{job[:id]}", :result => 'test run result', :success => true
+        put "/jobs/#{job.id}", :result => 'test run result', :success => true
         assert last_response.ok?
-        assert_equal 'test run result', job.reload.result
-        assert_equal 'true', job.success
+        assert_equal 'test run result', job.result
+        assert_equal true, job.success
       end
 
       should "update the related build" do
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build      
-        put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => true
-        put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
-        assert_equal 'test run result 1\ntest run result 2\n', build.reload[:results]
-        assert_equal true, build[:success]
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => "true"
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => "true"
+        assert_equal 'test run result 1\ntest run result 2\n', build.results
+        assert_equal true, build.success
       end
 
       should "make the related build done if there are no more jobs for the build" do
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
-        put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => true
-        put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
-        assert_equal true, build[:done]
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => true
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => true
+        assert_equal true, build.done
       end
 
       should "make the build fail if one of the jobs fail" do
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
-        put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => false
-        put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
-        assert_equal false, build[:success]
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => false
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => true
+        assert_equal false, build.success
       end 
 
     end

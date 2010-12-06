@@ -2,6 +2,9 @@ module Testbot::Server
 
   class Runner < MemoryModel
 
+    attribute :idle_instances, :integer
+    attribute :max_instances, :integer
+
     def self.record!(hash)
       create_or_update_by_mac!(hash)
     end
@@ -31,12 +34,12 @@ module Testbot::Server
     end  
 
     def self.available_instances
-      find_all_available.inject(0) { |sum, r| r[:idle_instances].to_i + sum }
+      find_all_available.inject(0) { |sum, r| r.idle_instances + sum }
     end
 
     def self.total_instances
       return 1 if ENV['INTEGRATION_TEST']
-      find_all_available.inject(0) { |sum, r| r[:max_instances].to_i + sum }
+      find_all_available.inject(0) { |sum, r| r.max_instances + sum }
     end
 
   end

@@ -14,16 +14,16 @@ module Testbot::Server
     end
 
     def create_jobs!(available_runner_usage)
-      groups = Group.build(self[:files].split, self[:sizes].split.map { |size| size.to_i },
-                           Runner.total_instances.to_f * (available_runner_usage.to_i / 100.0), self[:type])
+      groups = Group.build(self.files.split, self.sizes.split.map { |size| size.to_i },
+                           Runner.total_instances.to_f * (available_runner_usage.to_i / 100.0), self.type)
       groups.each do |group|
         Job.create(:files => group.join(' '),
-                   :root => self[:root],
-                   :project => self[:project],
-                   :type => self[:type],
-                   :requester_mac => self[:requester_mac],
+                   :root => self.root,
+                   :project => self.project,
+                   :type => self.type,
+                   :requester_mac => self.requester_mac,
                    :build => self,
-                   :jruby => self[:jruby])
+                   :jruby => self.jruby)
       end
     end
 
