@@ -13,7 +13,7 @@ Feature: Rails integration
      | rails_version | generate_config_command                        |
      | 3.0.3         | rails g testbot --connect 192.168.1.55         |
      | 2.3.10        | script/generate testbot --connect 192.168.1.55 |
-   
+
   Scenario: Using testbot with Rails 3 and RSpec 2
     Given I have a rails 3.0.3 application
     And I add testbot

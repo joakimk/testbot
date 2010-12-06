@@ -31,7 +31,7 @@ Given /^I have a rails (.+) application$/ do |version|
   has_rvm = system "which rvm > /dev/null"
   raise "You need rvm to run these tests as the tests use it to setup isolated environments." unless has_rvm
   
-  system "rm -rf tmp/cucumber; mkdir -p tmp/cucumber"
+  system "rm -rf tmp; mkdir -p tmp"
   
   @version = version
   @test_gemset_name = "testbot_rails_#{@version}"
@@ -70,7 +70,11 @@ end
 Given /^I have a testbot network setup$/ do
   system "export INTEGRATION_TEST=true; testbot --server 1> /dev/null"
   system "export INTEGRATION_TEST=true; testbot --runner --connect 127.0.0.1 --working_dir #{@testbot_path}/tmp/runner 1> /dev/null"
-  system "cd #{@app_path}; rails g testbot --connect 127.0.0.1 --rsync_path #{@testbot_path}/tmp/server 1> /dev/null"
+
+  # Ignoring Gemfile.lock because bundle within the runner fails otherwise.
+  # Seems the runner uses the "testbot" gemset even though its started with
+  # the testing gemset... why is this?
+  system "cd #{@app_path}; rails g testbot --connect 127.0.0.1 --rsync_ignores Gemfile.lock --rsync_path #{@testbot_path}/tmp/server 1> /dev/null"
 
   # Add db setup to testbot.rake
   lines = File.readlines("#{@app_path}/lib/tasks/testbot.rake")
