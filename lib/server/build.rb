@@ -22,13 +22,13 @@ module Testbot::Server
                    :project => self[:project],
                    :type => self[:type],
                    :requester_mac => self[:requester_mac],
-                   :build_id => self[:id],
+                   :build => self,
                    :jruby => self[:jruby])
       end
     end
 
     def destroy
-      Job.all.find_all { |j| j.build_id == self.id }.each { |job| job.destroy }
+      Job.all.find_all { |j| j.build == self }.each { |job| job.destroy }
       super
     end
 

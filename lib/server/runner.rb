@@ -7,7 +7,7 @@ module Testbot::Server
     end
 
     def self.create_or_update_by_mac!(hash)
-      if (runner = all.find { |r| r.uid == hash[:uid] })
+      if runner = find_by_uid(hash[:uid])
         runner.update hash
       else
         Runner.create hash

@@ -3,8 +3,8 @@ module Testbot::Server
   class Job < MemoryModel
     def update(hash)
       super(hash)
-      if build = Build.all.find { |b| b.id == self[:build_id] }
-        done = !Job.all.find { |j| !j.result && j.build_id == self[:build_id] }
+      if self.build
+        done = !Job.all.find { |j| !j.result && j.build == self.build }
         build.update(:results => build[:results].to_s + hash[:result].to_s,
                      :done => done)
 
@@ -35,8 +35,8 @@ module Testbot::Server
 
     def self.release_jobs_taken_by_missing_runners!
       missing_runners = Runner.all.find_all { |r| r.last_seen_at < (Time.now - Runner.timeout) }
-      missing_runners.each { |r|
-        Job.all.find_all { |j| j.taken_by_id == r.id }.each { |job| job.update(:taken_at => nil) }
+      missing_runners.each { |runner|
+        Job.all.find_all { |job| job.taken_by == runner }.each { |job| job.update(:taken_at => nil) }
       }
     end
   end

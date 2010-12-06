@@ -61,7 +61,7 @@ module Testbot::Server
         assert_equal 'bb:bb:bb:bb:bb:bb', first_job[:requester_mac]
         assert_equal 'things', first_job[:project]
         assert_equal 1, first_job[:jruby]
-        assert_equal Build.all.first[:id], first_job[:build_id]
+        assert_equal Build.all.first, first_job[:build]
       end
 
       should "only use resources according to available_runner_usage" do
@@ -91,8 +91,8 @@ module Testbot::Server
 
       should 'remove all related jobs of a build that is done' do
         build = Build.create(:done => true)
-        related_job = Job.create(:build_id => build.id)
-        other_job = Job.create(:build_id => nil)
+        related_job = Job.create(:build => build)
+        other_job = Job.create(:build => nil)
         get "/builds/#{build[:id]}"
         assert !Job.find(related_job.id)
         assert Job.find(other_job.id)
@@ -130,7 +130,7 @@ module Testbot::Server
       should "save which runner takes a job" do
         job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa"
         get '/jobs/next', :version => Testbot.version
-        assert_equal Runner.first.id, job.reload.taken_by_id
+        assert_equal Runner.first, job.reload.taken_by
       end
 
       should "save information about the runners" do
@@ -225,11 +225,11 @@ module Testbot::Server
 
       should "return taken jobs to other runners if the runner hasn't been seen for 10 seconds or more" do
         missing_runner = Runner.create(:last_seen_at => Time.now - 15)
-        old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa", :taken_by_id => missing_runner.id, :taken_at => Time.now - 30, :project => 'things'
+        old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa", :taken_by => missing_runner, :taken_at => Time.now - 30, :project => 'things'
 
         new_runner = Runner.create(:uid => "00:01")
         get '/jobs/next', :version => Testbot.version, :uid => "00:01"
-        assert_equal new_runner.id, old_taken_job.reload.taken_by_id
+        assert_equal new_runner, old_taken_job.reload.taken_by
 
         assert last_response.ok?
         assert_equal [ old_taken_job[:id], "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
@@ -306,7 +306,7 @@ module Testbot::Server
       should "not return instances as available when not seen the last 10 seconds" do
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4
-        Runner.all.find { |r| r.uid == "00:02" }.update(:last_seen_at => Time.now - 10)
+        Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)
         get '/runners/total_instances'
         assert last_response.ok?
         assert_equal "2", last_response.body
@@ -362,8 +362,8 @@ module Testbot::Server
 
       should "update the related build" do
         build = Build.create
-        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
-        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]      
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build      
         put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => true
         put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
         assert_equal 'test run result 1\ntest run result 2\n', build.reload[:results]
@@ -372,8 +372,8 @@ module Testbot::Server
 
       should "make the related build done if there are no more jobs for the build" do
         build = Build.create
-        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
-        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => true
         put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
         assert_equal true, build[:done]
@@ -381,8 +381,8 @@ module Testbot::Server
 
       should "make the build fail if one of the jobs fail" do
         build = Build.create
-        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]
-        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build_id => build[:id]      
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         put "/jobs/#{job1[:id]}", :result => 'test run result 1\n', :success => false
         put "/jobs/#{job2[:id]}", :result => 'test run result 2\n', :success => true
         assert_equal false, build[:success]
