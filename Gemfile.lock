@@ -9,7 +9,6 @@ PATH
       macaddr (>= 1.0.0)
       net-ssh (>= 2.0.23)
       sinatra (= 1.0.0)
-      sqlite3-ruby (= 1.2.5)
 
 GEM
   remote: http://rubygems.org/
@@ -42,7 +41,6 @@ GEM
     shoulda (2.11.3)
     sinatra (1.0)
       rack (>= 1.0)
-    sqlite3-ruby (1.2.5)
     term-ansicolor (1.0.5)
 
 PLATFORMS
@@ -62,5 +60,4 @@ DEPENDENCIES
   rvm
   shoulda
   sinatra (= 1.0.0)
-  sqlite3-ruby (= 1.2.5)
   testbot!

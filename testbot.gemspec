@@ -17,11 +17,8 @@ Gem::Specification.new do |s|
   s.add_dependency('httparty', '>= 0.6.1')
   s.add_dependency('macaddr', '>= 1.0.0')
   s.add_dependency('net-ssh', '>= 2.0.23')
-  s.add_dependency('json', '>= 1.4.6')
+  s.add_dependency('json_pure', '>= 1.4.6')
   s.add_dependency('daemons', '>= 1.0.10')
   s.add_dependency('acts_as_rails3_generator')
-
-  # TODO: Remove. The Rails3 + RSpec2 feature fails without it.
-  s.add_dependency('sqlite3-ruby', '= 1.2.5')
 end
 

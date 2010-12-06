@@ -60,45 +60,6 @@ Given /^I add testbot$/ do
   end
 end
 
-And /^I add rspec 2 and some specs$/ do
-  system %{echo "gem 'rspec-rails', '~> 2.0.1'" >> #{@app_path}/Gemfile}
-  And 'I run "gem install rspec-rails -v 2.0.1 --no-ri --no-rdoc"'
-  And 'I run "script/rails generate rspec:install"'
-  And 'I run "script/rails generate scaffold user name:string"'
-end
-
-Given /^I have a testbot network setup$/ do
-  system "export INTEGRATION_TEST=true; testbot --server 1> /dev/null"
-  system "export INTEGRATION_TEST=true; testbot --runner --connect 127.0.0.1 --working_dir #{@testbot_path}/tmp/runner 1> /dev/null"
-
-  # Ignoring Gemfile.lock because bundle within the runner fails otherwise.
-  # Seems the runner uses the "testbot" gemset even though its started with
-  # the testing gemset... why is this?
-  system "cd #{@app_path}; rails g testbot --connect 127.0.0.1 --rsync_ignores Gemfile.lock --rsync_path #{@testbot_path}/tmp/server 1> /dev/null"
-
-  # Add db setup to testbot.rake
-  lines = File.readlines("#{@app_path}/lib/tasks/testbot.rake")
-  file = File.open("#{@app_path}/lib/tasks/testbot.rake", "w")
-  lines.each do |line|
-    file.write(line)
-    if line.include?("task :before_run")
-      file.write("system 'rake db:migrate'\n")
-    end
-  end
-  file.close
-
-  # Wait for the runner to register with the server
-  sleep 2
-end
-
-Given /^I can successfully run "([^"]*)"$/ do |cmd|
-  success = system("cd #{@app_path}; export INTEGRATION_TEST=true; #{cmd} 1> /dev/null")
-  system "export INTEGRATION_TEST=true; testbot --server stop 1> /dev/null"
-  system "export INTEGRATION_TEST=true; testbot --runner stop 1> /dev/null"
-  system "rm -rf #{@testbot_path}/tmp"
-  raise "Command failed!" unless success
-end
-
 Given /^I run "([^"]*)"$/ do |command|
   system("cd #{@app_path}; #{command} 1>/dev/null") || raise("Command failed.")
 end

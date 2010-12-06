@@ -19,7 +19,7 @@ class IntegrationTest < Test::Unit::TestCase
       stop!
     }
 
-    system "mkdir -p tmp; cp -rf test/fixtures/local tmp/local"
+    system "rm -rf tmp; mkdir -p tmp; cp -rf test/fixtures/local tmp/local"
     system "export INTEGRATION_TEST=true; bin/testbot --runner --connect 127.0.0.1 --working_dir tmp/runner > /dev/null"
     system "export INTEGRATION_TEST=true; bin/testbot --server > /dev/null"
      
