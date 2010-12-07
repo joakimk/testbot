@@ -32,7 +32,7 @@ How it works
 Testbot is:
 
 * A **server** to distribute test jobs.
-* One or more **runners** to run test jobs and return the results (this is the "slave" process that runs tests).
+* One or more **runners** to run test jobs and return the results (this is the "worker" process).
 * One or more **requesters** that tells the server which tests to distribute and displays the results (the client you use to run tests, for example: **rake testbot:spec**).
 
 <pre>
