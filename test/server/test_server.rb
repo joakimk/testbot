@@ -414,6 +414,17 @@ module Testbot::Server
                      JSON.parse(last_response.body)
       end
 
+      should "not return instances when not seen the last 10 seconds" do
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
+        Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)
+        get '/runners'
+        assert last_response.ok?
+        parsed_body = JSON.parse(last_response.body)
+        assert_equal 1, parsed_body.size
+        assert_equal '00:01', parsed_body.first["uid"] 
+      end
+
     end
 
     context "GET /status" do

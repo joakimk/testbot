@@ -53,7 +53,7 @@ module Testbot::Server
   end
 
   get '/runners' do
-    Runner.all.map { |r| r.attributes }.to_json
+    Runner.find_all_available.map { |r| r.attributes }.to_json
   end
 
   get '/runners/outdated' do
