@@ -400,8 +400,24 @@ module Testbot::Server
 
     end
 
+    context "GET /runners" do
+
+      should "return runner information in json format" do
+        get '/jobs/next', :version => Testbot.version, :uid => "00:01"
+        get "/runners/ping", :uid => '00:01', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'testbot'
+        get '/runners'
+        
+        assert last_response.ok?
+        assert_equal ([ { "version" => Testbot.version.to_s, "hostname" => 'hostname1', "uid" => "00:01",
+                          "idle_instances" => 2, "max_instances" => 4, "username" => 'testbot',
+                          "ip" => "127.0.0.1", "last_seen_at" => Runner.first.last_seen_at.to_s } ]),
+                     JSON.parse(last_response.body)
+      end
+
+    end
+
     context "GET /status" do
-    
+
       should "return the contents of the status page" do
         get '/status'
         assert_equal true, last_response.body.include?('Testbot status')

@@ -3,19 +3,46 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>Testbot status</title>
 
-  <link rel="stylesheet" href="/stylesheets/status.css" type="text/css" media="screen" charset="utf-8" />
+  <link rel="stylesheet" href="/status/stylesheets/status.css" type="text/css" media="screen" charset="utf-8" />
   <script type="text/javascript" charset="utf-8" src="/status/javascripts/jquery-1.4.4.min.js"></script>
   <script type="text/javascript" charset="utf-8" src="/status/javascripts/sammy-0.6.2.min.js"></script>  
   <script type="text/javascript" charset="utf-8">
-    $(function (){
-      $.ajax({ url: "/runners/available", context: document.body, success: function(data){
-        console.log(data);
-      }});
+    $(function () {
+        var status = new function() {
+
+        this.renderRunners = function(runners) {
+          $("#runners").empty();
+          $("#runners").append("<ul>");
+          
+          var idle_instances = 0;
+          var total_instances = 0;
+          $.each(runners, function(i, runner) {
+            $("#runners").append("<li>" + runner.hostname + ": " + runner.idle_instances + " / " + runner.max_instances + " idle</li>");
+            idle_instances += runner.idle_instances;
+            total_instances += runner.max_instances;
+          });
+          $("#runners").append("</ul>");
+          
+          $("#total").empty();
+          $("#total").append("Idle instances: " + idle_instances + " / " + total_instances);
+        }
+        
+        this.update = function()
+        {
+          $.ajax({ url: "/runners", dataType: "json", success: function(data){
+            status.renderRunners(data);
+          }});
+        }
+      };
+
+      setInterval(status.update, 500);
     });
   </script>
 </head>  
 <body>
-  Status page
+  <h2>Testbot status</h2>
+  <div id="runners">Loading...</div>
+  <div id="total"</div>
 </body>
 </html>
 

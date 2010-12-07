@@ -17,6 +17,10 @@ class MemoryModel < OpenStruct
     @table[:type]
   end
 
+  def attributes
+    @table
+  end
+
   def update(hash)
     @table.merge!(resolve_types(symbolize_keys(hash)))
     self

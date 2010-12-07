@@ -1,0 +1,14 @@
+body {
+  background-color: black;
+  color: white;
+  font-family: Monaco, monospace; font-size: 10pt;
+}
+
+#total {
+  margin-top: 20px;
+}
+
+#runners li {
+  list-style: none;
+}
+

@@ -52,6 +52,10 @@ module Testbot::Server
     nil
   end
 
+  get '/runners' do
+    Runner.all.map { |r| r.attributes }.to_json
+  end
+
   get '/runners/outdated' do
     Runner.find_all_outdated.map { |runner| [ runner.ip, runner.hostname, runner.uid ].join(' ') }.join("\n").strip
   end
