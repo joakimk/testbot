@@ -1,3 +1,7 @@
+0.4.9
+
+There is now a very basic status page at http://testbot_server:2288/status.
+
 0.4.8
 
 Removed all remaining native dependencies to make testbot simpler to install.
