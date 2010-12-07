@@ -59,6 +59,13 @@ Running tests:
     testbot --test --connect 192.168.0.100
     # --test could also be --spec or --features
 
+Using testbot with Rails 2:
+
+    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.4.9'
+    script/generate testbot --connect 192.168.0.100
+
+    rake testbot:spec (or :test, :features)
+
 Using testbot with Rails 3:
 
     rails g testbot --connect 192.168.0.100
@@ -66,13 +73,6 @@ Using testbot with Rails 3:
 
     # Gemfile:
     gem 'testbot'
-
-Using testbot with Rails 2:
-
-    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.4.9'
-    script/generate testbot --connect 192.168.0.100
-
-    rake testbot:spec (or :test, :features)
 
 You can keep track of the testbots on:
 
