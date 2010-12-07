@@ -74,6 +74,10 @@ Using testbot with Rails 2:
 
     rake testbot:spec (or :test, :features)
 
+You can keep track of the testbots on:
+
+    http://192.168.0.100:2288/status
+
 Updating testbot
 ----
 
