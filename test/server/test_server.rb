@@ -357,7 +357,7 @@ module Testbot::Server
         put "/jobs/#{job.id}", :result => 'test run result', :success => true
         assert last_response.ok?
         assert_equal 'test run result', job.result
-        assert_equal true, job.success
+        assert_equal 'true', job.success
       end
 
       should "update the related build" do
