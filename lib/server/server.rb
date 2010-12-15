@@ -5,7 +5,7 @@ require 'json'
 require File.expand_path(File.join(File.dirname(__FILE__), '/../shared/testbot'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'memory_model.rb'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'job.rb'))
-require File.expand_path(File.join(File.dirname(__FILE__), 'group.rb')) #unless defined?(Group)
+require File.expand_path(File.join(File.dirname(__FILE__), 'group.rb'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'runner.rb'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'build.rb'))
 
