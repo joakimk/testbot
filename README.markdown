@@ -128,5 +128,4 @@ Add a **lib/adapters/framework_name_adapter.rb** file, update **lib/adapters/ada
 More
 ----
 
-* IRC channel: #testbot (freenode)
 * Check the [wiki](http://github.com/joakimk/testbot/wiki) for more info.

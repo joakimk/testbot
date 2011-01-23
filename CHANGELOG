@@ -17,7 +17,6 @@ Removed all remaining native dependencies to make testbot simpler to install.
 0.4.7
 
 - Refactored the code into modules with one directory for each.
-- Added a notice about our IRC channel, #testbot on freenode.
 - No longer dependent on mongel, now using webrat.
 
 0.4.6
