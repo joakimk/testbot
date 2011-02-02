@@ -1,3 +1,7 @@
+0.5.4
+
+Fixed some typos that caused the ruby interpreter to always be "ruby".
+
 0.5.3
 
 Added support for rubygems-test and http://gem-testers.org.

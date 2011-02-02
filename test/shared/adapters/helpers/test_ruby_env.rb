@@ -56,14 +56,14 @@ class RubyEnvTest < Test::Unit::TestCase
       flexmock(RubyEnv).should_receive(:bundler?).and_return(false)
       flexmock(File).should_receive(:exists?).and_return(true)
       assert_equal 'jruby -S script/spec', RubyEnv.ruby_command("path/to/project", :script => "script/spec",
-                                                                :bin => "rspec", :ruby_interpeter => "jruby")
+                                                                :bin => "rspec", :ruby_interpreter => "jruby")
     end
 
     should "be able to use jruby with bundler" do
       flexmock(RubyEnv).should_receive(:bundler?).and_return(true)
       flexmock(File).should_receive(:exists?).and_return(true)
       assert_equal 'jruby -S bundle exec script/spec', RubyEnv.ruby_command("path/to/project", :script => "script/spec",
-                                                                            :bin => "rspec", :ruby_interpeter => "jruby")
+                                                                            :bin => "rspec", :ruby_interpreter => "jruby")
     end
 
     should "use the interpeter when there is no binary specified" do
