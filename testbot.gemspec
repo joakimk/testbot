@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.description = %q{Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber.}
   s.bindir      = "bin"
   s.executables = [ "testbot" ]
-  s.files       = Dir.glob("lib/**/*") + %w(Gemfile testbot.gemspec CHANGELOG README.markdown bin/testbot) +
+  s.files       = Dir.glob("lib/**/*") + %w(Gemfile .gemtest testbot.gemspec CHANGELOG README.markdown bin/testbot) +
                   (File.exists?("DEV_VERSION") ? [ "DEV_VERSION" ] : [])
   s.add_dependency('sinatra', '=1.0.0') # To be able to use rack 1.0.1 which is compatible with rails 2.
   s.add_dependency('httparty', '>= 0.6.1')
@@ -20,5 +20,12 @@ Gem::Specification.new do |s|
   s.add_dependency('json_pure', '>= 1.4.6')
   s.add_dependency('daemons', '>= 1.0.10')
   s.add_dependency('acts_as_rails3_generator')
+
+  s.add_development_dependency("shoulda")
+  s.add_development_dependency("rack-test")
+  s.add_development_dependency("flexmock")
+  s.add_development_dependency("cucumber")
+  s.add_development_dependency("rvm")
+  s.add_development_dependency("rake")
 end
 
