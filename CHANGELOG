@@ -1,3 +1,7 @@
+0.5.2
+
+Added support for rubygems-test and http://gem-testers.org.
+
 0.5.1
 
 Fixed a bug that caused exit status to be 1 even if the test run is successful.
