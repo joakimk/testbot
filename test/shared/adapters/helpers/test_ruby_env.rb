@@ -52,6 +52,11 @@ class RubyEnvTest < Test::Unit::TestCase
       assert_equal 'ruby -S script/spec', RubyEnv.ruby_command("path/to/project", :script => "script/spec", :bin => "rspec")  
     end
 
+    should "not look for a script when none is provided" do
+      flexmock(File).should_receive(:exists?).once # Once for bundler check
+      assert_equal 'ruby -S rspec', RubyEnv.ruby_command("path/to/project", :bin => "rspec")  
+    end
+
     should "be able to use jruby" do
       flexmock(RubyEnv).should_receive(:bundler?).and_return(false)
       flexmock(File).should_receive(:exists?).and_return(true)

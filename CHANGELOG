@@ -1,3 +1,7 @@
+0.5.5
+
+Added RSpec2 support. Thanks to Bryan Helmkamp, https://github.com/brynary.
+
 0.5.4
 
 Fixed some typos that caused the ruby interpreter to always be "ruby".

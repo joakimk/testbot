@@ -6,14 +6,14 @@ class RubyEnv
 
   def self.ruby_command(project_path, opts = {})
     ruby_interpreter = opts[:ruby_interpreter] || "ruby"
-    
-    if File.exists?("#{project_path}/#{opts[:script]}")
+
+    if opts[:script] && File.exists?("#{project_path}/#{opts[:script]}")
       command = opts[:script]
     elsif opts[:bin]
       command = opts[:bin]
     else
       command = ruby_interpreter
-    end 
+    end
 
     if bundler?(project_path)
       "#{ruby_interpreter} -S bundle exec #{command}"
