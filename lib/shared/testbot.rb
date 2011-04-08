@@ -1,19 +1,10 @@
+require File.expand_path(File.join(File.dirname(__FILE__), '/version'))
 require File.expand_path(File.join(File.dirname(__FILE__), '/simple_daemonize'))
 require File.expand_path(File.join(File.dirname(__FILE__), '/adapters/adapter'))
 require 'fileutils'
 
 module Testbot
   require 'railtie' if defined?(Rails)
-
-  # Don't forget to update readme and changelog
-  def self.version
-    version = "0.5.4"
-    dev_version_file = File.join(File.dirname(__FILE__), '..', '..', 'DEV_VERSION')
-    if File.exists?(dev_version_file)
-      version += File.read(dev_version_file)
-    end
-    version
-  end
 
   if ENV['INTEGRATION_TEST']
     SERVER_PID = "/tmp/integration_test_testbot_server.pid"
