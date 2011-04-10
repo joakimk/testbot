@@ -1,8 +1,6 @@
 module Testbot::Server
 
   class Job < MemoryModel
-   
-    #attribute :success, :boolean
 
     def update(hash)
       super(hash)
@@ -42,6 +40,7 @@ module Testbot::Server
         Job.all.find_all { |job| job.taken_by == runner }.each { |job| job.update(:taken_at => nil) }
       }
     end
+
   end
 
 end

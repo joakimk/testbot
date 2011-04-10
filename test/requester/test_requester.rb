@@ -330,17 +330,6 @@ module Testbot::Requester
 
     end
 
-    context "result_lines" do
-
-      should "return all lines with results in them" do
-        results = "one\ntwo..\n... 0 failures\nthree"
-        requester = requester_with_result(results)
-        requester.run_tests(RspecAdapter, 'spec')
-        assert_equal [ '... 0 failures' ], requester.result_lines
-      end
-
-    end
-
   end
 
 end

@@ -98,10 +98,6 @@ module Testbot::Requester
       Requester.new(config)
     end
 
-    def result_lines
-      @build['results'].split("\n").find_all { |line| line_is_result?(line) }.map { |line| line.chomp }
-    end
-
     private
 
     def root
@@ -118,10 +114,6 @@ module Testbot::Requester
 
     def localhost?
       [ '0.0.0.0', 'localhost', '127.0.0.1' ].include?(config.server_host)
-    end
-
-    def line_is_result?(line)
-      line =~ /\d+ fail/
     end
 
     def jruby?
