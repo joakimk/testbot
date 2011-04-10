@@ -4,7 +4,7 @@ class Adapter
   FILES.each { |file| require(file) }
 
   def self.all
-    FILES.map { |file| load_adapter(file)  }
+    FILES.map { |file| load_adapter(file) }
   end
 
   def self.find(type)
