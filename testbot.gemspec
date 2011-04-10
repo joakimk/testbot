@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.email       = ["joakim.kolsjo@gmail.com"]
   s.homepage    = "http://github.com/joakimk/testbot"
   s.summary     = %q{A test distribution tool.}
-  s.description = %q{Testbot is a test distribution tool that works with Rails, RSpec, Test::Unit and Cucumber.}
+  s.description = %q{Testbot is a test distribution tool that works with Rails, RSpec, RSpec2, Test::Unit and Cucumber.}
   s.bindir      = "bin"
   s.executables = [ "testbot" ]
   s.files       = Dir.glob("lib/**/*") + Dir.glob("test/**/*") + %w(Gemfile .gemtest Rakefile testbot.gemspec CHANGELOG README.markdown bin/testbot) +
