@@ -1,3 +1,7 @@
+0.5.6
+
+Removed CPU usage check before running jobs (issue #25).
+
 0.5.5
 
 Added RSpec2 support. Thanks to Bryan Helmkamp, https://github.com/brynary.
