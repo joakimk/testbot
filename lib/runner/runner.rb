@@ -11,15 +11,8 @@ module Testbot::Runner
   TIME_BETWEEN_QUICK_POLLS = 0.1
   TIME_BETWEEN_PINGS = 5
   TIME_BETWEEN_VERSION_CHECKS = Testbot.version.include?('.DEV.') ? 10 : 60
-  MAX_CPU_USAGE_WHEN_IDLE = 50
 
   class CPU
-
-    def self.current_usage
-      process_usages = `ps -eo pcpu`
-      total_usage = process_usages.split("\n").inject(0) { |sum, usage| sum += usage.strip.to_f }
-      (total_usage / count).to_i
-    end
 
     def self.count
       case RUBY_PLATFORM
@@ -103,7 +96,6 @@ module Testbot::Runner
 
         # Makes sure all instances are listed as available after a run
         clear_completed_instances 
-        next unless cpu_available?
 
         next_job = Server.get("/jobs/next", :query => next_params) rescue nil
         last_check_found_a_job = (next_job != nil)
@@ -141,10 +133,6 @@ module Testbot::Runner
 
     def first_job_from_requester?
       @last_requester_mac == nil
-    end
-
-    def cpu_available?
-      @instances.size > 0 || CPU.current_usage < MAX_CPU_USAGE_WHEN_IDLE
     end
 
     def time_for_update?
