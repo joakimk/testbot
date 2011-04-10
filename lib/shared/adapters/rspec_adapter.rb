@@ -1,6 +1,6 @@
 require File.expand_path(File.join(File.dirname(__FILE__), "/helpers/ruby_env"))
 
-class RSpecAdapter
+class RspecAdapter
   
   def self.command(project_path, ruby_interpreter, files)
     spec_command = RubyEnv.ruby_command(project_path, :script => "script/spec", :bin => "rspec",

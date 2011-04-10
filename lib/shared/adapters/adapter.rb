@@ -1,25 +1,27 @@
-require File.dirname(__FILE__) + '/rspec_adapter'
-require File.dirname(__FILE__) + '/rspec2_adapter'
-require File.dirname(__FILE__) + '/cucumber_adapter'
-require File.dirname(__FILE__) + '/test_unit_adapter'
-
 class Adapter
+
+  FILES = Dir[File.dirname(__FILE__) + "/*_adapter.rb"]
+  FILES.each { |file| require(file) }
+
   def self.all
-    [ RSpecAdapter, RSpec2Adapter, CucumberAdapter, TestUnitAdapter ]
+    FILES.map { |file| load_adapter(file)  }
   end
 
   def self.find(type)
-    case type.to_sym
-    when :rspec
-      RSpec2Adapter
-    when :spec
-      RSpecAdapter
-    when :features
-      CucumberAdapter
-    when :test
-      TestUnitAdapter
+    if adapter = all.find { |adapter| adapter.type == type.to_s }
+      adapter
     else
       raise "Unknown adapter: #{type}"
     end
   end
+
+  private
+
+  def self.load_adapter(file)
+    eval("::" + File.basename(file).
+         gsub(/\.rb/, '').
+         gsub(/(?:^|_)(.)/) { $1.upcase })
+  end
+
 end
+

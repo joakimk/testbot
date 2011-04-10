@@ -122,7 +122,7 @@ You can also contribute by adding to the [wiki](http://github.com/joakimk/testbo
 How to add support for more test frameworks and/or programming languages
 ----
 
-Add a **lib/adapters/framework_name_adapter.rb** file, update **lib/adapters/adapter.rb** and this readme.
+Add a **lib/adapters/framework_name_adapter.rb** file and update this readme.
 
 More
 ----

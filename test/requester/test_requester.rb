@@ -27,7 +27,7 @@ module Testbot::Requester
     end
 
     def build_with_result(results)
-      requester_with_result(results).run_tests(RSpecAdapter, 'spec')
+      requester_with_result(results).run_tests(RspecAdapter, 'spec')
     end
 
     def setup
@@ -77,7 +77,7 @@ module Testbot::Requester
       should "should be able to create a build" do
         flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
         requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => '/path', :available_runner_usage => '60%', :project => 'things', :server_user => "cruise")
-        flexmock(RSpecAdapter).should_receive(:test_files).with('spec').once.and_return([ 'spec/models/house_spec.rb', 'spec/models/car_spec.rb' ])
+        flexmock(RspecAdapter).should_receive(:test_files).with('spec').once.and_return([ 'spec/models/house_spec.rb', 'spec/models/car_spec.rb' ])
 
         flexmock(File).should_receive(:stat).once.with("spec/models/house_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(10)
         flexmock(File).should_receive(:stat).once.with("spec/models/car_spec.rb").and_return(mock = Object.new); flexmock(mock).should_receive(:size).and_return(20)
@@ -98,7 +98,7 @@ module Testbot::Requester
                                                            flexmock(requester).should_receive(:puts)
                                                            flexmock(requester).should_receive(:system)
 
-                                                           assert_equal true, requester.run_tests(RSpecAdapter, 'spec')
+                                                           assert_equal true, requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "keep calling the server for results until done" do
@@ -118,7 +118,7 @@ module Testbot::Requester
                                                               flexmock(requester).should_receive(:puts).once.with("job 2 done: ....")
                                                               flexmock(requester).should_receive(:puts).once.with("job 1 done: ....")
 
-                                                              requester.run_tests(RSpecAdapter, 'spec')
+                                                              requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "return false if not successful" do
@@ -136,7 +136,7 @@ module Testbot::Requester
                                                           flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
                                                           mock_file_sizes
 
-                                                          assert_equal false, requester.run_tests(RSpecAdapter, 'spec')
+                                                          assert_equal false, requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "not print empty lines when there is no result" do
@@ -155,7 +155,7 @@ module Testbot::Requester
                                                               flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
                                                               mock_file_sizes
 
-                                                              requester.run_tests(RSpecAdapter, 'spec')
+                                                              requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "sync the files to the server" do
@@ -172,7 +172,7 @@ module Testbot::Requester
                                                           flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . testbot@192.168.1.100:/path")
                                                           mock_file_sizes
 
-                                                          requester.run_tests(RSpecAdapter, 'spec')
+                                                          requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "just try again if the request encounters an error while running and print on the fith time" do
@@ -193,7 +193,7 @@ module Testbot::Requester
                                                                                                                     flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
                                                                                                                     mock_file_sizes
 
-                                                                                                                    requester.run_tests(RSpecAdapter, 'spec')
+                                                                                                                    requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "just try again if the status returns as nil" do
@@ -212,7 +212,7 @@ module Testbot::Requester
                                                               flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
                                                               mock_file_sizes
 
-                                                              requester.run_tests(RSpecAdapter, 'spec')
+                                                              requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "remove unnessesary output from rspec when told to do so" do
@@ -234,7 +234,7 @@ module Testbot::Requester
                                                               flexmock(requester).should_receive(:puts)
                                                               mock_file_sizes
 
-                                                              requester.run_tests(RSpecAdapter, 'spec')
+                                                              requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "use SSHTunnel when specified (with a port that does not collide with the runner)" do
@@ -251,7 +251,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:puts)
         mock_file_sizes
 
-        requester.run_tests(RSpecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "use another user for rsync and ssh_tunnel when specified" do
@@ -270,7 +270,7 @@ module Testbot::Requester
         flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh  . cruise@somewhere:/tmp/testbot/foo")
         mock_file_sizes
 
-        requester.run_tests(RSpecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "use another port for cucumber to be able to run at the same time as rspec" do
@@ -335,7 +335,7 @@ module Testbot::Requester
       should "return all lines with results in them" do
         results = "one\ntwo..\n... 0 failures\nthree"
         requester = requester_with_result(results)
-        requester.run_tests(RSpecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
         assert_equal [ '... 0 failures' ], requester.result_lines
       end
 

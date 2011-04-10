@@ -3,7 +3,6 @@ require 'httparty'
 require 'macaddr'
 require 'ostruct'
 require File.dirname(__FILE__) + '/../shared/ssh_tunnel'
-require File.dirname(__FILE__) + '/../shared/adapters/adapter'
 require File.expand_path(File.dirname(__FILE__) + '/../shared/testbot')
 
 class Hash
