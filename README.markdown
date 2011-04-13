@@ -109,10 +109,12 @@ Contributing to testbot
 ----
 
 First, get the tests to run:
+
     bundle
     rake
 
 For development I recommend: [grosser/autotest](http://github.com/grosser/autotest)
+
     autotest -f -c
 
 Make your change (don't forget to write tests) and send me a pull request.
