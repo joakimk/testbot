@@ -2,6 +2,8 @@ Testbot is a test distribution tool that works with Rails, RSpec, RSpec2, Test::
 
 Using testbot on 11 machines (25 cores) we got our test suite down to **2 minutes from 30**. [More examples of how testbot is used](http://github.com/joakimk/testbot/wiki/How-testbot-is-used).
 
+If you intend to use testbot with cloud computing (like EC2), take a look at [TestbotCloud](https://github.com/joakimk/testbot_cloud).
+
 Installing
 ----
 
