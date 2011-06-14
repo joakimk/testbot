@@ -39,21 +39,35 @@ module Testbot::Requester
       flexmock(mock).should_receive(:size).and_return(0)
     end
 
+    def mock_file(local_path)
+      contents = File.open(File.join(File.dirname(__FILE__), local_path)).read
+      file = flexmock(File)
+      file.should_receive(:read).and_return(contents)
+      file
+    end
+
     context "self.create_by_config" do
 
       should 'create a requester from config' do
-        flexmock(YAML).should_receive(:load_file).once.with("testbot.yml").
-          and_return({ :server_host => 'hostname', :rsync_path => '/path',
-                     :rsync_ignores => ".git tmp", :available_runner_usage => '50%',
-                     :ssh_tunnel => false, :project => "appname", :server_user => "user" })
-        flexmock(Requester).should_receive(:new).once.with({ :server_host => 'hostname',
-                                                           :rsync_path => '/path', :rsync_ignores => '.git tmp',
-                                                           :available_runner_usage => '50%', :ssh_tunnel => false, :project => "appname",
-                                                           :server_user => "user" })
-        Requester.create_by_config("testbot.yml")
+        yml_file = mock_file("testbot.yml")
+        flexmock(File).should_receive(:open).with("testbot.yml").and_return(yml_file)
+        requester = Requester.create_by_config("testbot.yml")
+        assert_equal 'hostname', requester.config.server_host
+        assert_equal '/path', requester.config.rsync_path
+        assert_equal '.git tmp', requester.config.rsync_ignores
+        assert_equal 'appname', requester.config.project
+        assert_equal false, requester.config.ssh_tunnel
+        assert_equal 'user', requester.config.server_user
+        assert_equal '50%', requester.config.available_runner_usage
       end
 
-
+      should 'accept ERB-snippets in testbot.yml' do
+        yml_file = mock_file("testbot_with_erb.yml")
+        flexmock(File).should_receive(:open).with("testbot.yml").and_return(yml_file)
+        requester = Requester.create_by_config("testbot.yml")
+        assert_equal 'dynamic_host', requester.config.server_host
+        assert_equal '50%', requester.config.available_runner_usage
+      end
     end
 
     context "initialize" do
