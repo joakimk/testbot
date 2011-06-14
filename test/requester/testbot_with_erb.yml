@@ -1,0 +1,2 @@
+server_host: <%= "dynamic_host" %>
+available_runner_usage: "<%= 50 %>%"

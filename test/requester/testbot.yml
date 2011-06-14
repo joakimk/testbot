@@ -1,0 +1,7 @@
+server_host: hostname
+rsync_path: /path
+rsync_ignores: .git tmp
+project: appname
+ssh_tunnel: false
+server_user: user
+available_runner_usage: 50%

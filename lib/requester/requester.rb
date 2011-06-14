@@ -2,6 +2,7 @@ require 'rubygems'
 require 'httparty'
 require 'macaddr'
 require 'ostruct'
+require 'erb'
 require File.dirname(__FILE__) + '/../shared/ssh_tunnel'
 require File.expand_path(File.dirname(__FILE__) + '/../shared/testbot')
 
@@ -94,7 +95,9 @@ module Testbot::Requester
     end
 
     def self.create_by_config(path)
-      config = YAML.load_file(path)
+      file_contents = File.open(path).read
+      erb_processed = ERB.new(file_contents).result
+      config = YAML.load(erb_processed)
       Requester.new(config)
     end
 
