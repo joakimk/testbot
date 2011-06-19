@@ -91,6 +91,10 @@ module Testbot::Requester
 
       puts if config.simple_output
 
+      if adapter.respond_to?(:sum_results)
+        puts "\n" + adapter.sum_results(@build['results'])
+      end
+
       @build["success"]
     end
 

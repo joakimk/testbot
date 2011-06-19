@@ -40,6 +40,17 @@ class RspecAdapter
     'spec'
   end
 
+  def self.sum_results(results)
+    examples, failures = 0, 0
+    results.split("\n").each do |line|
+      line =~ /(\d+) examples, (\d+) failures/
+      next unless $1
+      examples += $1.to_i
+      failures += $2.to_i
+    end
+    "#{examples} examples, #{failures} failures"
+  end
+
 private
 
   def self.file_pattern

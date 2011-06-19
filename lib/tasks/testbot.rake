@@ -15,8 +15,6 @@ namespace :testbot do
     success = requester.run_tests(adapter, path)
     
     puts
-    puts requester.result_lines.join("\n")
-    puts
     puts "Finished in #{Time.now - start_time} seconds."
     success
   end

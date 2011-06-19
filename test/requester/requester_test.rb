@@ -100,12 +100,34 @@ module Testbot::Requester
                                                              :sizes => "10 20",
                                                              :jruby => false })
 
-                                                           flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, 'results' => '', "success" => true })
-                                                           flexmock(requester).should_receive(:sleep)
-                                                           flexmock(requester).should_receive(:puts)
-                                                           flexmock(requester).should_receive(:system)
+        flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, 'results' => '', "success" => true })
+        flexmock(requester).should_receive(:sleep)
+        flexmock(requester).should_receive(:puts)
+        flexmock(requester).should_receive(:system)
 
-                                                           assert_equal true, requester.run_tests(RspecAdapter, 'spec')
+        assert_equal true, requester.run_tests(RspecAdapter, 'spec')
+      end
+
+      should "print the sum of results formatted by the adapter" do
+        requester = Requester.new(:server_host => "192.168.1.100")
+
+        flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+        flexmock(requester).should_receive(:system)
+
+        flexmock(HTTParty).should_receive(:post).and_return('5')
+
+        flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
+                                                              :format => :json).and_return({ "done" => false, "results" => "job 2 done: ...." },
+                                                                { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
+                                                              mock_file_sizes
+
+        flexmock(requester).should_receive(:sleep).times(2).with(1)
+        flexmock(requester).should_receive(:puts).once.with("job 2 done: ....")
+        flexmock(requester).should_receive(:puts).once.with("job 1 done: ....")
+        flexmock(requester).should_receive(:puts).once.with("\nformatted result")
+
+        flexmock(RspecAdapter).should_receive(:sum_results).with("job 2 done: ....job 1 done: ....").and_return("formatted result")
+        requester.run_tests(RspecAdapter, 'spec')        
       end
 
       should "keep calling the server for results until done" do
@@ -119,13 +141,14 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                               :format => :json).and_return({ "done" => false, "results" => "job 2 done: ...." },
                                                                 { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
-                                                              mock_file_sizes
+        mock_file_sizes
 
-                                                              flexmock(requester).should_receive(:sleep).times(2).with(1)
-                                                              flexmock(requester).should_receive(:puts).once.with("job 2 done: ....")
-                                                              flexmock(requester).should_receive(:puts).once.with("job 1 done: ....")
+        flexmock(requester).should_receive(:sleep).times(2).with(1)
+        flexmock(requester).should_receive(:puts).once.with("job 2 done: ....")
+        flexmock(requester).should_receive(:puts).once.with("job 1 done: ....")
+        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
 
-                                                              requester.run_tests(RspecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "return false if not successful" do
@@ -139,11 +162,12 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                           :format => :json).and_return({ "success" => false, "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
 
-                                                          flexmock(requester).should_receive(:sleep).once.with(1)
-                                                          flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
-                                                          mock_file_sizes
+        flexmock(requester).should_receive(:sleep).once.with(1)
+        flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        mock_file_sizes
 
-                                                          assert_equal false, requester.run_tests(RspecAdapter, 'spec')
+        assert_equal false, requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "not print empty lines when there is no result" do
@@ -158,11 +182,12 @@ module Testbot::Requester
                                                               :format => :json).and_return({ "done" => false, "results" => "" },
                                                                 { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
 
-                                                              flexmock(requester).should_receive(:sleep).times(2).with(1)
-                                                              flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
-                                                              mock_file_sizes
+        flexmock(requester).should_receive(:sleep).times(2).with(1)
+        flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        mock_file_sizes
 
-                                                              requester.run_tests(RspecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "sync the files to the server" do
@@ -173,13 +198,14 @@ module Testbot::Requester
 
         flexmock(HTTParty).should_receive(:post).and_return('5')
         flexmock(requester).should_receive(:sleep).once
+        flexmock(requester).should_receive(:puts)
         flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                           :format => :json).and_return({ "done" => true, "results" => "" })
 
-                                                          flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . testbot@192.168.1.100:/path")
-                                                          mock_file_sizes
+        flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . testbot@192.168.1.100:/path")
+        mock_file_sizes
 
-                                                          requester.run_tests(RspecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "just try again if the request encounters an error while running and print on the fith time" do
@@ -195,12 +221,13 @@ module Testbot::Requester
                                                               flexmock(HTTParty).should_receive(:get).times(1).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                                                                                     :format => :json).and_return({ "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
 
-                                                                                                                    flexmock(requester).should_receive(:sleep).times(6).with(1)
-                                                                                                                    flexmock(requester).should_receive(:puts).once.with("Failed to get status: some connection error")
-                                                                                                                    flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
-                                                                                                                    mock_file_sizes
+        flexmock(requester).should_receive(:sleep).times(6).with(1)
+        flexmock(requester).should_receive(:puts).once.with("Failed to get status: some connection error")
+        flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        mock_file_sizes
 
-                                                                                                                    requester.run_tests(RspecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "just try again if the status returns as nil" do
@@ -215,11 +242,12 @@ module Testbot::Requester
                                                               :format => :json).and_return(nil,
                                                                 { "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
 
-                                                              flexmock(requester).should_receive(:sleep).times(2).with(1)
-                                                              flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
-                                                              mock_file_sizes
+        flexmock(requester).should_receive(:sleep).times(2).with(1)
+        flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
+        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        mock_file_sizes
 
-                                                              requester.run_tests(RspecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "remove unnessesary output from rspec when told to do so" do
@@ -234,14 +262,14 @@ module Testbot::Requester
                                                               :format => :json).and_return(nil,
                                                                 { "done" => true, "results" => "testbot4:\n....\n\nFinished in 84.333 seconds\n\n206 examples, 0 failures, 2 pending; testbot4:\n.F..\n\nFinished in 84.333 seconds\n\n206 examples, 0 failures, 2 pending" })
 
-                                                              flexmock(requester).should_receive(:sleep).times(2).with(1)
+        flexmock(requester).should_receive(:sleep).times(2).with(1)
 
-                                                              # Imperfect match, includes "." in 84.333, but good enough.
-                                                              flexmock(requester).should_receive(:print).once.with("......F...")
-                                                              flexmock(requester).should_receive(:puts)
-                                                              mock_file_sizes
+        # Imperfect match, includes "." in 84.333, but good enough.
+        flexmock(requester).should_receive(:print).once.with("......F...")
+        flexmock(requester).should_receive(:puts)
+        mock_file_sizes
 
-                                                              requester.run_tests(RspecAdapter, 'spec')
+        requester.run_tests(RspecAdapter, 'spec')
       end
 
       should "use SSHTunnel when specified (with a port that does not collide with the runner)" do
