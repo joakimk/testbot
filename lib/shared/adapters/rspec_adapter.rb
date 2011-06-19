@@ -1,4 +1,5 @@
 require File.expand_path(File.join(File.dirname(__FILE__), "/helpers/ruby_env"))
+require File.expand_path(File.join(File.dirname(__FILE__), "../color"))
 
 class RspecAdapter
   
@@ -40,6 +41,7 @@ class RspecAdapter
     'spec'
   end
 
+  # This is an optional method. It gets passed the entire test result and summarizes it. See the tests.
   def self.sum_results(results)
     examples, failures, pending = 0, 0, 0
     results.split("\n").each do |line|
@@ -52,11 +54,11 @@ class RspecAdapter
 
     result = [ pluralize(examples, 'example'), pluralize(failures, 'failure'), (pending > 0 ? "#{pending} pending" : nil) ].compact.join(', ')
     if failures == 0 && pending == 0
-      "\033[32m#{result}\033[0m" # Green
+      Color.colorize(result, :green)
     elsif failures == 0 && pending > 0
-      "\033[93m#{result}\033[0m" # Yellow
+      Color.colorize(result, :orange)
     else
-      "\033[31m#{result}\033[0m" # Red
+      Color.colorize(result, :red)
     end
   end
 

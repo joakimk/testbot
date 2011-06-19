@@ -3,10 +3,6 @@ require 'test/unit'
 require 'shoulda'
 
 class RspecAdapterTest < Test::Unit::TestCase
-  
-  def strip_colors(text)
-    text.gsub(/\e.+?m/, '')
-  end
 
   context "sum_results" do
 
@@ -41,11 +37,11 @@ Finished in 9.987141 seconds
 
 1 example, 0 failures, 0 pending
 STR
-      assert_equal "170 examples, 5 failures, 4 pending", strip_colors(RspecAdapter.sum_results(results))
+      assert_equal "170 examples, 5 failures, 4 pending", Color.strip(RspecAdapter.sum_results(results))
     end
 
     should "return 0 examples and failures for an empty resultset" do
-      assert_equal "0 examples, 0 failures", strip_colors(RspecAdapter.sum_results(""))
+      assert_equal "0 examples, 0 failures", Color.strip(RspecAdapter.sum_results(""))
     end
 
     should "print in singular for examples" do
@@ -57,7 +53,7 @@ Finished in 9.987141 seconds
 
 1 example, 0 failures
 STR
-      assert_equal "1 example, 0 failures", strip_colors(RspecAdapter.sum_results(str))
+      assert_equal "1 example, 0 failures", Color.strip(RspecAdapter.sum_results(str))
     end
 
     should "print in singular for failures" do
@@ -69,7 +65,7 @@ Finished in 9.987141 seconds
 
 0 example, 1 failures
 STR
-      assert_equal "0 examples, 1 failure", strip_colors(RspecAdapter.sum_results(str))
+      assert_equal "0 examples, 1 failure", Color.strip(RspecAdapter.sum_results(str))
     end
     
     should "make the result green if there is no failed or pending examples" do
@@ -84,7 +80,7 @@ STR
       assert_equal "\033[32m1 example, 0 failures\033[0m", RspecAdapter.sum_results(str)
     end
 
-    should "make the result yellow if there is pending examples" do
+    should "make the result orange if there is pending examples" do
       str =<<STR
 testbot1:/tmp/testbot
 *
@@ -93,7 +89,7 @@ Finished in 9.987141 seconds
 
 1 example, 0 failures, 1 pending
 STR
-      assert_equal "\033[93m1 example, 0 failures, 1 pending\033[0m", RspecAdapter.sum_results(str)
+      assert_equal "\033[33m1 example, 0 failures, 1 pending\033[0m", RspecAdapter.sum_results(str)
     end
 
     should "make the results red if there is failed examples" do
