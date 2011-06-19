@@ -95,10 +95,7 @@ module Testbot::Requester
     end
 
     def self.create_by_config(path)
-      file_contents = File.open(path).read
-      erb_processed = ERB.new(file_contents).result
-      config = YAML.load(erb_processed)
-      Requester.new(config)
+      Requester.new(YAML.load(ERB.new(File.open(path).read).result))
     end
 
     private
