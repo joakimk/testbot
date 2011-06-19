@@ -41,14 +41,20 @@ class RspecAdapter
   end
 
   def self.sum_results(results)
-    examples, failures = 0, 0
+    examples, failures, pending = 0, 0, 0
     results.split("\n").each do |line|
-      line =~ /(\d+) examples, (\d+) failures/
+      line =~ /(\d+) examples, (\d+) failures(, (\d+) pending)?/
       next unless $1
       examples += $1.to_i
       failures += $2.to_i
+      pending += $4.to_i
     end
-    "#{examples} examples, #{failures} failures"
+
+    if pending == 0
+      "#{examples} examples, #{failures} failures"
+    else
+      "#{examples} examples, #{failures} failures, #{pending} pending"
+    end
   end
 
 private
