@@ -12,3 +12,4 @@ instance*
 */**/*.swp
 */*/*/*.swp
 tmp
+.bundle/bin

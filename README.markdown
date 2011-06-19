@@ -117,9 +117,10 @@ First, get the tests to run:
     bundle
     rake
 
-For development I recommend: [grosser/autotest](http://github.com/grosser/autotest)
+For development I recommend using guard.
 
-    autotest -f -c
+    # OSX needs: gem install rb-fsevent
+    guard
 
 Make your change (don't forget to write tests) and send me a pull request.
 

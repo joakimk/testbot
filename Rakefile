@@ -11,7 +11,7 @@ end
 
 desc "Run Test::Unit tests"
 task :test do
-  Dir["test/**/test_*.rb"].each { |test| require(File.expand_path(test)) }
+  Dir["test/**/*_test.rb"].each { |test| require(File.expand_path(test)) }
 end
 
 
