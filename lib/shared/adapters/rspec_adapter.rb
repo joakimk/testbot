@@ -50,14 +50,25 @@ class RspecAdapter
       pending += $4.to_i
     end
 
-    if pending == 0
-      "#{examples} examples, #{failures} failures"
+    result = [ pluralize(examples, 'example'), pluralize(failures, 'failure'), (pending > 0 ? "#{pending} pending" : nil) ].compact.join(', ')
+    if failures == 0 && pending == 0
+      "\033[32m#{result}\033[0m" # Green
+    elsif failures == 0 && pending > 0
+      "\033[93m#{result}\033[0m" # Yellow
     else
-      "#{examples} examples, #{failures} failures, #{pending} pending"
+      "\033[31m#{result}\033[0m" # Red
     end
   end
 
 private
+
+  def self.pluralize(count, singular)
+    if count == 1
+      "#{count} #{singular}"
+    else
+      "#{count} #{singular}s"
+    end
+  end
 
   def self.file_pattern
     '**/**/*_spec.rb'

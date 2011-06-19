@@ -146,7 +146,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:sleep).times(2).with(1)
         flexmock(requester).should_receive(:puts).once.with("job 2 done: ....")
         flexmock(requester).should_receive(:puts).once.with("job 1 done: ....")
-        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        flexmock(requester).should_receive(:puts).once.with("\n\033[32m0 examples, 0 failures\033[0m")
 
         requester.run_tests(RspecAdapter, 'spec')
       end
@@ -164,7 +164,7 @@ module Testbot::Requester
 
         flexmock(requester).should_receive(:sleep).once.with(1)
         flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
-        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        flexmock(requester).should_receive(:puts).once.with("\n\033[32m0 examples, 0 failures\033[0m")
         mock_file_sizes
 
         assert_equal false, requester.run_tests(RspecAdapter, 'spec')
@@ -184,7 +184,7 @@ module Testbot::Requester
 
         flexmock(requester).should_receive(:sleep).times(2).with(1)
         flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
-        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        flexmock(requester).should_receive(:puts).once.with("\n\033[32m0 examples, 0 failures\033[0m")
         mock_file_sizes
 
         requester.run_tests(RspecAdapter, 'spec')
@@ -224,7 +224,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:sleep).times(6).with(1)
         flexmock(requester).should_receive(:puts).once.with("Failed to get status: some connection error")
         flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
-        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        flexmock(requester).should_receive(:puts).once.with("\n\033[32m0 examples, 0 failures\033[0m")
         mock_file_sizes
 
         requester.run_tests(RspecAdapter, 'spec')
@@ -244,7 +244,7 @@ module Testbot::Requester
 
         flexmock(requester).should_receive(:sleep).times(2).with(1)
         flexmock(requester).should_receive(:puts).once.with("job 2 done: ....job 1 done: ....")
-        flexmock(requester).should_receive(:puts).once.with("\n0 examples, 0 failures")
+        flexmock(requester).should_receive(:puts).once.with("\n\033[32m0 examples, 0 failures\033[0m")
         mock_file_sizes
 
         requester.run_tests(RspecAdapter, 'spec')
