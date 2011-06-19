@@ -21,16 +21,23 @@ testbot1:/tmp/testbot
 
 Finished in 9.987141 seconds
 
-50 examples, 1 failures, 1 pending
+50 examples, 1 failure, 1 pending
 
 testbot1:/tmp/testbot
-.............F........****........................
+.............FF.......****........................
 
 Finished in 9.987141 seconds
 
-50 examples, 1 failures, 4 pending
+50 examples, 2 failures, 3 pending
+
+testbot1:/tmp/testbot
+.
+
+Finished in 9.987141 seconds
+
+1 example, 0 failures, 0 pending
 STR
-      assert_equal "169 examples, 4 failures, 5 pending", RspecAdapter.sum_results(results) 
+      assert_equal "170 examples, 5 failures, 4 pending", RspecAdapter.sum_results(results) 
     end
 
     should "return 0 examples and failures for an empty resultset" do
