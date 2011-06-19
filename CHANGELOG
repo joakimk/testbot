@@ -1,3 +1,7 @@
+0.5.7
+
+Added @meeiw's patch to support ERB in config. Added test result summarization for RSpec and Cucumber.
+
 0.5.6
 
 Removed CPU usage check before running jobs (issue #25).
@@ -32,8 +36,7 @@ Removed all remaining native dependencies to make testbot simpler to install.
 
 0.4.7
 
-- Refactored the code into modules with one directory for each.
-- No longer dependent on mongel, now using webrat.
+Refactored the code into modules with one directory for each. No longer dependent on mongel, now using webrick.
 
 0.4.6
 
