@@ -37,7 +37,14 @@ module Testbot::Runner
     end
 
     def run_and_return_result(command)
-      `#{command} 2>&1`
+      @test_process = open("|#{command} 2>&1", 'r')
+      output = ''
+      while char = @test_process.getc
+        char = (char.is_a?(Fixnum) ? char.chr : char) # 1.8 <-> 1.9
+        output << char
+      end
+      @test_process.close
+      output
     end
 
     def success?
