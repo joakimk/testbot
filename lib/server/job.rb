@@ -15,19 +15,19 @@ module Testbot::Server
     end
 
     def self.next(params, remove_addr)
-      clean_params = params.reject { |k, v| [ "requester_mac", "no_jruby" ].include?(k) }
+      clean_params = params.reject { |k, v| k == "no_jruby" }
       runner = Runner.record! clean_params.merge({ :ip => remove_addr, :last_seen_at => Time.now })
       return unless Server.valid_version?(params[:version])
-      [ next_job(params["requester_mac"], params["no_jruby"]), runner ]
+      [ next_job(params["build_id"], params["no_jruby"]), runner ]
     end
 
     private
 
-    def self.next_job(requester_mac, no_jruby)
+    def self.next_job(build_id, no_jruby)
       release_jobs_taken_by_missing_runners!
       jobs = Job.all.find_all { |j|
         !j.taken_at &&
-          (requester_mac ? j.requester_mac == requester_mac : true) &&
+          (build_id ? j.build.id.to_s == build_id : true) &&
           (no_jruby ? j.jruby != 1 : true)
       }
 

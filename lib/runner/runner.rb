@@ -33,7 +33,7 @@ module Testbot::Runner
 
     def initialize(config)
       @instances = []
-      @last_requester_mac = nil
+      @last_build_id = nil
       @last_version_check = Time.now - TIME_BETWEEN_VERSION_CHECKS - 1
       @config = OpenStruct.new(config)
       @config.max_instances = @config.max_instances ? @config.max_instances.to_i : CPU.count 
@@ -85,13 +85,13 @@ module Testbot::Runner
 
         check_for_update if !last_check_found_a_job && time_for_update?
 
-        # Only get jobs from one requester at a time
+        # Only get jobs from one build at a time
         next_params = base_params
         if @instances.size > 0
-          next_params.merge!({ :requester_mac => @last_requester_mac })
+          next_params.merge!({ :build_id => @last_build_id })
           next_params.merge!({ :no_jruby => true }) if max_jruby_instances?
         else
-          @last_requester_mac = nil
+          @last_build_id = nil
         end
 
         # Makes sure all instances are listed as available after a run
@@ -102,14 +102,14 @@ module Testbot::Runner
         next unless last_check_found_a_job
 
         job = Job.new(*([ self, next_job.split(',') ].flatten))
-        if first_job_from_requester?
+        if first_job_from_build?
           fetch_code(job)
           before_run(job) if File.exists?("#{job.project}/lib/tasks/testbot.rake")
         end
 
         @instances << [ Thread.new { job.run(free_instance_number) },
           free_instance_number, job ]
-        @last_requester_mac = job.requester_mac
+        @last_build_id = job.build_id
         loop do
           clear_completed_instances
           break unless max_instances_running?
@@ -131,8 +131,8 @@ module Testbot::Runner
       system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}; #{bundler_cmd} rake testbot:before_run"
     end
 
-    def first_job_from_requester?
-      @last_requester_mac == nil
+    def first_job_from_build?
+      @last_build_id == nil
     end
 
     def time_for_update?

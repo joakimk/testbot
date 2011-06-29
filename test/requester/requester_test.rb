@@ -82,7 +82,6 @@ module Testbot::Requester
     context "run_tests" do
 
       should "should be able to create a build" do
-        flexmock(Mac).should_receive(:addr).and_return('aa:aa:aa:aa:aa:aa')
         requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => '/path', :available_runner_usage => '60%', :project => 'things', :server_user => "cruise")
         flexmock(RspecAdapter).should_receive(:test_files).with('spec').once.and_return([ 'spec/models/house_spec.rb', 'spec/models/car_spec.rb' ])
 
@@ -94,7 +93,6 @@ module Testbot::Requester
                                                              :root => "cruise@192.168.1.100:/path",
                                                              :project => "things",
                                                              :available_runner_usage => "60%",
-                                                             :requester_mac => 'aa:aa:aa:aa:aa:aa',
                                                              :files => "spec/models/house_spec.rb" +
                                                              " spec/models/car_spec.rb",
                                                              :sizes => "10 20",
@@ -346,12 +344,11 @@ module Testbot::Requester
         ENV['USE_JRUBY'] = "true"
         requester = Requester.new
         flexmock(requester).should_receive(:system)
-        flexmock(Mac).should_receive(:addr).and_return("00:01:..") 
 
         # This is quite ugly. I want something like hash_including instead...
         other_args = { :type=>"test", :available_runner_usage=>"100%",
           :root=>"testbot@:/tmp/testbot/#{ENV['USER']}", :files=>"test/some_test.rb",
-        :requester_mac=>"00:01:..", :sizes=>"0", :project=>"project" }
+          :sizes=>"0", :project=>"project" }
 
         flexmock(TestUnitAdapter).should_receive(:test_files).and_return([ 'test/some_test.rb' ])
         flexmock(HTTParty).should_receive(:post).with(any, :body => other_args.merge({ :jruby => true })).and_return('5')

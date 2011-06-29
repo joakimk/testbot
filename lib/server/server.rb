@@ -37,7 +37,7 @@ module Testbot::Server
     next_job, runner = Job.next(params, @env['REMOTE_ADDR'])
     if next_job
       next_job.update(:taken_at => Time.now, :taken_by => runner)
-      [ next_job.id, next_job.requester_mac, next_job.project, next_job.root, next_job.type, (next_job.jruby == 1 ? 'jruby' : 'ruby'), next_job.files ].join(',')
+      [ next_job.id, next_job.build.id, next_job.project, next_job.root, next_job.type, (next_job.jruby == 1 ? 'jruby' : 'ruby'), next_job.files ].join(',')
     end
   end
 

@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'httparty'
-require 'macaddr'
 require 'ostruct'
 require 'erb'
 require File.dirname(__FILE__) + '/../shared/ssh_tunnel'
@@ -49,7 +48,6 @@ module Testbot::Requester
       build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => root,
                                :type => adapter.type.to_s,
                                :project => config.project,
-                               :requester_mac => Mac.addr,
                                :available_runner_usage => config.available_runner_usage,
                                :files => files.join(' '),
                                :sizes => sizes.join(' '),

@@ -2,11 +2,11 @@ require File.expand_path(File.join(File.dirname(__FILE__), 'runner.rb'))
 
 module Testbot::Runner
   class Job
-    attr_reader :root, :project, :requester_mac
+    attr_reader :root, :project, :build_id
 
-    def initialize(runner, id, requester_mac, project, root, type, ruby_interpreter, files)
-      @runner, @id, @requester_mac, @project, @root, @type, @ruby_interpreter, @files =
-        runner, id, requester_mac, project, root, type, ruby_interpreter, files
+    def initialize(runner, id, build_id, project, root, type, ruby_interpreter, files)
+      @runner, @id, @build_id, @project, @root, @type, @ruby_interpreter, @files =
+        runner, id, build_id, project, root, type, ruby_interpreter, files
     end
 
     def jruby?
@@ -14,7 +14,7 @@ module Testbot::Runner
     end
 
     def run(instance)
-      puts "Running job #{@id} from #{@requester_mac}... "
+      puts "Running job #{@id} (build #{@build_id})... "
       test_env_number = (instance == 0) ? '' : instance + 1
       result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
       base_environment = "export RAILS_ENV=test; export TEST_ENV_NUMBER=#{test_env_number}; cd #{@project};"

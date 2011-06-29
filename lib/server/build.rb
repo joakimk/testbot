@@ -21,7 +21,6 @@ module Testbot::Server
                    :root => self.root,
                    :project => self.project,
                    :type => self.type,
-                   :requester_mac => self.requester_mac,
                    :build => self,
                    :jruby => self.jruby)
       end

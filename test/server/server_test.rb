@@ -25,7 +25,7 @@ module Testbot::Server
 
       should "create a build and return its id" do
         flexmock(Runner).should_receive(:total_instances).and_return(2)
-        post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "10 20", :jruby => false
+        post '/builds', :files => 'spec/models/car_spec.rb spec/models/house_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :project => 'things', :sizes => "10 20", :jruby => false
 
         first_build = Build.all.first
         assert last_response.ok?
@@ -35,7 +35,6 @@ module Testbot::Server
         assert_equal '10 20', first_build.sizes
         assert_equal 'server:/path/to/project', first_build.root
         assert_equal 'spec', first_build.type
-        assert_equal 'bb:bb:bb:bb:bb:bb', first_build.requester_mac
         assert_equal 'things', first_build.project
         assert_equal 0, first_build.jruby
         assert_equal '', first_build.results
@@ -49,7 +48,7 @@ module Testbot::Server
                                                                                                                                                                                                                    ["spec/models/house_spec.rb", "spec/models/house2_spec.rb"]
         ])
 
-        post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :sizes => "1 1 1 1", :jruby => true
+        post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :project => 'things', :sizes => "1 1 1 1", :jruby => true
 
         assert_equal 2, Job.count
         first_job, last_job = Job.all
@@ -58,7 +57,6 @@ module Testbot::Server
 
         assert_equal 'server:/path/to/project', first_job.root
         assert_equal 'spec', first_job.type
-        assert_equal 'bb:bb:bb:bb:bb:bb', first_job.requester_mac
         assert_equal 'things', first_job.project
         assert_equal 1, first_job.jruby
         assert_equal Build.all.first, first_job.build
@@ -103,21 +101,23 @@ module Testbot::Server
     context "GET /jobs/next" do
 
       should "be able to return a job and mark it as taken" do
-        job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :project => 'things', :jruby => 1
+        build = Build.create
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :build => build, :project => 'things', :jruby => 1
 
         get '/jobs/next', :version => Testbot.version
         assert last_response.ok?      
 
-        assert_equal [ job1.id, "bb:bb:bb:bb:bb:bb", "things", "server:/project", "spec", "jruby", "spec/models/car_spec.rb" ].join(','), last_response.body
+        assert_equal [ job1.id, build.id, "things", "server:/project", "spec", "jruby", "spec/models/car_spec.rb" ].join(','), last_response.body
         assert job1.taken_at != nil
       end
 
       should "not return a job that has already been taken" do
-        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now, :type => 'spec'
-        job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa", :project => 'things', :jruby => 0
+        build = Build.create
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now, :type => 'spec', :build => build
+        job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :build => build, :project => 'things', :jruby => 0
         get '/jobs/next', :version => Testbot.version
         assert last_response.ok?
-        assert_equal [ job2.id, "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
+        assert_equal [ job2.id, build.id, "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
         assert job2.taken_at != nil
       end
 
@@ -128,7 +128,7 @@ module Testbot::Server
       end
 
       should "save which runner takes a job" do
-        job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa"
+        job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :build => Build.create
         get '/jobs/next', :version => Testbot.version
         assert_equal Runner.first, job.taken_by
       end
@@ -160,23 +160,25 @@ module Testbot::Server
       end
 
       should "only give jobs from the same source to a runner" do
-        job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb"
-        get '/jobs/next', :version => Testbot.version, :uid => "00:..."
+        build = Build.create
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :build => build
+        get '/jobs/next', :version => Testbot.version, :uid => "00:...", :build_id => build.id
 
         # Creating the second job here because of the random lookup.
-        job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa"
-        get '/jobs/next', :version => Testbot.version, :uid => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
+        job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :build => build
+        get '/jobs/next', :version => Testbot.version, :uid => "00:...", :build_id => build.id + 1
 
         assert last_response.ok?
         assert_equal '', last_response.body
       end
 
       should "not give more jruby jobs to an instance that can't take more" do
-        job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :jruby => 1
+        build = Build.create
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :jruby => 1, :build => build
         get '/jobs/next', :version => Testbot.version, :uid => "00:..."
 
         # Creating the second job here because of the random lookup.
-        job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :jruby => 1
+        job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :jruby => 1, :build => build
         get '/jobs/next', :version => Testbot.version, :uid => "00:...", :no_jruby => "true"
 
         assert last_response.ok?
@@ -184,38 +186,40 @@ module Testbot::Server
       end
 
       should "still return other jobs when the runner cant take more jruby jobs" do
-        job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb", :jruby => 1
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :type => 'spec', :jruby => 1, :build => Build.create
         get '/jobs/next', :version => Testbot.version, :uid => "00:..."
 
         # Creating the second job here because of the random lookup.
-        job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :jruby => 0
+        job2 = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :jruby => 0, :build => Build.create
         get '/jobs/next', :version => Testbot.version, :uid => "00:...", :no_jruby => "true"
 
         assert last_response.ok?
         assert_equal job2.id.to_s, last_response.body.split(',')[0]
       end
 
-      should "return the jobs in random order in order to start working for a new requester right away" do
-        20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb" }
+      should "return the jobs in random order in order to start working for a new build right away" do
+        build1, build2 = Build.create, Build.create
+        20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :build => build1 }
 
-        20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa" }
+        20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :build => build2 }
 
-        macs = (0...10).map {
+        build_ids = (0...10).map {
           get '/jobs/next', :version => Testbot.version, :uid => "00:..."
           last_response.body.split(',')[1]
         }
 
-        assert macs.find { |mac| mac == 'bb:bb:bb:bb:bb:bb' }
-        assert macs.find { |mac| mac == 'aa:aa:aa:aa:aa:aa' }
+        assert build_ids.find { |build_id| build_id == build1.id.to_s }
+        assert build_ids.find { |build_id| build_id == build2.id.to_s }
       end
 
-      should "return the jobs randomly when passing requester" do
-        20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb" }
+      should "return the jobs randomly when passing build_id" do
+        build = Build.create
+        20.times { Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :build => build }
 
-        20.times { Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "bb:bb:bb:bb:bb:bb" }
+        20.times { Job.create :files => 'spec/models/car_spec.rb', :root => 'server:/project', :type => 'spec', :build => build }
 
         files = (0...10).map {
-          get '/jobs/next', :version => Testbot.version, :uid => "00:...", :requester_mac => "bb:bb:bb:bb:bb:bb"
+          get '/jobs/next', :version => Testbot.version, :uid => "00:...", :build_id => build.id
           last_response.body.split(',').last
         }
 
@@ -225,14 +229,15 @@ module Testbot::Server
 
       should "return taken jobs to other runners if the runner hasn't been seen for 10 seconds or more" do
         missing_runner = Runner.create(:last_seen_at => Time.now - 15)
-        old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :requester_mac => "aa:aa:aa:aa:aa:aa", :taken_by => missing_runner, :taken_at => Time.now - 30, :project => 'things'
+        build = Build.create
+        old_taken_job = Job.create :files => 'spec/models/house_spec.rb', :root => 'server:/project', :type => 'spec', :build => build, :taken_by => missing_runner, :taken_at => Time.now - 30, :project => 'things'
 
         new_runner = Runner.create(:uid => "00:01")
         get '/jobs/next', :version => Testbot.version, :uid => "00:01"
         assert_equal new_runner, old_taken_job.taken_by
 
         assert last_response.ok?
-        assert_equal [ old_taken_job.id, "aa:aa:aa:aa:aa:aa", "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
+        assert_equal [ old_taken_job.id, build.id.to_s, "things", "server:/project", "spec", "ruby", "spec/models/house_spec.rb" ].join(','), last_response.body
       end
 
     end
