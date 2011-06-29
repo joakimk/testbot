@@ -64,7 +64,7 @@ Using testbot with Rails 2:
 
     # Add testbot to your Gemfile if you use bundler. You also need the plugin because
     # Rails 2 does not load raketasks from gems.
-    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.5.7'
+    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.5.8'
     script/generate testbot --connect 192.168.0.100
 
     rake testbot:spec (or :rspec, :test, :features)
