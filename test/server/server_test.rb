@@ -330,8 +330,9 @@ module Testbot::Server
       end
 
       should "update data on the runner" do
+        build = Build.create
         runner = Runner.create(:uid => 'aa:aa:..')
-        get "/runners/ping", :uid => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'jocke'
+        get "/runners/ping", :uid => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'jocke', :build_id => build.id
         assert last_response.ok?
         assert_equal 'aa:aa:..', runner.uid
         assert_equal 4, runner.max_instances
@@ -339,6 +340,7 @@ module Testbot::Server
         assert_equal 'hostname1', runner.hostname
         assert_equal Testbot.version, runner.version
         assert_equal 'jocke', runner.username
+        assert_equal build, runner.build
       end
 
       should "do nothing if the version does not match" do
@@ -351,6 +353,12 @@ module Testbot::Server
       should "do nothing if the runners isnt known yet found" do
         get "/runners/ping", :uid => 'aa:aa:aa:aa:aa:aa', :version => Testbot.version
         assert last_response.ok?
+      end
+
+      should "return an order to stop the build if the build id does not exist anymore" do
+        runner = Runner.create(:uid => 'aa:aa:..')
+        get "/runners/ping", :uid => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'jocke', :build_id => 1
+        assert_equal last_response.body, "stop_build,1"
       end
 
     end
@@ -409,11 +417,11 @@ module Testbot::Server
 
       should "return runner information in json format" do
         get '/jobs/next', :version => Testbot.version, :uid => "00:01"
-        get "/runners/ping", :uid => '00:01', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'testbot'
+        get "/runners/ping", :uid => '00:01', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'testbot', :build_id => nil
         get '/runners'
         
         assert last_response.ok?
-        assert_equal ([ { "version" => Testbot.version.to_s, "hostname" => 'hostname1', "uid" => "00:01",
+        assert_equal ([ { "version" => Testbot.version.to_s, "build" => nil, "hostname" => 'hostname1', "uid" => "00:01",
                           "idle_instances" => 2, "max_instances" => 4, "username" => 'testbot',
                           "ip" => "127.0.0.1", "last_seen_at" => Runner.first.last_seen_at.to_s } ]),
                      JSON.parse(last_response.body)

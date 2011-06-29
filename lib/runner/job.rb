@@ -47,6 +47,12 @@ module Testbot::Runner
       output
     end
 
+    def kill!(build_id)
+      if @build_id == build_id && @test_process
+        Process.kill("HUP", @test_process.pid)
+      end
+    end
+
     def success?
       $?.exitstatus == 0
     end

@@ -164,7 +164,7 @@ module Testbot::Runner
 
     def ping_params
       { :hostname => (@hostname ||= `hostname`.chomp), :max_instances => @config.max_instances,
-        :idle_instances => (@config.max_instances - @instances.size), :username => ENV['USER'] }.merge(base_params)
+        :idle_instances => (@config.max_instances - @instances.size), :username => ENV['USER'], :build_id => @last_build_id }.merge(base_params)
     end
 
     def base_params
@@ -191,7 +191,11 @@ module Testbot::Runner
       Thread.new do
         while true
           begin
-            Server.get("/runners/ping", :body => ping_params)
+            response = Server.get("/runners/ping", :body => ping_params).body
+            if response.include?('stop_build')
+              build_id = response.split(',').last
+              @instances.each { |instance, n, job| job.kill!(build_id) }
+            end
           rescue
           end
           sleep TIME_BETWEEN_PINGS

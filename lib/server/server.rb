@@ -48,8 +48,15 @@ module Testbot::Server
   get '/runners/ping' do
     return unless Server.valid_version?(params[:version])
     runner = Runner.find_by_uid(params[:uid])
-    runner.update(params.merge({ :last_seen_at => Time.now })) if runner
+    if runner
+      runner.update(params.reject { |k, v| k == "build_id" }.merge({ :last_seen_at => Time.now, :build => Build.find(params[:build_id]) }))
+      return "stop_build,#{params[:build_id]}" unless runner.build
+    end
     nil
+  end
+
+  get '/kill' do
+    Build.all.each { |b| b.destroy }
   end
 
   get '/runners' do
