@@ -248,6 +248,25 @@ module Testbot::Requester
         requester.run_tests(RspecAdapter, 'spec')
       end
 
+      should "print and error message and return false if an error is returned" do
+        requester = Requester.new(:server_host => "192.168.1.100")
+
+        flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+        flexmock(requester).should_receive(:system)
+
+        flexmock(HTTParty).should_receive(:post).and_return('5')
+
+        flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
+                                                              :format => :json).and_return({ "done" => false, "results" => "" },
+                                                                { "error" => "Error message" })
+
+        flexmock(requester).should_receive(:sleep).times(2).with(1)
+        flexmock(requester).should_receive(:puts).once.with("Error message")
+        mock_file_sizes
+
+        assert !requester.run_tests(RspecAdapter, 'spec')
+      end
+
       should "remove unnessesary output from rspec when told to do so" do
         requester = Requester.new(:server_host => "192.168.1.100", :simple_output => true)
 

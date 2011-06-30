@@ -28,6 +28,13 @@ module Testbot::Runner
       puts "Job #{@id} finished."
     end
 
+    def kill!(build_id)
+      if @build_id == build_id && @test_process
+        # The child process that runs the tests is a shell, we need to kill it's child process
+        system("pkill -KILL -P #{@test_process.pid}")
+      end
+    end
+
     private
 
     def measure_run_time
@@ -38,19 +45,9 @@ module Testbot::Runner
 
     def run_and_return_result(command)
       @test_process = open("|#{command} 2>&1", 'r')
-      output = ''
-      while char = @test_process.getc
-        char = (char.is_a?(Fixnum) ? char.chr : char) # 1.8 <-> 1.9
-        output << char
-      end
+      output = @test_process.gets
       @test_process.close
       output
-    end
-
-    def kill!(build_id)
-      if @build_id == build_id && @test_process
-        Process.kill("HUP", @test_process.pid)
-      end
     end
 
     def success?

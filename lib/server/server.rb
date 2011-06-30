@@ -33,6 +33,12 @@ module Testbot::Server
     { "done" => build.done, "results" => build.results, "success" => build.success }.to_json
   end
 
+  delete '/builds/:id' do
+    build = Build.find(params[:id])
+    build.destroy if build
+    nil
+  end
+
   get '/jobs/next' do
     next_job, runner = Job.next(params, @env['REMOTE_ADDR'])
     if next_job
@@ -50,13 +56,11 @@ module Testbot::Server
     runner = Runner.find_by_uid(params[:uid])
     if runner
       runner.update(params.reject { |k, v| k == "build_id" }.merge({ :last_seen_at => Time.now, :build => Build.find(params[:build_id]) }))
-      return "stop_build,#{params[:build_id]}" unless runner.build
+      unless params[:build_id] == '' || params[:build_id] == nil || runner.build
+        return "stop_build,#{params[:build_id]}"
+      end
     end
     nil
-  end
-
-  get '/kill' do
-    Build.all.each { |b| b.destroy }
   end
 
   get '/runners' do

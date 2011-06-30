@@ -30,6 +30,8 @@ module Testbot::Requester
     end
 
     def run_tests(adapter, dir)
+      trap("SIGINT") {  HTTParty.delete("#{server_uri}/builds/#{build_id}"); return false }
+
       puts if config.simple_output
 
       if config.ssh_tunnel
@@ -52,7 +54,6 @@ module Testbot::Requester
                                :files => files.join(' '),
                                :sizes => sizes.join(' '),
                                :jruby => jruby? })
-
 
       last_results_size = 0
       success = true

@@ -361,6 +361,14 @@ module Testbot::Server
         assert_equal last_response.body, "stop_build,1"
       end
 
+      should "not return an order to stop a build without an id" do
+        runner = Runner.create(:uid => 'aa:aa:..')
+        get "/runners/ping", :uid => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'jocke', :build_id => ''
+        assert_equal last_response.body, ''
+        get "/runners/ping", :uid => 'aa:aa:..', :max_instances => 4, :idle_instances => 2, :hostname => "hostname1", :version => Testbot.version, :username => 'jocke', :build_id => nil
+        assert_equal last_response.body, ''
+      end
+
     end
 
     context "PUT /jobs/:id" do
