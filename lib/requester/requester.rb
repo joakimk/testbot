@@ -39,8 +39,6 @@ module Testbot::Requester
         server_uri = "http://#{config.server_host}:#{Testbot::SERVER_PORT}"
       end
 
-      trap("SIGINT") {  HTTParty.delete("#{server_uri}/builds/#{build_id}"); return false }
-
       rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
       system "rsync -az --delete -e ssh #{rsync_ignores} . #{rsync_uri}"
 
@@ -54,6 +52,8 @@ module Testbot::Requester
                                :files => files.join(' '),
                                :sizes => sizes.join(' '),
                                :jruby => jruby? })
+
+      trap("SIGINT") {  HTTParty.delete("#{server_uri}/builds/#{build_id}"); return false }
 
       last_results_size = 0
       success = true
