@@ -3,6 +3,9 @@
 When you hit ctrl+c all related test jobs will be stopped (within about 5 seconds). You can
 now exit, change code and re-run much faster than before.
 
+It does not stop before_run or code fetch. But no tests will be run after
+those complete when the build is stopped.
+
 0.5.8
 
 Now only running tests from one build on a runner at a time.
