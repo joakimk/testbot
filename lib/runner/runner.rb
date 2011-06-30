@@ -107,9 +107,9 @@ module Testbot::Runner
           before_run(job) if File.exists?("#{job.project}/lib/tasks/testbot.rake")
         end
 
+        @last_build_id = job.build_id
         @instances << [ Thread.new { job.run(free_instance_number) },
           free_instance_number, job ]
-        @last_build_id = job.build_id
         loop do
           clear_completed_instances
           break unless max_instances_running?

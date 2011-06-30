@@ -14,6 +14,7 @@ module Testbot::Runner
     end
 
     def run(instance)
+      return if @killed
       puts "Running job #{@id} (build #{@build_id})... "
       test_env_number = (instance == 0) ? '' : instance + 1
       result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
@@ -32,6 +33,7 @@ module Testbot::Runner
       if @build_id == build_id && @test_process
         # The child process that runs the tests is a shell, we need to kill it's child process
         system("pkill -KILL -P #{@test_process.pid}")
+        @killed = true
       end
     end
 
