@@ -45,7 +45,7 @@ module Testbot::Runner
 
     def run_and_return_result(command)
       @test_process = open("|#{command} 2>&1", 'r')
-      output = @test_process.gets
+      output = @test_process.read
       @test_process.close
       output
     end

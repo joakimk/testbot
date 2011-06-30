@@ -64,7 +64,7 @@ Using testbot with Rails 2:
 
     # Add testbot to your Gemfile if you use bundler. You also need the plugin because
     # Rails 2 does not load raketasks from gems.
-    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.5.8'
+    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.5.9'
     script/generate testbot --connect 192.168.0.100
 
     rake testbot:spec (or :rspec, :test, :features)
@@ -107,6 +107,7 @@ Features
 * Testbot will try to balance the testload so that every computer finishes running the tests at the same time to reduce the time it takes to run the entire test suite. It does a good job, but has potential for further improvement.
 * You can access your testbot network through SSH by using the built in SSH tunneling code.
 * You can use the same testbot network with multiple projects.
+* You can abort a test run with ctrl+c and all remote processes will be stopped.
 * Testbot is continuously tested for compability with Ruby 1.8.7 and 1.9.2.
 
 Contributing to testbot
