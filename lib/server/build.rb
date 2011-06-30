@@ -3,7 +3,7 @@ module Testbot::Server
   class Build < MemoryModel
 
     def initialize(hash)
-      super({ :success => true, :done => false, :results => '' }.merge(hash))
+      super({ :success => true, :done => false, :results => '', :completed_files => [] }.merge(hash))
     end
 
     def self.create_and_build_jobs(hash)

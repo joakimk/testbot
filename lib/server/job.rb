@@ -5,9 +5,11 @@ module Testbot::Server
     def update(hash)
       super(hash)
       if self.build
-        done = !Job.all.find { |j| !j.result && j.build == self.build }
+        all_files = self.build.files.to_s.split
+        completed_files = self.build.completed_files + self.files.split
+        done = (all_files.sort == completed_files.sort)
         self.build.update(:results => build.results.to_s + self.result.to_s,
-                          :done => done)
+                          :done => done, :completed_files => completed_files.uniq)
 
         build_broken_by_job = (self.success == "false" && build.success)
         self.build.update(:success => false) if build_broken_by_job

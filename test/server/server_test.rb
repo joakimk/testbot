@@ -392,9 +392,9 @@ module Testbot::Server
       end
 
       should "make the related build done if there are no more jobs for the build" do
-        build = Build.create
+        build = Build.create :files => 'spec/models/car_spec.rb spec/models/house_spec.rb'
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
-        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        job2 = Job.create :files => 'spec/models/house_spec.rb', :taken_at => Time.now - 30, :build => build
         put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => true
         put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => true
         assert_equal true, build.done
