@@ -108,7 +108,7 @@ Features
 * You can access your testbot network through SSH by using the built in SSH tunneling code.
 * You can use the same testbot network with multiple projects.
 * You can abort a test run with ctrl+c and all remote processes will be stopped.
-* Testbot is continuously tested for compability with Ruby 1.8.7 and 1.9.2.
+* Testbot is continuously tested for compatibility with Ruby 1.8.7 and 1.9.2.
 
 Contributing to testbot
 ----
