@@ -27,8 +27,9 @@ module Testbot::Runner
 
       expect_put_with(10, "result text", true)
       flexmock(job).should_receive(:run_and_return_result).once.
-        with("export RAILS_ENV=test; export TEST_ENV_NUMBER=; cd project; export RSPEC_COLOR=true; ruby -S rspec spec/foo_spec.rb spec/bar_spec.rb").
+        with("export RAILS_ENV=test; export TEST_ENV_NUMBER=; cd project; export RSPEC_COLOR=true; ruby -S bundle exec rspec spec/foo_spec.rb spec/bar_spec.rb").
         and_return('result text')
+      flexmock(RubyEnv).should_receive(:bundler?).returns(true)
       job.run(0)
     end
 
