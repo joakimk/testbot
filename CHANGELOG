@@ -1,3 +1,9 @@
+0.6.0
+
+Fixed bug that caused the runner to crash and block the server after checking for jobs (issue #34).
+
+Merged in https://github.com/joakimk/testbot/pull/33 (Bugfix: Run rake task testbot:before_run with bundler if present).
+
 0.5.9
 
 When you hit ctrl+c all related test jobs will be stopped (within about 5 seconds). You can
