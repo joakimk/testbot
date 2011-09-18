@@ -98,7 +98,7 @@ module Testbot::Runner
         clear_completed_instances 
 
         next_job = Server.get("/jobs/next", :query => next_params) rescue nil
-        last_check_found_a_job = (next_job != nil)
+        last_check_found_a_job = (next_job != nil && next_job.body != "")
         next unless last_check_found_a_job
 
         job = Job.new(*([ self, next_job.split(',') ].flatten))
