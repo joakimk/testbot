@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    testbot (0.5.9)
+    testbot (0.6.0)
       acts_as_rails3_generator
       daemons (>= 1.0.10)
       httparty (>= 0.6.1)
@@ -32,15 +32,15 @@ GEM
     guard-test (0.3.0)
       guard (>= 0.2.2)
       test-unit (~> 2.2)
-    httparty (0.8.0)
+    httparty (0.8.1)
       multi_json
       multi_xml
     json (1.4.6)
-    json_pure (1.6.0)
+    json_pure (1.6.1)
     macaddr (1.4.0)
       systemu (~> 2.2.0)
     multi_json (1.0.3)
-    multi_xml (0.4.0)
+    multi_xml (0.4.1)
     net-ssh (2.2.1)
     rack (1.2.1)
     rack-test (0.5.6)
