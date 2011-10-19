@@ -17,10 +17,17 @@ module Testbot::Runner
     def self.count
       case RUBY_PLATFORM
       when /darwin/
-        `hwprefs cpu_count`.to_i
+        value = hwprefs_available? ? `hwprefs cpu_count` : `sysctl -n hw.ncpu`
+        value.to_i
       when /linux/
         `cat /proc/cpuinfo | grep processor | wc -l`.to_i
       end
+    end
+
+    private
+
+    def self.hwprefs_available?
+      `which hwprefs` != ''
     end
 
   end
