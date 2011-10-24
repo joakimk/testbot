@@ -31,6 +31,13 @@ module Testbot::Runner
 
   class Runner
 
+    require 'syslog'
+
+    def log(message)
+      # $0 is the current script name
+      Syslog.open($0, Syslog::LOG_PID | Syslog::LOG_CONS) { |s| s.warning message }
+    end
+
     def initialize(config)
       @instances = []
       @last_build_id = nil
@@ -128,7 +135,9 @@ module Testbot::Runner
 
     def before_run(job)
       bundler_cmd = RubyEnv.bundler?(job.project) ? "bundle; bundle exec" : ""
-      system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}; #{bundler_cmd} rake testbot:before_run"
+      the_command = "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}; #{bundler_cmd} rake testbot:before_run"
+      log the_command
+      system the_command
     end
 
     def first_job_from_build?
