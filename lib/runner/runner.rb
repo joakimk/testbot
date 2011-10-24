@@ -134,7 +134,7 @@ module Testbot::Runner
     end
 
     def before_run(job)
-      bundler_cmd = RubyEnv.bundler?(job.project) ? "bundle; bundle exec" : ""
+      bundler_cmd = RubyEnv.bundler?(job.project) ? "#{RubyEnv.rvm_prefix(job.project)} bundle; #{RubyEnv.rvm_prefix(job.project)} bundle exec" : "#{RubyEnv.rvm_prefix(job.project)}"
       the_command = "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}; #{bundler_cmd} rake testbot:before_run"
       log the_command
       system the_command
