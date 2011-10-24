@@ -23,9 +23,15 @@ class RubyEnv
   end
 
   def self.rvm_prefix(project_path)
-    rvmrc_path = File.join project_path, ".rvmrc"
-    if File.exists?(rvmrc_path)
-      File.read(rvmrc_path).to_s.strip + " exec"
+    if rvm?
+      rvmrc_path = File.join project_path, ".rvmrc"
+      if File.exists?(rvmrc_path)
+        File.read(rvmrc_path).to_s.strip + " exec"
+      end
     end
+  end
+
+  def self.rvm?
+    !!system("rvm info")
   end
 end
