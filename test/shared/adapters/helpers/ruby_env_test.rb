@@ -26,6 +26,36 @@ class RubyEnvTest < Test::Unit::TestCase
 
   end
 
+  context "self.rvm?" do
+
+    should "return true if rvm is installed" do
+      flexmock(RubyEnv).should_receive(:system).with("rvm info").once.and_return(true)
+      assert_equal true, RubyEnv.rvm?
+    end
+
+    should "return false if bundler is installed but there is no Gemfile" do
+      flexmock(RubyEnv).should_receive(:system).with("rvm info").once.and_return(nil)
+      assert_equal false, RubyEnv.rvm?
+    end
+
+  end
+
+  context "self.rvm_prefix" do
+
+    should "return rvm prefix if rvm is installed" do
+      flexmock(RubyEnv).should_receive(:rvm?).once.and_return(true)
+      flexmock(File).should_receive(:exists?).with("path/to/project/.rvmrc").once.and_return(true)
+      flexmock(File).should_receive(:read).with("path/to/project/.rvmrc").once.and_return("rvm 1.8.7\n")
+      assert_equal "rvm 1.8.7 exec", RubyEnv.rvm_prefix("path/to/project")
+    end
+
+    should "return nil if rvm is not installed" do
+      flexmock(RubyEnv).should_receive(:rvm?).once.and_return(false)
+      assert_equal nil, RubyEnv.rvm_prefix("path/to/project")
+    end
+
+  end
+
   context "self.ruby_command" do
     
     should "use ruby by default" do

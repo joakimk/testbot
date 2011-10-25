@@ -16,9 +16,9 @@ class RubyEnv
     end
 
     if bundler?(project_path)
-      "#{rvm_prefix(project_path)} #{ruby_interpreter} -S bundle exec #{command}"
+      "#{rvm_prefix(project_path)} #{ruby_interpreter} -S bundle exec #{command}".strip
     else
-      "#{rvm_prefix(project_path)} #{ruby_interpreter} -S #{command}"
+      "#{rvm_prefix(project_path)} #{ruby_interpreter} -S #{command}".strip
     end
   end
 
