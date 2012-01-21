@@ -30,9 +30,8 @@ module Testbot::Runner
     end
 
     def kill!(build_id)
-      if @build_id == build_id && @test_process
-        # The child process that runs the tests is a shell, we need to kill it's child process
-        system("pkill -KILL -P #{@test_process.pid}")
+      if @build_id == build_id && @pid
+        Process.kill('KILL', -@pid) # Kill process and its children (processes in the same group)
         @killed = true
       end
     end
@@ -46,10 +45,11 @@ module Testbot::Runner
     end
 
     def run_and_return_result(command)
-      @test_process = open("|#{command} 2>&1", 'r')
-      output = @test_process.read
-      @test_process.close
-      output
+      r, w = IO.pipe
+      @pid = spawn(command, err: w, out: w, pgroup: true)  
+      Process.wait(@pid)
+      w.close
+      r.read
     end
 
     def success?
