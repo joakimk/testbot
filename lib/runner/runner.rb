@@ -104,7 +104,7 @@ module Testbot::Runner
         job = Job.new(*([ self, next_job.split(',') ].flatten))
         if first_job_from_build?
           fetch_code(job)
-          before_run(job) if File.exists?("#{job.project}/lib/tasks/testbot.rake")
+          before_run(job)
         end
 
         @last_build_id = job.build_id
@@ -127,8 +127,11 @@ module Testbot::Runner
     end
 
     def before_run(job)
-      bundler_cmd = RubyEnv.bundler?(job.project) ? "bundle; bundle exec" : ""
-      system "export RAILS_ENV=test; export TEST_INSTANCES=#{@config.max_instances}; cd #{job.project}; #{bundler_cmd} rake testbot:before_run"
+      bundler_cmd = RubyEnv.bundler?(job.project) ? "bundle; bundle exec " : ""
+      command_prefix = "cd #{job.project}; RAILS_ENV=test TEST_INSTANCES=#{@config.max_instances} #{bundler_cmd}"
+      
+      system(command_prefix + 'rake testbot:before_run') if File.exists?("#{job.project}/lib/tasks/testbot.rake")
+      system(command_prefix + 'ruby config/testbot/before_run.rb') if File.exists?("#{job.project}/config/testbot/before_run.rb")
     end
 
     def first_job_from_build?
