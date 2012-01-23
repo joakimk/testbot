@@ -31,12 +31,16 @@ module Testbot::Runner
 
     def kill!(build_id)
       if @build_id == build_id && @pid
-        Process.kill('KILL', -@pid) # Kill process and its children (processes in the same group)
+        kill_processes
         @killed = true
       end
     end
 
     private
+
+    def kill_processes
+      Process.kill('KILL', -@pid) rescue false # Kill process and its children (processes in the same group)
+    end
 
     def measure_run_time
       start_time = Time.now
@@ -49,7 +53,9 @@ module Testbot::Runner
       @pid = spawn(command, err: w, out: w, pgroup: true)  
       Process.wait(@pid)
       w.close
-      r.read
+      output = r.read
+      kill_processes # Kill child processes, if any
+      output
     end
 
     def success?
