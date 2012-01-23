@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/../shared/adapters/adapter'
 namespace :testbot do
   
   def run_and_show_results(adapter, custom_path)
-    Rake::Task["testbot:before_request"].invoke
+    'testbot:before_request'.tap { |t| Rake::Task.task_defined?(t) && Rake::Task[t].invoke }
         
     require File.expand_path(File.join(File.dirname(__FILE__), '..', 'requester', 'requester.rb'))
     requester = Testbot::Requester::Requester.create_by_config("#{Rails.root}/config/testbot.yml")
