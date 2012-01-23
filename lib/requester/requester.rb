@@ -40,7 +40,7 @@ module Testbot::Requester
       end
 
       rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      system "rsync -az --delete -e ssh #{rsync_ignores} . #{rsync_uri}"
+      system "rsync -az --delete --delete-excluded -e ssh #{rsync_ignores} . #{rsync_uri}"
 
       files = adapter.test_files(dir) 
       sizes = adapter.get_sizes(files)

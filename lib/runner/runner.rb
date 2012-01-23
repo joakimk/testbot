@@ -123,7 +123,7 @@ module Testbot::Runner
     end
 
     def fetch_code(job)
-      system "rsync -az --delete -e ssh #{job.root}/ #{job.project}"
+      system "rsync -az --delete --delete-excluded -e ssh #{job.root}/ #{job.project}"
     end
 
     def before_run(job)
