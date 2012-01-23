@@ -1,7 +1,7 @@
 class RubyEnv
 
   def self.bundler?(project_path)
-    Gem.available?("bundler") && File.exists?("#{project_path}/Gemfile")
+    Gem::Specification.find_by_name("bundler") && File.exists?("#{project_path}/Gemfile") rescue false
   end
 
   def self.ruby_command(project_path, opts = {})
