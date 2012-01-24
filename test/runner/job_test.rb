@@ -30,7 +30,6 @@ module Testbot::Runner
         with("export RAILS_ENV=test; export TEST_ENV_NUMBER=; cd project; export RSPEC_COLOR=true; ruby -S bundle exec rspec spec/foo_spec.rb spec/bar_spec.rb").
         and_return('result text')
       flexmock(RubyEnv).should_receive(:bundler?).returns(true)
-      flexmock(RubyEnv).should_receive(:rvm?).returns(false)
       job.run(0)
     end
 
@@ -54,7 +53,6 @@ module Testbot::Runner
       flexmock(job).should_receive(:run_and_return_result).
         with(/TEST_ENV_NUMBER=2/).
         and_return('result text')
-      flexmock(RubyEnv).should_receive(:rvm?).returns(false)
       job.run(1)
     end
 
@@ -65,7 +63,6 @@ module Testbot::Runner
       stub_duration(10.55) 
       expect_put_with(10, "result text", true, 1055)
       flexmock(job).should_receive(:run_and_return_result).and_return('result text')
-      flexmock(RubyEnv).should_receive(:rvm?).returns(false)
       job.run(0)
     end
 
