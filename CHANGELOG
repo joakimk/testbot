@@ -1,3 +1,10 @@
+0.6.1
+
+Fixed CPU core check for OSX Lion.
+
+Updated sinatra requirement so that it's a bit less strict
+(https://github.com/joakimk/testbot/pull/41).
+
 0.6.0
 
 Fixed bug that caused the runner to crash and block the server after checking for jobs (issue #34).
