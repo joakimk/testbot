@@ -5,6 +5,7 @@ require 'ostruct'
 require File.expand_path(File.dirname(__FILE__) + '/../shared/ssh_tunnel')
 require File.expand_path(File.dirname(__FILE__) + '/../shared/adapters/adapter')
 require File.expand_path(File.dirname(__FILE__) + '/job')
+require File.expand_path(File.dirname(__FILE__) + '/server_uri')
 
 module Testbot::Runner
   TIME_BETWEEN_NORMAL_POLLS = 1
@@ -38,13 +39,9 @@ module Testbot::Runner
       @config = OpenStruct.new(config)
       @config.max_instances = @config.max_instances ? @config.max_instances.to_i : CPU.count 
 
-      if @config.ssh_tunnel
-        server_uri = "http://127.0.0.1:#{Testbot::SERVER_PORT}"
-      else
-        server_uri = "http://#{@config.server_host}:#{Testbot::SERVER_PORT}"
-      end
-
+      server_uri = ServerUri.for(@config)
       Server.base_uri(server_uri)
+      Server.basic_auth *@config.basic_auth.split(':') if @config.basic_auth
     end
 
     attr_reader :config

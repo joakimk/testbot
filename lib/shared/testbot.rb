@@ -74,6 +74,7 @@ module Testbot
         FileUtils.mkdir_p(working_dir)
         Dir.chdir(working_dir)
         runner = Runner::Runner.new(:server_host => opts[:connect],
+                                    :basic_auth => opts[:basic_auth],
                                     :auto_update => opts[:auto_update], :max_instances => opts[:cpus],
                                     :ssh_tunnel => opts[:ssh_tunnel], :server_user => opts[:user],
                                     :max_jruby_instances => opts[:max_jruby_instances],
