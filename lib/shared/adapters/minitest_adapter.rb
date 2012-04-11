@@ -4,7 +4,7 @@ class MinitestAdapter
 
   def self.command(project_path, ruby_interpreter, files)
     ruby_command = RubyEnv.ruby_command(project_path, :ruby_interpreter => ruby_interpreter)
-    "#{ruby_command} #{files}"
+    "#{ruby_command} -Ispec #{files}"
   end
 
   def self.test_files(dir)
