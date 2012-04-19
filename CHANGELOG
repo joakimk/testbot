@@ -1,3 +1,7 @@
+0.6.2
+
+Fixed "invalid byte sequence in UTF-8" errors cased by test output in some cases.
+
 0.6.1
 
 Fixed CPU core check for OSX Lion.
