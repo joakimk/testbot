@@ -1,4 +1,5 @@
 require File.expand_path(File.join(File.dirname(__FILE__), 'runner.rb'))
+require 'iconv'
 
 module Testbot::Runner
   class Job
@@ -25,7 +26,7 @@ module Testbot::Runner
         result += run_and_return_result("#{base_environment} #{adapter.command(@project, ruby_cmd, @files)}")
       end
 
-      Server.put("/jobs/#{@id}", :body => { :result => result, :success => success?, :time => run_time })
+      Server.put("/jobs/#{@id}", :body => { :result => strip_invalid_utf8(result), :success => success?, :time => run_time })
       puts "Job #{@id} finished."
     end
 
@@ -38,6 +39,12 @@ module Testbot::Runner
     end
 
     private
+
+    def strip_invalid_utf8(text)
+      # http://po-ru.com/diary/fixing-invalid-utf-8-in-ruby-revisited/
+      ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
+      ic.iconv(text + ' ')[0..-2]
+    end
 
     def measure_run_time
       start_time = Time.now
