@@ -26,7 +26,7 @@ module Testbot::Runner
         result += run_and_return_result("#{base_environment} #{adapter.command(@project, ruby_cmd, @files)}")
       end
 
-      Server.put("/jobs/#{@id}", :body => { :result => strip_invalid_utf8(result), :success => success?, :time => run_time })
+      Server.put("/jobs/#{@id}", :body => { :result => strip_invalid_utf8(result), :status => status, :time => run_time })
       puts "Job #{@id} finished."
     end
 
@@ -40,6 +40,10 @@ module Testbot::Runner
 
     private
 
+    def status
+      success? ? "successful" : "failed"
+    end
+
     def strip_invalid_utf8(text)
       # http://po-ru.com/diary/fixing-invalid-utf-8-in-ruby-revisited/
       ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
@@ -52,9 +56,22 @@ module Testbot::Runner
       (Time.now - start_time) * 100
     end
 
+    def post_results(output)
+      Server.put("/jobs/#{@id}", :body => { :result => strip_invalid_utf8(output), :status => "building" })
+    end
+
     def run_and_return_result(command)
       @test_process = open("|#{command} 2>&1", 'r')
-      output = @test_process.read
+      output = ""
+      t = Time.now
+      while char = @test_process.getc
+        char = (char.is_a?(Fixnum) ? char.chr : char) # 1.8 <-> 1.9
+        output << char
+        if Time.now - t > 1
+          post_results(output)
+          t = Time.now
+        end
+      end
       @test_process.close
       output
     end

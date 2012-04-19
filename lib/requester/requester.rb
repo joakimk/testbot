@@ -79,7 +79,8 @@ module Testbot::Requester
             print results.gsub(/[^\.F]|Finished/, '')
             STDOUT.flush
           else
-            puts results
+            print results
+            STDOUT.flush
           end
         end
 

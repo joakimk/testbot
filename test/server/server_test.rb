@@ -375,18 +375,18 @@ module Testbot::Server
 
       should "receive the results of a job" do
         job = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30
-        put "/jobs/#{job.id}", :result => 'test run result', :success => true
+        put "/jobs/#{job.id}", :result => 'test run result', :status => "successful"
         assert last_response.ok?
         assert_equal 'test run result', job.result
-        assert_equal 'true', job.success
+        assert_equal 'successful', job.status
       end
 
       should "update the related build" do
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build      
-        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => "true"
-        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => "true"
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :status => "successful"
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :status => "successful"
         assert_equal 'test run result 1\ntest run result 2\n', build.results
         assert_equal true, build.success
       end
@@ -395,8 +395,8 @@ module Testbot::Server
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
-        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => true
-        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => true
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :status => "successful"
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :status => "successful"
         assert_equal true, build.done
       end
 
@@ -404,10 +404,25 @@ module Testbot::Server
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
-        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => false
-        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => true
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :status => "failed"
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :status => "successful"
         assert_equal false, build.success
       end 
+
+      should "be able to update from multiple result postings" do
+        build = Build.create
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        # maybe later:
+        # put "/jobs/#{job.id}", :result => 'Preparing, db setup, etc.', :status => "preparing"
+        put "/jobs/#{job1.id}", :result => 'Running tests..', :status => "running"
+        put "/jobs/#{job2.id}", :result => 'Running other tests. done.', :status => "successful"
+        put "/jobs/#{job1.id}", :result => 'Running tests....', :status => "running"
+        assert_equal false, build.done
+        assert_equal false, job1.done
+        assert_equal "Running tests....", job1.result
+        assert_equal "Running tests..Running other tests. done...", build.results
+      end
 
     end
 
