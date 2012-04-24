@@ -59,7 +59,7 @@ module Testbot::Requester
       success = true
       error_count = 0
       while true
-        sleep 1
+        sleep 0.5
 
         begin
           @build = HTTParty.get("#{server_uri}/builds/#{build_id}", :format => :json)

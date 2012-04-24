@@ -67,7 +67,7 @@ module Testbot::Runner
       while char = @test_process.getc
         char = (char.is_a?(Fixnum) ? char.chr : char) # 1.8 <-> 1.9
         output << char
-        if Time.now - t > 1
+        if Time.now - t > 0.5
           post_results(output)
           t = Time.now
         end
