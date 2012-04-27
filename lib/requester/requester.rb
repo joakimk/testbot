@@ -71,7 +71,13 @@ module Testbot::Requester
         end
       end
 
-      trap("SIGINT") {  HTTParty.delete("#{server_uri}/builds/#{build_id}"); return false }
+      at_exit do
+        unless ENV['IN_TEST'] || @done
+          log "Notifying server we want to stop the run" do
+            HTTParty.delete("#{server_uri}/builds/#{build_id}")
+          end
+        end
+      end
 
       puts if config.logging
 
@@ -115,6 +121,7 @@ module Testbot::Requester
         puts "\n" + adapter.sum_results(@build['results'])
       end
 
+      @done = true
       @build["success"]
     end
 
