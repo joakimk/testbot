@@ -1,3 +1,15 @@
+0.6.6
+
+The runner will now run config/testbot/before_run.rb if it exists.
+
+Replaced the old process code with the posix-spawn gem's methods. This fixed
+process shutdown in my current setup. Hopefully more stable overall.
+
+The requester will now request that the build is stopped when exiting early (like when killed),
+and not only on ctrl+c (SIGINT).
+
+Most of this was based on a fork by https://github.com/Skalar.
+
 0.6.5
 
 Fixed test unit require path so that it works with ruby 1.9.
