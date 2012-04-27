@@ -12,13 +12,13 @@ class RubyEnv
     elsif opts[:bin]
       command = opts[:bin]
     else
-      command = ruby_interpreter
+      command = nil
     end
 
     if bundler?(project_path)
-      "#{ruby_interpreter} -S bundle exec #{command}"
+      "#{ruby_interpreter} -S bundle exec #{command}".strip
     else
-      "#{ruby_interpreter} -S #{command}"
+      "#{ruby_interpreter} -S #{command}".strip
     end
   end
 

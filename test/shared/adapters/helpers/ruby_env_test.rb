@@ -71,11 +71,19 @@ class RubyEnvTest < Test::Unit::TestCase
                                                                             :bin => "rspec", :ruby_interpreter => "jruby")
     end
 
-    should "use the interpeter when there is no binary specified" do
+    should "work when there is no binary specified and bundler is present" do
       flexmock(RubyEnv).should_receive(:bundler?).and_return(true)
       flexmock(File).should_receive(:exists?).and_return(false)
-      assert_equal 'ruby -S bundle exec ruby', RubyEnv.ruby_command("path/to/project")
+      assert_equal 'ruby -S bundle exec', RubyEnv.ruby_command("path/to/project")
     end
+
+    should "work when there is no binary specified and bundler is not present" do
+      flexmock(RubyEnv).should_receive(:bundler?).and_return(false)
+      flexmock(File).should_receive(:exists?).and_return(false)
+      assert_equal 'ruby -S', RubyEnv.ruby_command("path/to/project")
+    end
+
+
   end
 
 end
