@@ -140,4 +140,3 @@ More
 ----
 
 * Check the [wiki](http://github.com/joakimk/testbot/wiki) for more info.
-* Chat: [https://convore.com/github/testbot](https://convore.com/github/testbot)
