@@ -71,9 +71,7 @@ module Testbot::Requester
         end
       end
 
-      at_exit do
-        HTTParty.delete("#{server_uri}/builds/#{build_id}") unless ENV['IN_TEST']
-      end
+      trap("SIGINT") {  HTTParty.delete("#{server_uri}/builds/#{build_id}"); return false }
 
       puts if config.logging
 

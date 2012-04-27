@@ -41,7 +41,6 @@ module Testbot::Requester
 
     def setup
       ENV['USE_JRUBY'] = nil
-      ENV['IN_TEST'] = "true"
     end
 
     def mock_file_sizes
