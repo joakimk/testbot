@@ -62,6 +62,8 @@ module Testbot::Requester
 
       trap("SIGINT") {  HTTParty.delete("#{server_uri}/builds/#{build_id}"); return false }
 
+      puts if config.logging
+
       last_results_size = 0
       success = true
       error_count = 0
