@@ -9,6 +9,7 @@ module Testbot::Runner
     def initialize(runner, id, build_id, project, root, type, ruby_interpreter, files)
       @runner, @id, @build_id, @project, @root, @type, @ruby_interpreter, @files =
         runner, id, build_id, project, root, type, ruby_interpreter, files
+      @success = true
     end
 
     def jruby?
@@ -84,7 +85,8 @@ module Testbot::Runner
       @pid = POSIX::Spawn::spawn(command, :err => write_pipe, :out => write_pipe, :pgroup => true)
 
       Thread.new do
-        Process.wait(@pid)
+        Process.waitpid(@pid)
+        @success = ($?.exitstatus == 0)
         write_pipe.close
       end
 
@@ -92,7 +94,7 @@ module Testbot::Runner
     end
 
     def success?
-      $?.exitstatus == 0
+      @success
     end
 
     def ruby_cmd
