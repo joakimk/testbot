@@ -6,11 +6,13 @@ class RubyEnv
 
   def self.gem_exists?(gem)
     if Gem::Specification.respond_to?(:find_by_name)
-      Gem::Specification.find_by_name(gem) rescue false
+      Gem::Specification.find_by_name(gem)
     else
       # older depricated method
       Gem.available?(gem)
     end
+  rescue Gem::LoadError
+    false
   end
 
   def self.ruby_command(project_path, opts = {})
