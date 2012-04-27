@@ -1,3 +1,7 @@
+0.6.7
+
+Fixed broken gem lookup in ruby 1.9.
+
 0.6.6
 
 The runner will now run config/testbot/before_run.rb if it exists.
