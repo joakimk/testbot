@@ -1,3 +1,7 @@
+0.6.5
+
+Fixed test unit require path so that it works with ruby 1.9.
+
 0.6.4
 
 Fixed bug with running test unit tests that caused errors like '/bin/ruby:1: Invalid char `\317' in expression`'.
