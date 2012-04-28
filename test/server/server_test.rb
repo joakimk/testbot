@@ -267,6 +267,14 @@ module Testbot::Server
         assert_equal "127.0.0.1 macmini1.local 00:01 user1 2\n127.0.0.1 macmini2.local 00:02 user2 4", last_response.body
       end
 
+      should "not return a runner as available when it hasnt pinged the server yet" do
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :username => 'user1'
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4, :username => 'user2'
+        get '/runners/available'
+        assert last_response.ok?
+        assert_equal "127.0.0.1 macmini2.local 00:02 user2 4", last_response.body
+      end
+
       should "not return runners as available when not seen the last 10 seconds" do
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2, :username => "user1"
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
@@ -301,16 +309,16 @@ module Testbot::Server
     context "GET /runners/total_instances" do
 
       should "return the number of available runner instances" do
-        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2
-        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2, :idle_instances => 1
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4, :idle_instances => 2
         get '/runners/total_instances'
         assert last_response.ok?
         assert_equal "6", last_response.body
       end    
 
       should "not return instances as available when not seen the last 10 seconds" do
-        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2
-        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2, :idle_instances => 1
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4, :idle_instances => 2
         Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)
         get '/runners/total_instances'
         assert last_response.ok?

@@ -30,7 +30,7 @@ module Testbot::Server
     end
 
     def self.find_all_available
-      all.find_all { |r| r.version == Testbot.version && r.last_seen_at > (Time.now - Runner.timeout) }
+      all.find_all { |r| r.idle_instances && r.version == Testbot.version && r.last_seen_at > (Time.now - Runner.timeout) }
     end  
 
     def self.available_instances
