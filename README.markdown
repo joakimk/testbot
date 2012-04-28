@@ -14,7 +14,7 @@ Try it out
 
     testbot --server
     testbot --runner --connect localhost
-    sleep 3 # wait for the runner to fully register with the server
+    sleep 5 # wait for the runner to register with the server
 
     mkdir -p testbotdemo/test; cd testbotdemo
     echo 'require "test/unit"' > test/demo_test.rb
