@@ -62,6 +62,14 @@ module Testbot::Server
         assert_equal Build.all.first, first_job.build
       end
 
+      should "return a 503 error if there are no known runners" do
+        flexmock(Runner).should_receive(:total_instances).and_return(0)
+        post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :project => 'things', :sizes => "1 1 1 1", :jruby => true
+        assert_equal 0, Job.count
+        assert_equal 503, last_response.status
+        assert_equal "No runners available", last_response.body
+      end
+
       should "only use resources according to available_runner_usage" do
         flexmock(Runner).should_receive(:total_instances).and_return(4)
         flexmock(Group).should_receive(:build).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], [ 1, 1, 1, 1 ], 2, 'spec').and_return([])

@@ -51,13 +51,23 @@ module Testbot::Requester
 
       build_id = nil
       log "Requesting run" do
-        build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => root,
+        response = HTTParty.post("#{server_uri}/builds", :body => { :root => root,
                                  :type => adapter.type.to_s,
                                  :project => config.project,
                                  :available_runner_usage => config.available_runner_usage,
                                  :files => files.join(' '),
                                  :sizes => sizes.join(' '),
-                                 :jruby => jruby? })
+                                 :jruby => jruby? }).response
+
+        if response.code == "503"
+          puts "No runners available. If you just started a runner, try again. It usually takes a few seconds before they're available."
+          return false
+        elsif response.code != "200"
+          puts "Could not create build, #{response.code}: #{response.body}"
+          return false
+        else
+          build_id = response.body
+        end
       end
 
       trap("SIGINT") {  HTTParty.delete("#{server_uri}/builds/#{build_id}"); return false }

@@ -17,7 +17,7 @@ module Testbot::Requester
       requester = Requester.new(:server_host => "192.168.1.100", :rsync_path => 'user@server:/tmp/somewhere')
 
       flexmock(requester).should_receive(:find_tests).and_return([])
-      flexmock(HTTParty).should_receive(:post).and_return('5')
+      flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
       flexmock(requester).should_receive(:sleep).once
       flexmock(requester).should_receive(:print).once
       flexmock(requester).should_receive(:puts).once
@@ -25,6 +25,14 @@ module Testbot::Requester
       flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                         :format => :json).and_return({ "done" => true, "results" => results })
                                                         requester
+    end
+
+    def response_with_build_id
+      OpenStruct.new(:response => OpenStruct.new(:code => "200", :body => "5"))
+    end
+
+    def error_response(opts = {})
+      OpenStruct.new(:response => OpenStruct.new(opts))
     end
 
     def build_with_result(results)
@@ -97,7 +105,7 @@ module Testbot::Requester
                                                              :files => "spec/models/house_spec.rb" +
                                                              " spec/models/car_spec.rb",
                                                              :sizes => "10 20",
-                                                             :jruby => false })
+                                                             :jruby => false }).and_return(response_with_build_id)
 
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, 'results' => '', "success" => true })
         flexmock(requester).should_receive(:sleep)
@@ -108,13 +116,35 @@ module Testbot::Requester
         assert_equal true, requester.run_tests(RspecAdapter, 'spec')
       end
 
+      should "print a message and exit if the status is 503" do
+        requester = Requester.new(:server_host => "192.168.1.100")
+
+        flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+        flexmock(requester).should_receive(:system)
+
+        flexmock(HTTParty).should_receive(:post).and_return(error_response(:code => "503"))
+        flexmock(requester).should_receive(:puts)
+        assert_equal false, requester.run_tests(RspecAdapter, 'spec')
+      end
+
+      should "print what the server returns in case there is anything but a 200 response" do
+        requester = Requester.new(:server_host => "192.168.1.100")
+
+        flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
+        flexmock(requester).should_receive(:system)
+
+        flexmock(HTTParty).should_receive(:post).and_return(error_response(:code => "123", :body => "Some error"))
+        flexmock(requester).should_receive(:puts).with("Could not create build, 123: Some error")
+        assert_equal false, requester.run_tests(RspecAdapter, 'spec')
+      end
+
       should "print the sum of results formatted by the adapter" do
         requester = Requester.new(:server_host => "192.168.1.100")
 
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
         flexmock(requester).should_receive(:system)
 
-        flexmock(HTTParty).should_receive(:post).and_return('5')
+        flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
 
         flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                               :format => :json).and_return({ "done" => false, "results" => "job 2 done: ...." },
@@ -136,7 +166,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
         flexmock(requester).should_receive(:system)
 
-        flexmock(HTTParty).should_receive(:post).and_return('5')
+        flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
 
         flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                               :format => :json).and_return({ "done" => false, "results" => "job 2 done: ...." },
@@ -157,7 +187,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
         flexmock(requester).should_receive(:system)
 
-        flexmock(HTTParty).should_receive(:post).and_return('5')
+        flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
 
         flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                           :format => :json).and_return({ "success" => false, "done" => true, "results" => "job 2 done: ....job 1 done: ...." })
@@ -176,7 +206,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
         flexmock(requester).should_receive(:system)
 
-        flexmock(HTTParty).should_receive(:post).and_return('5')
+        flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
 
         flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                               :format => :json).and_return({ "done" => false, "results" => "" },
@@ -196,7 +226,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
         flexmock(requester).should_receive(:system)
 
-        flexmock(HTTParty).should_receive(:post).and_return('5')
+        flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
         flexmock(requester).should_receive(:sleep).once
         flexmock(requester).should_receive(:print)
         flexmock(requester).should_receive(:puts)
@@ -215,7 +245,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
         flexmock(requester).should_receive(:system)
 
-        flexmock(HTTParty).should_receive(:post).and_return('5')
+        flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
 
         flexmock(HTTParty).should_receive(:get).times(5).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                               :format => :json).and_raise('some connection error')
@@ -237,7 +267,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
         flexmock(requester).should_receive(:system)
 
-        flexmock(HTTParty).should_receive(:post).and_return('5')
+        flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
 
         flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                               :format => :json).and_return(nil,
@@ -257,7 +287,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb', 'spec_models/car_spec.rb' ])
         flexmock(requester).should_receive(:system)
 
-        flexmock(HTTParty).should_receive(:post).and_return('5')
+        flexmock(HTTParty).should_receive(:post).and_return(response_with_build_id)
 
         flexmock(HTTParty).should_receive(:get).times(2).with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                               :format => :json).and_return(nil,
@@ -282,7 +312,7 @@ module Testbot::Requester
         flexmock(ssh_tunnel).should_receive(:open).once
 
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb' ])
-        flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2299/builds", any).and_return('5')
+        flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2299/builds", any).and_return(response_with_build_id)
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
@@ -300,7 +330,7 @@ module Testbot::Requester
         flexmock(ssh_tunnel).should_receive(:open).once
 
         flexmock(requester).should_receive(:find_tests).and_return([ 'spec/models/house_spec.rb' ])
-        flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2299/builds", any).and_return('5')
+        flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2299/builds", any).and_return(response_with_build_id)
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
@@ -320,7 +350,7 @@ module Testbot::Requester
         flexmock(ssh_tunnel).should_receive(:open).once
 
         flexmock(requester).should_receive(:find_tests).and_return([ 'features/some.feature' ])
-        flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2230/builds", any).and_return('5')
+        flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2230/builds", any).and_return(response_with_build_id)
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
@@ -338,7 +368,7 @@ module Testbot::Requester
         flexmock(ssh_tunnel).should_receive(:open).once
 
         flexmock(requester).should_receive(:find_tests).and_return([ 'test/some_test.rb' ])
-        flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2231/builds", any).and_return('5')
+        flexmock(HTTParty).should_receive(:post).with("http://127.0.0.1:2231/builds", any).and_return(response_with_build_id)
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
@@ -359,7 +389,7 @@ module Testbot::Requester
           :sizes=>"0", :project=>"project" }
 
         flexmock(TestUnitAdapter).should_receive(:test_files).and_return([ 'test/some_test.rb' ])
-        flexmock(HTTParty).should_receive(:post).with(any, :body => other_args.merge({ :jruby => true })).and_return('5')
+        flexmock(HTTParty).should_receive(:post).with(any, :body => other_args.merge({ :jruby => true })).and_return(response_with_build_id)
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)

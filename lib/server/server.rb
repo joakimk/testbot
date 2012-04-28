@@ -24,7 +24,11 @@ module Testbot::Server
   end
 
   post '/builds' do
-    build = Build.create_and_build_jobs(params).id.to_s
+    if Runner.total_instances == 0
+      [ 503, "No runners available" ]
+    else
+      Build.create_and_build_jobs(params).id.to_s
+    end
   end
 
   get '/builds/:id' do
