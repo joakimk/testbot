@@ -28,7 +28,8 @@ module Testbot::Server
       new_results = self.result.to_s[self.last_result_position..-1]
       self.last_result_position = self.result.to_s.size
 
-      # don't know why this is needed yet
+      # Don't know why this is needed as the job should cleanup
+      # escape sequences.
       if new_results[0,4] == '[32m'
         new_results = new_results[4..-1]
       end

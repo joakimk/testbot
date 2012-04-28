@@ -1,3 +1,10 @@
+0.6.3
+
+Results are now shown as they happen. It takes care not to break escape codes used for
+coloring output (only tested with rspec, add a script/spec file containing "rspec --tty $@").
+
+Also, you can add a "logging: true" option to testbot.yml to see when files are synced, etc.
+
 0.6.2
 
 Fixed "invalid byte sequence in UTF-8" errors cased by test output in some cases.

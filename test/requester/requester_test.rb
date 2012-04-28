@@ -20,6 +20,7 @@ module Testbot::Requester
       flexmock(HTTParty).should_receive(:post).and_return('5')
       flexmock(requester).should_receive(:sleep).once
       flexmock(requester).should_receive(:print).once
+      flexmock(requester).should_receive(:puts).once
       flexmock(requester).should_receive(:system)
       flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                         :format => :json).and_return({ "done" => true, "results" => results })
@@ -101,6 +102,7 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, 'results' => '', "success" => true })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
+        flexmock(requester).should_receive(:puts)
         flexmock(requester).should_receive(:system)
 
         assert_equal true, requester.run_tests(RspecAdapter, 'spec')
@@ -197,6 +199,7 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:post).and_return('5')
         flexmock(requester).should_receive(:sleep).once
         flexmock(requester).should_receive(:print)
+        flexmock(requester).should_receive(:puts)
         flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                           :format => :json).and_return({ "done" => true, "results" => "" })
 
@@ -265,6 +268,7 @@ module Testbot::Requester
         # Imperfect match, includes "." in 84.333, but good enough.
         flexmock(requester).should_receive(:print).once.with("......F...")
         flexmock(requester).should_receive(:print)
+        flexmock(requester).should_receive(:puts)
         mock_file_sizes
 
         requester.run_tests(RspecAdapter, 'spec')
@@ -282,6 +286,7 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
+        flexmock(requester).should_receive(:puts)
         mock_file_sizes
 
         requester.run_tests(RspecAdapter, 'spec')
@@ -299,6 +304,7 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
+        flexmock(requester).should_receive(:puts)
 
         flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh  . cruise@somewhere:/tmp/testbot/foo")
         mock_file_sizes
@@ -318,6 +324,7 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
+        flexmock(requester).should_receive(:puts)
         mock_file_sizes
 
         requester.run_tests(CucumberAdapter, 'features')
@@ -335,6 +342,7 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
+        flexmock(requester).should_receive(:puts)
         mock_file_sizes
 
         requester.run_tests(TestUnitAdapter, 'test')
@@ -355,6 +363,7 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).and_return({ "done" => true, "results" => "job 1 done: ...." })
         flexmock(requester).should_receive(:sleep)
         flexmock(requester).should_receive(:print)
+        flexmock(requester).should_receive(:puts)
         mock_file_sizes
 
         requester.run_tests(TestUnitAdapter, 'test')
