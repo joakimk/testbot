@@ -14,11 +14,13 @@ Try it out
 
     testbot --server
     testbot --runner --connect localhost
+    sleep 3 # wait for the runner to fully register with the server
+
     mkdir -p testbotdemo/test; cd testbotdemo
     echo 'require "test/unit"' > test/demo_test.rb
     echo 'class DemoTest < Test::Unit::TestCase; def test_first; end; end' >> test/demo_test.rb
+
     testbot --test --connect localhost
-    sleep 3 # wait for the runner to fully register with the server
         
     # Cleanup
     testbot --server stop
