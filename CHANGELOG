@@ -1,3 +1,11 @@
+0.6.4
+
+Fixed bug with running test unit tests that caused errors like '/bin/ruby:1: Invalid char `\317' in expression`'.
+
+Now handling errors creating builds.
+
+Returning 503 and reporting that there are no runners when that is the case.
+
 0.6.3
 
 Results are now shown as they happen. It takes care not to break escape codes used for
