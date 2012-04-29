@@ -17,7 +17,7 @@ module Testbot::Runner
     def self.count
       case RUBY_PLATFORM
       when /darwin/
-        `hwprefs cpu_count`.to_i
+        `sysctl machdep.cpu.core_count | awk '{ print $2 }'`.to_i
       when /linux/
         `cat /proc/cpuinfo | grep processor | wc -l`.to_i
       end

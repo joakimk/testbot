@@ -4,7 +4,7 @@ class TestUnitAdapter
   
   def self.command(project_path, ruby_interpreter, files)
     ruby_command = RubyEnv.ruby_command(project_path, :ruby_interpreter => ruby_interpreter)
-    "#{ruby_command} -Itest -e '%w(#{files}).each { |file| require(file) }'"
+    %{#{ruby_command} -Itest -e '%w(#{files}).each { |file| require(Dir.pwd + "/" + file) }'}
   end
   
   def self.test_files(dir)

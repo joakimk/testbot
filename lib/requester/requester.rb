@@ -30,36 +30,56 @@ module Testbot::Requester
     end
 
     def run_tests(adapter, dir)
-      puts if config.simple_output
+      puts if config.simple_output || config.logging
 
       if config.ssh_tunnel
-        SSHTunnel.new(config.server_host, config.server_user, adapter.requester_port).open
+        log "Setting up ssh tunnel" do
+          SSHTunnel.new(config.server_host, config.server_user, adapter.requester_port).open
+        end
         server_uri = "http://127.0.0.1:#{adapter.requester_port}"
       else
         server_uri = "http://#{config.server_host}:#{Testbot::SERVER_PORT}"
       end
 
-      rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
-      system "rsync -az --delete --delete-excluded -e ssh #{rsync_ignores} . #{rsync_uri}"
+      log "Syncing files" do
+        rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
+        # todo: exit when this fails
+        system "rsync -az --delete --delete-excluded -e ssh #{rsync_ignores} . #{rsync_uri}"
+      end
 
       files = adapter.test_files(dir) 
       sizes = adapter.get_sizes(files)
 
-      build_id = HTTParty.post("#{server_uri}/builds", :body => { :root => root,
-                               :type => adapter.type.to_s,
-                               :project => config.project,
-                               :available_runner_usage => config.available_runner_usage,
-                               :files => files.join(' '),
-                               :sizes => sizes.join(' '),
-                               :jruby => jruby? })
+      build_id = nil
+      log "Requesting run" do
+        response = HTTParty.post("#{server_uri}/builds", :body => { :root => root,
+                                 :type => adapter.type.to_s,
+                                 :project => config.project,
+                                 :available_runner_usage => config.available_runner_usage,
+                                 :files => files.join(' '),
+                                 :sizes => sizes.join(' '),
+                                 :jruby => jruby? }).response
+
+        if response.code == "503"
+          puts "No runners available. If you just started a runner, try again. It usually takes a few seconds before they're available."
+          return false
+        elsif response.code != "200"
+          puts "Could not create build, #{response.code}: #{response.body}"
+          return false
+        else
+          build_id = response.body
+        end
+      end
 
       trap("SIGINT") {  HTTParty.delete("#{server_uri}/builds/#{build_id}"); return false }
+
+      puts if config.logging
 
       last_results_size = 0
       success = true
       error_count = 0
       while true
-        sleep 1
+        sleep 0.5
 
         begin
           @build = HTTParty.get("#{server_uri}/builds/#{build_id}", :format => :json)
@@ -79,7 +99,8 @@ module Testbot::Requester
             print results.gsub(/[^\.F]|Finished/, '')
             STDOUT.flush
           else
-            puts results
+            print results
+            STDOUT.flush
           end
         end
 
@@ -102,6 +123,16 @@ module Testbot::Requester
     end
 
     private
+
+    def log(text)
+      if config.logging
+        print "#{text}... "; STDOUT.flush
+        yield
+        puts "done"
+      else
+        yield
+      end
+    end
 
     def root
       if localhost?

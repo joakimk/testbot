@@ -62,6 +62,14 @@ module Testbot::Server
         assert_equal Build.all.first, first_job.build
       end
 
+      should "return a 503 error if there are no known runners" do
+        flexmock(Runner).should_receive(:total_instances).and_return(0)
+        post '/builds', :files => 'spec/models/car_spec.rb spec/models/car2_spec.rb spec/models/house_spec.rb spec/models/house2_spec.rb', :root => 'server:/path/to/project', :type => 'spec', :available_runner_usage => "100%", :project => 'things', :sizes => "1 1 1 1", :jruby => true
+        assert_equal 0, Job.count
+        assert_equal 503, last_response.status
+        assert_equal "No runners available", last_response.body
+      end
+
       should "only use resources according to available_runner_usage" do
         flexmock(Runner).should_receive(:total_instances).and_return(4)
         flexmock(Group).should_receive(:build).with(["spec/models/car_spec.rb", "spec/models/car2_spec.rb", "spec/models/house_spec.rb", "spec/models/house2_spec.rb"], [ 1, 1, 1, 1 ], 2, 'spec').and_return([])
@@ -267,6 +275,14 @@ module Testbot::Server
         assert_equal "127.0.0.1 macmini1.local 00:01 user1 2\n127.0.0.1 macmini2.local 00:02 user2 4", last_response.body
       end
 
+      should "not return a runner as available when it hasnt pinged the server yet" do
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :username => 'user1'
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4, :username => 'user2'
+        get '/runners/available'
+        assert last_response.ok?
+        assert_equal "127.0.0.1 macmini2.local 00:02 user2 4", last_response.body
+      end
+
       should "not return runners as available when not seen the last 10 seconds" do
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :idle_instances => 2, :username => "user1"
         get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :idle_instances => 4
@@ -301,16 +317,16 @@ module Testbot::Server
     context "GET /runners/total_instances" do
 
       should "return the number of available runner instances" do
-        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2
-        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2, :idle_instances => 1
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4, :idle_instances => 2
         get '/runners/total_instances'
         assert last_response.ok?
         assert_equal "6", last_response.body
       end    
 
       should "not return instances as available when not seen the last 10 seconds" do
-        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2
-        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini1.local', :uid => "00:01", :max_instances => 2, :idle_instances => 1
+        get '/jobs/next', :version => Testbot.version, :hostname => 'macmini2.local', :uid => "00:02", :max_instances => 4, :idle_instances => 2
         Runner.find_by_uid("00:02").update(:last_seen_at => Time.now - 10)
         get '/runners/total_instances'
         assert last_response.ok?
@@ -375,18 +391,18 @@ module Testbot::Server
 
       should "receive the results of a job" do
         job = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30
-        put "/jobs/#{job.id}", :result => 'test run result', :success => true
+        put "/jobs/#{job.id}", :result => 'test run result', :status => "successful"
         assert last_response.ok?
         assert_equal 'test run result', job.result
-        assert_equal 'true', job.success
+        assert_equal 'successful', job.status
       end
 
       should "update the related build" do
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build      
-        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => "true"
-        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => "true"
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :status => "successful"
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :status => "successful"
         assert_equal 'test run result 1\ntest run result 2\n', build.results
         assert_equal true, build.success
       end
@@ -395,8 +411,8 @@ module Testbot::Server
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
-        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => true
-        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => true
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :status => "successful"
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :status => "successful"
         assert_equal true, build.done
       end
 
@@ -404,10 +420,25 @@ module Testbot::Server
         build = Build.create
         job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
         job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
-        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :success => false
-        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :success => true
+        put "/jobs/#{job1.id}", :result => 'test run result 1\n', :status => "failed"
+        put "/jobs/#{job2.id}", :result => 'test run result 2\n', :status => "successful"
         assert_equal false, build.success
       end 
+
+      should "be able to update from multiple result postings" do
+        build = Build.create
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        job2 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        # maybe later:
+        # put "/jobs/#{job.id}", :result => 'Preparing, db setup, etc.', :status => "preparing"
+        put "/jobs/#{job1.id}", :result => 'Running tests..', :status => "running"
+        put "/jobs/#{job2.id}", :result => 'Running other tests. done.', :status => "successful"
+        put "/jobs/#{job1.id}", :result => 'Running tests....', :status => "running"
+        assert_equal false, build.done
+        assert_equal false, job1.done
+        assert_equal "Running tests....", job1.result
+        assert_equal "Running tests..Running other tests. done...", build.results
+      end
 
     end
 

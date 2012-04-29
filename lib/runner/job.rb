@@ -1,4 +1,5 @@
 require File.expand_path(File.join(File.dirname(__FILE__), 'runner.rb'))
+require File.expand_path(File.join(File.dirname(__FILE__), 'safe_result_text.rb'))
 
 module Testbot::Runner
   class Job
@@ -25,7 +26,7 @@ module Testbot::Runner
         result += run_and_return_result("#{base_environment} #{adapter.command(@project, ruby_cmd, @files)}")
       end
 
-      Server.put("/jobs/#{@id}", :body => { :result => result, :success => success?, :time => run_time })
+      Server.put("/jobs/#{@id}", :body => { :result => SafeResultText.clean(result), :status => status, :time => run_time })
       puts "Job #{@id} finished."
     end
 
@@ -43,18 +44,36 @@ module Testbot::Runner
       Process.kill('KILL', -@pid) rescue :failed_to_kill_process
     end
 
+    def status
+      success? ? "successful" : "failed"
+    end
+
     def measure_run_time
       start_time = Time.now
       yield
       (Time.now - start_time) * 100
     end
 
+    def post_results(output)
+      Server.put("/jobs/#{@id}", :body => { :result => SafeResultText.clean(output), :status => "building" })
+    end
+
     def run_and_return_result(command)
-      r, w = IO.pipe
-      @pid = spawn(command, err: w, out: w, pgroup: true)
-      Process.wait(@pid)
-      w.close
-      output = r.read
+      read_pipe, write_pipe = IO.pipe
+      @pid = spawn(command, err: write_pipe, out: write_pipe, pgroup: true)
+      output = read_pipe.read
+      
+      output = ""
+      last_post_time = Time.now
+      while char = read_pipe.getc
+        char = (char.is_a?(Fixnum) ? char.chr : char) # 1.8 <-> 1.9
+        output << char
+        if Time.now - last_post_time > 0.5
+          post_results(output)
+          last_post_time = Time.now
+        end
+      end
+      write_pipe.close
 
       # Kill child processes, if any
       kill_processes

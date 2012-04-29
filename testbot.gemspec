@@ -13,7 +13,8 @@ Gem::Specification.new do |s|
   s.executables = [ "testbot" ]
   s.files       = Dir.glob("lib/**/*") + Dir.glob("test/**/*") + %w(Gemfile .gemtest Rakefile testbot.gemspec CHANGELOG README.markdown bin/testbot) +
                   (File.exists?("DEV_VERSION") ? [ "DEV_VERSION" ] : [])
-  s.add_dependency('sinatra', '~>1.0') # To be able to use rack 1.0.1 which is compatible with rails 2.
+
+  s.add_dependency('sinatra', '>=1.0.0')
   s.add_dependency('httparty', '>= 0.6.1')
   s.add_dependency('macaddr', '>= 1.0.0')
   s.add_dependency('net-ssh', '>= 2.0.23')
@@ -24,7 +25,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency("shoulda")
   s.add_development_dependency("rack-test")
   s.add_development_dependency("flexmock")
-  s.add_development_dependency("cucumber")
   s.add_development_dependency("rvm")
   s.add_development_dependency("rake", "0.8.7")
   s.add_development_dependency("bundler")

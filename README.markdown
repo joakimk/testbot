@@ -14,9 +14,12 @@ Try it out
 
     testbot --server
     testbot --runner --connect localhost
+    sleep 5 # wait for the runner to register with the server
+
     mkdir -p testbotdemo/test; cd testbotdemo
     echo 'require "test/unit"' > test/demo_test.rb
     echo 'class DemoTest < Test::Unit::TestCase; def test_first; end; end' >> test/demo_test.rb
+
     testbot --test --connect localhost
         
     # Cleanup
@@ -64,7 +67,7 @@ Using testbot with Rails 2:
 
     # Add testbot to your Gemfile if you use bundler. You also need the plugin because
     # Rails 2 does not load raketasks from gems.
-    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.6.0'
+    ruby script/plugin install git://github.com/joakimk/testbot.git -r 'refs/tags/v0.6.5'
     script/generate testbot --connect 192.168.0.100
 
     rake testbot:spec (or :rspec, :test, :features)
@@ -108,6 +111,7 @@ Features
 * You can access your testbot network through SSH by using the built in SSH tunneling code.
 * You can use the same testbot network with multiple projects.
 * You can abort a test run with ctrl+c and all remote processes will be stopped.
+* It shows you the output as it happens.
 * Testbot is continuously tested for compatibility with Ruby 1.8.7 and 1.9.2.
 
 Contributing to testbot
@@ -136,4 +140,3 @@ More
 ----
 
 * Check the [wiki](http://github.com/joakimk/testbot/wiki) for more info.
-* Chat: [https://convore.com/github/testbot](https://convore.com/github/testbot)

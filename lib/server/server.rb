@@ -24,7 +24,11 @@ module Testbot::Server
   end
 
   post '/builds' do
-    build = Build.create_and_build_jobs(params).id.to_s
+    if Runner.total_instances == 0
+      [ 503, "No runners available" ]
+    else
+      Build.create_and_build_jobs(params).id.to_s
+    end
   end
 
   get '/builds/:id' do
@@ -48,7 +52,7 @@ module Testbot::Server
   end
 
   put '/jobs/:id' do
-    Job.find(params[:id]).update(:result => params[:result], :success => params[:success]); nil
+    Job.find(params[:id]).update(:result => params[:result], :status => params[:status]); nil
   end
 
   get '/runners/ping' do

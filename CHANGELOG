@@ -1,3 +1,33 @@
+0.6.5
+
+Fixed test unit require path so that it works with ruby 1.9.
+
+0.6.4
+
+Fixed bug with running test unit tests that caused errors like '/bin/ruby:1: Invalid char `\317' in expression`'.
+
+Now handling errors creating builds.
+
+Returning 503 and reporting that there are no runners when that is the case.
+
+0.6.3
+
+Results are now shown as they happen. It takes care not to break escape codes used for
+coloring output (only tested with rspec, add a script/spec file containing "rspec --tty $@").
+
+Also, you can add a "logging: true" option to testbot.yml to see when files are synced, etc.
+
+0.6.2
+
+Fixed "invalid byte sequence in UTF-8" errors cased by test output in some cases.
+
+0.6.1
+
+Fixed CPU core check for OSX Lion.
+
+Updated sinatra requirement so that it's a bit less strict
+(https://github.com/joakimk/testbot/pull/41).
+
 0.6.0
 
 Fixed bug that caused the runner to crash and block the server after checking for jobs (issue #34).

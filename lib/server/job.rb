@@ -5,11 +5,11 @@ module Testbot::Server
     def update(hash)
       super(hash)
       if self.build
-        done = !Job.all.find { |j| !j.result && j.build == self.build }
-        self.build.update(:results => build.results.to_s + self.result.to_s,
-                          :done => done)
+        self.done = done?
+        done = !Job.all.find { |j| !j.done && j.build == self.build }
+        self.build.update(:results => build_results(build), :done => done)
 
-        build_broken_by_job = (self.success == "false" && build.success)
+        build_broken_by_job = (self.status == "failed" && build.success)
         self.build.update(:success => false) if build_broken_by_job
       end
     end
@@ -22,6 +22,24 @@ module Testbot::Server
     end
 
     private
+
+    def build_results(build)
+      self.last_result_position ||= 0
+      new_results = self.result.to_s[self.last_result_position..-1]
+      self.last_result_position = self.result.to_s.size
+
+      # Don't know why this is needed as the job should cleanup
+      # escape sequences.
+      if new_results[0,4] == '[32m'
+        new_results = new_results[4..-1]
+      end
+
+      build.results.to_s + new_results 
+    end
+
+    def done?
+      self.status == "successful" || self.status == "failed"
+    end
 
     def self.next_job(build_id, no_jruby)
       release_jobs_taken_by_missing_runners!

@@ -8,11 +8,11 @@ module Testbot::Runner
 
   class JobTest < Test::Unit::TestCase
 
-    def expect_put_with(id, result_text, success, time = 0)
+    def expect_put_with(id, result_text, status, time = 0)
       expected_result = "\n#{`hostname`.chomp}:#{Dir.pwd}\n"
       expected_result += result_text
       flexmock(Server).should_receive(:put).once.with("/jobs/#{id}", :body =>
-                                                      { :result => expected_result, :success => success, :time => time })
+                                                      { :result => expected_result, :status => status, :time => time })
     end
 
     def stub_duration(seconds)
@@ -25,7 +25,7 @@ module Testbot::Runner
       flexmock(job).should_receive(:puts)
       stub_duration(0)
 
-      expect_put_with(10, "result text", true)
+      expect_put_with(10, "result text", "successful")
       flexmock(job).should_receive(:run_and_return_result).once.
         with("export RAILS_ENV=test; export TEST_ENV_NUMBER=; cd project; export RSPEC_COLOR=true; ruby -S bundle exec rspec spec/foo_spec.rb spec/bar_spec.rb").
         and_return('result text')
@@ -38,7 +38,7 @@ module Testbot::Runner
       flexmock(job).should_receive(:puts)
       stub_duration(0)
 
-      expect_put_with(10, "result text", false)
+      expect_put_with(10, "result text", "failed")
       flexmock(job).should_receive(:run_and_return_result).and_return('result text')
       flexmock(job).should_receive(:success?).and_return(false)
       job.run(0)
@@ -49,7 +49,7 @@ module Testbot::Runner
       flexmock(job).should_receive(:puts)
       stub_duration(0)
 
-      expect_put_with(10, "result text", true)
+      expect_put_with(10, "result text", "successful")
       flexmock(job).should_receive(:run_and_return_result).
         with(/TEST_ENV_NUMBER=2/).
         and_return('result text')
@@ -61,7 +61,7 @@ module Testbot::Runner
       flexmock(job).should_receive(:puts)
 
       stub_duration(10.55) 
-      expect_put_with(10, "result text", true, 1055)
+      expect_put_with(10, "result text", "successful", 1055)
       flexmock(job).should_receive(:run_and_return_result).and_return('result text')
       job.run(0)
     end
