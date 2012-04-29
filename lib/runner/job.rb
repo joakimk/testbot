@@ -1,5 +1,6 @@
 require File.expand_path(File.join(File.dirname(__FILE__), 'runner.rb'))
 require File.expand_path(File.join(File.dirname(__FILE__), 'safe_result_text.rb'))
+require 'posix/spawn'
 
 module Testbot::Runner
   class Job
@@ -59,9 +60,7 @@ module Testbot::Runner
     end
 
     def run_and_return_result(command)
-      read_pipe, write_pipe = IO.pipe
-      @pid = spawn(command, err: write_pipe, out: write_pipe, pgroup: true)
-      output = read_pipe.read
+      read_pipe = spawn_process(command)
       
       output = ""
       last_post_time = Time.now
@@ -73,12 +72,23 @@ module Testbot::Runner
           last_post_time = Time.now
         end
       end
-      write_pipe.close
 
       # Kill child processes, if any
       kill_processes
 
       output
+    end
+
+    def spawn_process(command)
+      read_pipe, write_pipe = IO.pipe
+      @pid = POSIX::Spawn::spawn(command, :err => write_pipe, :out => write_pipe, :pgroup => true)
+
+      Thread.new do
+        Process.wait(@pid)
+        write_pipe.close
+      end
+
+      read_pipe
     end
 
     def success?

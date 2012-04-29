@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency('json_pure', '>= 1.4.6')
   s.add_dependency('daemons', '>= 1.0.10')
   s.add_dependency('acts_as_rails3_generator')
+  s.add_dependency('posix-spawn', '>= 0.3.6')
 
   s.add_development_dependency("shoulda")
   s.add_development_dependency("rack-test")

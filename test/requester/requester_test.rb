@@ -233,7 +233,7 @@ module Testbot::Requester
         flexmock(HTTParty).should_receive(:get).once.with("http://192.168.1.100:#{Testbot::SERVER_PORT}/builds/5",
                                                           :format => :json).and_return({ "done" => true, "results" => "" })
 
-        flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh --exclude='.git' --exclude='tmp' . testbot@192.168.1.100:/path")
+        flexmock(requester).should_receive('system').with("rsync -az --delete --delete-excluded -e ssh --exclude='.git' --exclude='tmp' . testbot@192.168.1.100:/path")
         mock_file_sizes
 
         requester.run_tests(RspecAdapter, 'spec')
@@ -336,7 +336,7 @@ module Testbot::Requester
         flexmock(requester).should_receive(:print)
         flexmock(requester).should_receive(:puts)
 
-        flexmock(requester).should_receive('system').with("rsync -az --delete -e ssh  . cruise@somewhere:/tmp/testbot/foo")
+        flexmock(requester).should_receive('system').with("rsync -az --delete --delete-excluded -e ssh  . cruise@somewhere:/tmp/testbot/foo")
         mock_file_sizes
 
         requester.run_tests(RspecAdapter, 'spec')
