@@ -39,7 +39,8 @@ module Testbot::Runner
     private
 
     def kill_processes
-      Process.kill('KILL', -@pid) rescue false # Kill process and its children (processes in the same group)
+      # Kill process and its children (processes in the same group)
+      Process.kill('KILL', -@pid) rescue :failed_to_kill_process
     end
 
     def measure_run_time
@@ -50,11 +51,14 @@ module Testbot::Runner
 
     def run_and_return_result(command)
       r, w = IO.pipe
-      @pid = spawn(command, err: w, out: w, pgroup: true)  
+      @pid = spawn(command, err: w, out: w, pgroup: true)
       Process.wait(@pid)
       w.close
       output = r.read
-      kill_processes # Kill child processes, if any
+
+      # Kill child processes, if any
+      kill_processes
+
       output
     end
 
