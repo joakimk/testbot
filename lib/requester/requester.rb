@@ -5,6 +5,7 @@ require 'erb'
 require File.dirname(__FILE__) + '/../shared/ssh_tunnel'
 require File.expand_path(File.dirname(__FILE__) + '/../shared/testbot')
 require File.expand_path(File.dirname(__FILE__) + '/client')
+require File.expand_path(File.dirname(__FILE__) + '/console_display')
 
 class Hash
   def symbolize_keys_without_active_support
@@ -29,44 +30,40 @@ module Testbot::Requester
     end
 
     def run_tests(adapter, dir)
-      puts if config.simple_output || config.logging
-
       client = Client.new(config, adapter, self)
+      display = ConsoleDisplay.new(self)
+
+      display.empty_line if config.simple_output || config.logging
 
       unless client.request_run(dir)
         if client.error_type == :no_runners_available
-          puts "No runners available. If you just started a runner, try again. It usually takes a few seconds before they're available."
+          display.text "No runners available. If you just started a runner, try again. It usually takes a few seconds before they're available."
         else
-          puts "Could not create build, #{client.error_info}"
+          display.text "Could not create build, #{client.error_info}"
         end
 
         return false
       end
 
       at_exit do
-        unless ENV['IN_TEST'] || @done
-          client.stop_run
-        end
+        client.stop_run
       end
 
-      puts if config.logging
+      display.empty_line if config.logging
 
       client.on_new_results do |result|
         if config.simple_output
-          print result.gsub(/[^\.F]|Finished/, '')
-          STDOUT.flush
+          display.text result.gsub(/[^\.F]|Finished/, ''), false
         else
-          print result
-          STDOUT.flush
+          display.text result, false
         end
       end
 
-      puts if config.simple_output
+      display.empty_line if config.simple_output
 
       summary = client.result_summary
-      puts "\n" + summary if summary
+      display.text "\n" + summary if summary
 
-      @done = true
       client.build_successful?
     end
 

@@ -49,10 +49,12 @@ module Testbot::Requester
         end
       end
 
+      @done = true
       [ success, @build_id, @server_uri ]
     end
 
     def stop_run
+      return if @done || ENV['IN_TEST']
       log "Notifying server we want to stop the run" do
         HTTParty.delete("#{@server_uri}/builds/#{@build_id}")
       end
