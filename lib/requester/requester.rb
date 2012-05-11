@@ -29,9 +29,9 @@ module Testbot::Requester
       @config = OpenStruct.new(config)
     end
 
-    def run_tests(adapter, dir)
-      client = Client.new(config, adapter, self)
-      display = ConsoleDisplay.new(self)
+    def run_tests(adapter, dir, client = nil, display = nil)
+      client ||= Client.new(config, adapter, self)
+      display ||= ConsoleDisplay.new(self)
 
       display.empty_line if config.simple_output || config.logging
 
