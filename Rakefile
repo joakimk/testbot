@@ -1,9 +1,23 @@
 require 'bundler'
+#require 'rspec/core/rake_task'
 
 Bundler::GemHelper.install_tasks
 
-task :default => [ :test ] do
+task :default => [ :spec, :spacing, :test ] do
 end
+
+#desc "Run specs (slowly replacing Test::Unit tests with specs)"
+task :spec do
+  system("rspec") || exit(1)
+end
+
+task :spacing do
+  puts
+end
+
+# Use this when it does not collide with shoulda...
+#RSpec::Core::RakeTask.new do |t|
+#end
 
 desc "Run Test::Unit tests"
 task :test do

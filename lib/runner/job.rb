@@ -56,18 +56,41 @@ module Testbot::Runner
       (Time.now - start_time) * 100
     end
 
-    def post_results(output)
-      Server.put("/jobs/#{@id}", :body => { :result => SafeResultText.clean(output), :status => "building" })
+    def post_results(output, status = "building")
+      Server.put("/jobs/#{@id}", :body => { :result => SafeResultText.clean(output), :status => status })
     end
 
+    JOB_TIMEOUT = 200
     def run_and_return_result(command)
       read_pipe = spawn_process(command)
-      
       output = ""
+     
+      start_time = Time.now 
+      Thread.new do
+        retries = 0
+        loop do
+          if Time.now - start_time > JOB_TIMEOUT
+            retries += 1
+            kill_processes
+            if retries < 2
+              output << "\n\n Job #{@id} with #{@files.inspect} timed out (still running after #{JOB_TIMEOUT} seconds), restarting, attempt #{retries}.\n\n"
+              post_results(output)
+              read_pipe = spawn_process(command)
+            else
+              output << "\n\n Job #{@id} with #{@files.inspect} timed out again, killing.\n\n"
+              post_results(output, "failed")
+              return
+            end
+          end
+          sleep 5
+        end
+      end
+
       last_post_time = Time.now
       while char = read_pipe.getc
         char = (char.is_a?(Fixnum) ? char.chr : char) # 1.8 <-> 1.9
         output << char
+
         if Time.now - last_post_time > 0.5
           post_results(output)
           last_post_time = Time.now
