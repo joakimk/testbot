@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'httparty'
-require 'macaddr'
 require 'ostruct'
 require File.expand_path(File.dirname(__FILE__) + '/../shared/ssh_tunnel')
 require File.expand_path(File.dirname(__FILE__) + '/../shared/adapters/adapter')
@@ -75,7 +74,7 @@ module Testbot::Runner
       # When a runner crashes or is restarted it might loose current job info. Because
       # of this we provide a new unique ID to the server so that it does not wait for
       # lost jobs to complete.
-      @uid = "#{Time.now.to_i}@#{Mac.addr}"
+      @uid = "#{Time.now.to_i * rand}"
     end
 
     def wait_for_jobs

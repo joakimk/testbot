@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency('sinatra', '>=1.0.0')
   s.add_dependency('httparty', '>= 0.6.1')
-  s.add_dependency('macaddr', '>= 1.0.0')
   s.add_dependency('net-ssh', '>= 2.0.23')
   s.add_dependency('json_pure', '>= 1.4.6')
   s.add_dependency('daemons', '>= 1.0.10')
