@@ -1,6 +1,6 @@
 require File.expand_path(File.join(File.dirname(__FILE__), "/helpers/ruby_env"))
 
-class MinitestAdapter
+class MinitestSpecAdapter
 
   def self.command(project_path, ruby_interpreter, files)
     ruby_command = RubyEnv.ruby_command(project_path, :ruby_interpreter => ruby_interpreter)
@@ -20,25 +20,25 @@ class MinitestAdapter
   end
 
   def self.pluralized
-    'tests'
+    'specs'
   end
 
   def self.base_path
-    "test"
+    "spec"
   end
 
   def self.name
-    'Minitest'
+    'MinitestSpec'
   end
 
   def self.type
-    'minitest'
+    'minitest_spec'
   end
 
 private
 
   def self.file_pattern
-    '**/**/*_test.rb'
+    '**/**/*_spec.rb'
   end
 
 end
