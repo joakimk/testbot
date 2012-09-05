@@ -38,6 +38,7 @@ Finished in 9.987141 seconds
 1 example, 0 failures, 0 pending
 STR
       assert_equal "170 examples, 5 failures, 4 pending", Color.strip(RspecAdapter.sum_results(results))
+
     end
 
     should "return 0 examples and failures for an empty resultset" do
