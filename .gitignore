@@ -13,3 +13,4 @@ instance*
 */*/*/*.swp
 tmp
 .bundle/bin
+script
