@@ -4,7 +4,12 @@ require 'shoulda'
 require 'flexmock/test_unit'
 
 class RubyEnvTest < Test::Unit::TestCase
-  
+
+  def setup
+    # Can't override a stub in flexmock?
+    def RubyEnv.rvm?; false; end
+  end
+
   context "self.bundler?" do
 
     should "return true if bundler is installed and there is a Gemfile" do
@@ -22,6 +27,21 @@ class RubyEnvTest < Test::Unit::TestCase
     should "return false if bundler is not installed" do
       flexmock(Gem::Specification).should_receive(:find_by_name).with("bundler").once.and_return(false)
       assert_equal false, RubyEnv.bundler?("path/to/project")
+    end
+
+  end
+
+  context "self.rvm_prefix" do
+
+    should "return rvm prefix if rvm is installed" do
+      def RubyEnv.rvm?; true; end
+      flexmock(File).should_receive(:exists?).with("path/to/project/.rvmrc").once.and_return(true)
+      flexmock(File).should_receive(:read).with("path/to/project/.rvmrc").once.and_return("rvm 1.8.7\n")
+      assert_equal "rvm 1.8.7 exec", RubyEnv.rvm_prefix("path/to/project")
+    end
+
+    should "return nil if rvm is not installed" do
+      assert_equal nil, RubyEnv.rvm_prefix("path/to/project")
     end
 
   end
