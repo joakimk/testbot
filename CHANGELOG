@@ -1,3 +1,9 @@
+0.7.0
+
+Added per project rvm support. Using this you can run testbot using system ruby
+while being able to run test processes using the project rvm environment. This
+is also useful if you have several projects with different rvm rubies and gemsets.
+
 0.6.9
 
 Removed dependency on macaddr as that does not work on some platforms.

@@ -126,14 +126,18 @@ module Testbot::Runner
     end
 
     def before_run(job)
-      using_bundler = RubyEnv.bundler?(job.project)
-      bundler_cmd = using_bundler ? "bundle exec" : ""
+      rvm_prefix = RubyEnv.rvm_prefix(job.project)
+      bundler_cmd = (RubyEnv.bundler?(job.project) ? [rvm_prefix, "bundle &&", rvm_prefix, "bundle exec"] : [rvm_prefix]).compact.join(" ")
       command_prefix = "cd #{job.project}; RAILS_ENV=test TEST_INSTANCES=#{@config.max_instances} #{bundler_cmd}"
 
-      # todo: exit if this fails, report back, etc.
-      system("cd #{job.project}; bundle") if using_bundler
-      system "#{command_prefix} rake testbot:before_run" if File.exists?("#{job.project}/lib/tasks/testbot.rake")
-      system "#{command_prefix} ruby config/testbot/before_run.rb" if File.exists?("#{job.project}/config/testbot/before_run.rb")
+      if File.exists?("#{job.project}/lib/tasks/testbot.rake")
+        system "#{command_prefix} rake testbot:before_run"
+      elsif File.exists?("#{job.project}/config/testbot/before_run.rb")
+        system "#{command_prefix} ruby config/testbot/before_run.rb"
+      else
+        # workaround to bundle within the correct env
+        system "#{command_prefix} ruby -e ''"
+      end
     end
 
     def first_job_from_build?
