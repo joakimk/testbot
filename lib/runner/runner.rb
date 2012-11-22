@@ -128,7 +128,7 @@ module Testbot::Runner
     def before_run(job)
       rvm_prefix = RubyEnv.rvm_prefix(job.project)
       bundler_cmd = (RubyEnv.bundler?(job.project) ? [rvm_prefix, "bundle &&", rvm_prefix, "bundle exec"] : [rvm_prefix]).compact.join(" ")
-      command_prefix = "cd #{job.project}; RAILS_ENV=test TEST_INSTANCES=#{@config.max_instances} #{bundler_cmd}"
+      command_prefix = "cd #{job.project} && export RAILS_ENV=test && export TEST_INSTANCES=#{@config.max_instances} && #{bundler_cmd}"
 
       if File.exists?("#{job.project}/lib/tasks/testbot.rake")
         system "#{command_prefix} rake testbot:before_run"

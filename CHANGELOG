@@ -1,3 +1,8 @@
+0.7.1
+
+Fixed a bug introduced in 0.7.0. The TEST_INSTANCES env-variable are now
+present again when running before_run scripts.
+
 0.7.0
 
 Added per project rvm support. Using this you can run testbot using system ruby
