@@ -26,6 +26,7 @@ module Testbot::Runner
 
   class Server
     include HTTParty
+    default_timeout 10
   end
 
   class Runner

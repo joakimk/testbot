@@ -1,3 +1,7 @@
+0.7.2
+
+Increased timeout on http requests to the server to 10 seconds.
+
 0.7.1
 
 Fixed a bug introduced in 0.7.0. The TEST_INSTANCES env-variable are now
