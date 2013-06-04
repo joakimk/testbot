@@ -6,6 +6,8 @@ module Testbot::Runner
   class Job
     attr_reader :root, :project, :build_id
 
+    TIME_TO_WAIT_BETWEEN_POSTING_RESULTS = 5
+
     def initialize(runner, id, build_id, project, root, type, ruby_interpreter, files)
       @runner, @id, @build_id, @project, @root, @type, @ruby_interpreter, @files =
         runner, id, build_id, project, root, type, ruby_interpreter, files
@@ -70,7 +72,7 @@ module Testbot::Runner
       while char = read_pipe.getc
         char = (char.is_a?(Fixnum) ? char.chr : char) # 1.8 <-> 1.9
         output << char
-        if Time.now - last_post_time > 0.5
+        if Time.now - last_post_time > TIME_TO_WAIT_BETWEEN_POSTING_RESULTS
           post_results(output)
           last_post_time = Time.now
         end
