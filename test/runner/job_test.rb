@@ -15,8 +15,16 @@ module Testbot::Runner
                                                       { :result => expected_result, :status => status, :time => time })
     end
 
+    def expect_put
+      flexmock(Server).should_receive(:put).once
+    end
+
+    def expect_put_to_timeout
+      flexmock(Server).should_receive(:put).and_raise(Timeout::Error)
+    end
+
     def stub_duration(seconds)
-      time ||= Time.now 
+      time ||= Time.now
       flexmock(Time).should_receive(:now).and_return(time, time + seconds)
     end
 
@@ -34,7 +42,19 @@ module Testbot::Runner
       job.run(0)
     end
 
-    should "return false on success if the job fails" do
+    should "not raise an error when posting results time out" do
+      job = Job.new(Runner.new({}), 10, "00:00", "project", "/tmp/testbot/user", "spec", "ruby", "spec/foo_spec.rb spec/bar_spec.rb")
+      flexmock(job).should_receive(:puts)
+
+      # We're using send here because triggering post_results though the rest of the
+      # code requires very complex setup. The code need to be refactored to be more testable.
+      expect_put
+      job.send(:post_results, "result text")
+      expect_put_to_timeout
+      job.send(:post_results, "result text")
+    end
+
+    should "not be successful when the job fails" do
       job = Job.new(Runner.new({}), 10, "00:00", "project", "/tmp/testbot/user", "spec", "ruby", "spec/foo_spec.rb spec/bar_spec.rb")
       flexmock(job).should_receive(:puts)
       stub_duration(0)
@@ -62,7 +82,7 @@ module Testbot::Runner
       job = Job.new(Runner.new({}), 10, "00:00", "project", "/tmp/testbot/user", "spec", "ruby", "spec/foo_spec.rb spec/bar_spec.rb")
       flexmock(job).should_receive(:puts)
 
-      stub_duration(10.55) 
+      stub_duration(10.55)
       expect_put_with(10, "result text", "successful", 1055)
       flexmock(job).should_receive(:run_and_return_result).and_return('result text')
       flexmock(RubyEnv).should_receive(:rvm?).returns(false)
