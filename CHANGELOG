@@ -1,3 +1,10 @@
+0.7.3
+
+Increased time between updates to avoid timeouts. Allow timeout when posting
+incremental build results (but not when posting the final results).
+
+Should make testbot more stable for some people.
+
 0.7.2
 
 Increased timeout on http requests to the server to 10 seconds.
