@@ -58,11 +58,13 @@ module Testbot::Runner
 
     def post_results(output)
       Server.put("/jobs/#{@id}", :body => { :result => SafeResultText.clean(output), :status => "building" })
+    rescue Timeout::Error
+      puts "Got a timeout when posting an job result update. This can happen when the server is busy and is not a critical error."
     end
 
     def run_and_return_result(command)
       read_pipe = spawn_process(command)
-      
+
       output = ""
       last_post_time = Time.now
       while char = read_pipe.getc

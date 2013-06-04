@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    testbot (0.7.1)
+    testbot (0.7.2)
       acts_as_rails3_generator
       daemons (>= 1.0.10)
       httparty (>= 0.6.1)
