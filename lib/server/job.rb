@@ -25,7 +25,7 @@ module Testbot::Server
 
     def build_results(build)
       self.last_result_position ||= 0
-      new_results = self.result.to_s[self.last_result_position..-1]
+      new_results = self.result.to_s[self.last_result_position..-1] || ""
       self.last_result_position = self.result.to_s.size
 
       # Don't know why this is needed as the job should cleanup

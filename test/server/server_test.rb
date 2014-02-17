@@ -440,6 +440,14 @@ module Testbot::Server
         assert_equal "Running tests..Running other tests. done...", build.results
       end
 
+      should "not break when updating without new results" do
+        build = Build.create
+        job1 = Job.create :files => 'spec/models/car_spec.rb', :taken_at => Time.now - 30, :build => build
+        put "/jobs/#{job1.id}", :result => 'Running tests..', :status => "running"
+        put "/jobs/#{job1.id}", :result => '', :status => "successful"
+        assert_equal "Running tests..", build.results
+      end
+
     end
 
     context "GET /version" do
