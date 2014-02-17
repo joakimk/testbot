@@ -1,3 +1,7 @@
+0.7.4
+
+Fixed bug where a runner updating without a result would fail.
+
 0.7.3
 
 Increased time between updates to avoid timeouts. Allow timeout when posting
