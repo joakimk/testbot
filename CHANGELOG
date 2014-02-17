@@ -2,6 +2,8 @@
 
 Fixed bug where a runner updating without a result would fail.
 
+Also dropping official support for 1.8 as it's such a hassle to maintain.
+
 0.7.3
 
 Increased time between updates to avoid timeouts. Allow timeout when posting
