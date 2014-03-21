@@ -82,7 +82,7 @@ module Testbot::Requester
           :server_user            => Testbot::DEFAULT_USER,
           :available_runner_usage => Testbot::DEFAULT_RUNNER_USAGE }
 
-        actual = Requester.new({ "server_host" => 'hostname' }).config 
+        actual = Requester.new({ "server_host" => 'hostname' }).config
 
         assert_equal OpenStruct.new(expected), actual
       end
