@@ -1,10 +1,7 @@
+0.7.7
 
-0.7.6
-
-Raise an error when file syncing fails.
-
-We don't want to continue when it fails. It would run the tests with an older version,
-possibly enabling a broken version of the app to be deployed.
+Exit when file syncing fails so that you don't run tests for a version of the
+code you did not expect.
 
 0.7.5
 
