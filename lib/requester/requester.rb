@@ -45,7 +45,8 @@ module Testbot::Requester
         rsync_ignores = config.rsync_ignores.to_s.split.map { |pattern| "--exclude='#{pattern}'" }.join(' ')
         system("rsync -az --delete --delete-excluded -e ssh #{rsync_ignores} . #{rsync_uri}")
         exitstatus = $?.exitstatus
-        raise "rsync failed with exit code #{exitstatus}" unless exitstatus == 0
+        puts "rsync failed with exit code #{exitstatus}" unless exitstatus == 0
+        exit 1
       end
 
       files = adapter.test_files(dir)
