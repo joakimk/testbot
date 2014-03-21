@@ -1,3 +1,11 @@
+
+0.7.6
+
+Raise an error when file syncing fails.
+
+We don't want to continue when it fails. It would run the tests with an older version,
+possibly enabling a broken version of the app to be deployed.
+
 0.7.5
 
 Fixed bug where a runner updating without a result would fail.
