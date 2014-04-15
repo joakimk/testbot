@@ -1,3 +1,11 @@
+0.7.8
+
+Fix test job bug that caused multiple jobs to use the same TEST_ENV_NUMBER.
+
+This caused multiple processes to use the same databases, etc.
+
+If you're seeing database deadlocks in tests, this will probably fix that.
+
 0.7.7
 
 Exit when file syncing fails so that you don't run tests for a version of the
