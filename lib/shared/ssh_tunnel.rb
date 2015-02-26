@@ -23,7 +23,7 @@ class SSHTunnel
   end
 
   def connect
-    @thread.kill! if @thread
+    @thread.kill if @thread
     @thread = Thread.new do
       Net::SSH.start(@host, @user, { :timeout => 1 }) do |ssh|
         ssh.forward.local(@local_port, 'localhost', Testbot::SERVER_PORT)
