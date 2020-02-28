@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("rack-test")
   s.add_development_dependency("flexmock")
   s.add_development_dependency("rvm")
-  s.add_development_dependency("rake", "0.8.7")
+  s.add_development_dependency("rake", "13.0.1")
   s.add_development_dependency("bundler")
   s.add_development_dependency("guard")
   s.add_development_dependency("guard-test")
